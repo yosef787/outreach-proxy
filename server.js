@@ -12,7 +12,7 @@ app.use(express.json());
 
 // Auth middleware — applied to all routes except health check
 function requireApiKey(req, res, next) {
-  if (!API_KEY) return next();
+  if (!API_KEY) return next(); // no key set = open (shouldn't happen in prod)
   const provided = req.headers['x-api-key'];
   if (!provided || provided !== API_KEY) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -26,28 +26,41 @@ const notionHeaders = () => ({
   'Notion-Version': '2022-06-28'
 });
 
-// Health check (no auth)
+// Health check (no auth — used to verify the proxy is reachable)
 app.get('/', (req, res) => res.json({ status: 'ok', message: 'Outreach Tracker proxy running' }));
 
 // All data routes require API key
 app.use('/entries', requireApiKey);
 
-// GET all entries
+// GET all entries (paginated — fetches all results)
 app.get('/entries', async (req, res) => {
   try {
-    const response = await fetch(`https://api.notion.com/v1/databases/${DATABASE_ID}/query`, {
-      method: 'POST',
-      headers: notionHeaders(),
-      body: JSON.stringify({ page_size: 100 })
-    });
-    const data = await response.json();
-    if (!response.ok) return res.status(response.status).json(data);
+    let allResults = [];
+    let hasMore = true;
+    let startCursor = undefined;
 
-    const entries = data.results.map(page => ({
+    while (hasMore) {
+      const body = { page_size: 100 };
+      if (startCursor) body.start_cursor = startCursor;
+
+      const response = await fetch(`https://api.notion.com/v1/databases/${DATABASE_ID}/query`, {
+        method: 'POST',
+        headers: notionHeaders(),
+        body: JSON.stringify(body)
+      });
+      const data = await response.json();
+      if (!response.ok) return res.status(response.status).json(data);
+
+      allResults = allResults.concat(data.results);
+      hasMore = data.has_more;
+      startCursor = data.next_cursor;
+    }
+
+    const entries = allResults.map(page => ({
       notionId: page.id,
       firm:     page.properties['Firm']?.title?.[0]?.plain_text || '',
       partner:  page.properties['Partner']?.rich_text?.[0]?.plain_text || '',
-      page:     page.properties['Page']?.select?.name === 'Other' ? 'other' : 'law',
+      page:     page.properties['Page']?.select?.name === 'Other' ? 'other' : page.properties['Page']?.select?.name === 'Targets' ? 'targets' : 'law',
       status:   statusToKey(page.properties['Status']?.select?.name),
       priority: (page.properties['Priority']?.select?.name || 'Medium').toLowerCase(),
       date:     page.properties['Date Contacted']?.date?.start || '',
@@ -102,7 +115,7 @@ function buildNotionPage(e) {
   const props = {
     'Firm':    { title: [{ text: { content: e.firm || '' } }] },
     'Partner': { rich_text: [{ text: { content: e.partner || '' } }] },
-    'Page':    { select: { name: e.page === 'other' ? 'Other' : 'Law Firms' } },
+    'Page':    { select: { name: e.page === 'other' ? 'Other' : e.page === 'targets' ? 'Targets' : 'Law Firms' } },
     'Status':  { select: { name: statusToLabel(e.status) } },
     'Priority':{ select: { name: capitalize(e.priority || 'medium') } },
     'Notes':   { rich_text: [{ text: { content: e.notes || '' } }] }
