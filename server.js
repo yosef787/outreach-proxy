@@ -3,16 +3,16 @@ import cors from 'cors';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const NOTION_TOKEN = process.env.NOTION_TOKEN;
-const DATABASE_ID = process.env.DATABASE_ID || '5c87a7f3e3ff4a5fb96bc77c0871fd7e';
-const API_KEY      = process.env.API_KEY;
+const NOTION_TOKEN   = process.env.NOTION_TOKEN;
+const DATABASE_ID    = process.env.DATABASE_ID    || '5c87a7f3e3ff4a5fb96bc77c0871fd7e';
+const TARGETS_DB_ID  = process.env.TARGETS_DB_ID  || '056b7385322d41cab18c98b2db054cc1';
+const API_KEY        = process.env.API_KEY;
 
 app.use(cors());
 app.use(express.json());
 
-// Auth middleware — applied to all routes except health check
 function requireApiKey(req, res, next) {
-  if (!API_KEY) return next(); // no key set = open (shouldn't happen in prod)
+  if (!API_KEY) return next();
   const provided = req.headers['x-api-key'];
   if (!provided || provided !== API_KEY) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -26,62 +26,56 @@ const notionHeaders = () => ({
   'Notion-Version': '2022-06-28'
 });
 
-// Health check (no auth — used to verify the proxy is reachable)
+async function queryAll(databaseId) {
+  let allResults = [];
+  let hasMore = true;
+  let startCursor = undefined;
+  while (hasMore) {
+    const body = { page_size: 100 };
+    if (startCursor) body.start_cursor = startCursor;
+    const response = await fetch(`https://api.notion.com/v1/databases/${databaseId}/query`, {
+      method: 'POST', headers: notionHeaders(), body: JSON.stringify(body)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || response.statusText);
+    allResults = allResults.concat(data.results);
+    hasMore = data.has_more;
+    startCursor = data.next_cursor;
+  }
+  return allResults;
+}
+
+// Health check (no auth)
 app.get('/', (req, res) => res.json({ status: 'ok', message: 'Outreach Tracker proxy running' }));
 
-// All data routes require API key
+// OUTREACH ENTRIES (Law Firms / Other)
 app.use('/entries', requireApiKey);
 
-// GET all entries (paginated — fetches all results)
 app.get('/entries', async (req, res) => {
   try {
-    let allResults = [];
-    let hasMore = true;
-    let startCursor = undefined;
-
-    while (hasMore) {
-      const body = { page_size: 100 };
-      if (startCursor) body.start_cursor = startCursor;
-
-      const response = await fetch(`https://api.notion.com/v1/databases/${DATABASE_ID}/query`, {
-        method: 'POST',
-        headers: notionHeaders(),
-        body: JSON.stringify(body)
-      });
-      const data = await response.json();
-      if (!response.ok) return res.status(response.status).json(data);
-
-      allResults = allResults.concat(data.results);
-      hasMore = data.has_more;
-      startCursor = data.next_cursor;
-    }
-
-    const entries = allResults.map(page => ({
+    const results = await queryAll(DATABASE_ID);
+    const entries = results.map(page => ({
       notionId: page.id,
       firm:     page.properties['Firm']?.title?.[0]?.plain_text || '',
       partner:  page.properties['Partner']?.rich_text?.[0]?.plain_text || '',
-      page:     page.properties['Page']?.select?.name === 'Other' ? 'other' : page.properties['Page']?.select?.name === 'Targets' ? 'targets' : 'law',
+      page:     page.properties['Page']?.select?.name === 'Other' ? 'other' : 'law',
       status:   statusToKey(page.properties['Status']?.select?.name),
       priority: (page.properties['Priority']?.select?.name || 'Medium').toLowerCase(),
       date:     page.properties['Date Contacted']?.date?.start || '',
       followup: page.properties['Follow-up Due']?.date?.start || '',
       notes:    page.properties['Notes']?.rich_text?.[0]?.plain_text || ''
     }));
-
     res.json(entries);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// POST create entry
 app.post('/entries', async (req, res) => {
   try {
-    const e = req.body;
     const response = await fetch('https://api.notion.com/v1/pages', {
-      method: 'POST',
-      headers: notionHeaders(),
-      body: JSON.stringify(buildNotionPage(e))
+      method: 'POST', headers: notionHeaders(),
+      body: JSON.stringify(buildEntryPage(req.body))
     });
     const data = await response.json();
     if (!response.ok) return res.status(response.status).json(data);
@@ -91,14 +85,11 @@ app.post('/entries', async (req, res) => {
   }
 });
 
-// PATCH update entry
 app.patch('/entries/:id', async (req, res) => {
   try {
-    const e = req.body;
     const response = await fetch(`https://api.notion.com/v1/pages/${req.params.id}`, {
-      method: 'PATCH',
-      headers: notionHeaders(),
-      body: JSON.stringify({ properties: buildNotionPage(e).properties })
+      method: 'PATCH', headers: notionHeaders(),
+      body: JSON.stringify({ properties: buildEntryPage(req.body).properties })
     });
     const data = await response.json();
     if (!response.ok) return res.status(response.status).json(data);
@@ -108,14 +99,11 @@ app.patch('/entries/:id', async (req, res) => {
   }
 });
 
-// DELETE endpoint disabled — deletions are local only
-// app.delete('/entries/:id', ...) removed for safety
-
-function buildNotionPage(e) {
+function buildEntryPage(e) {
   const props = {
     'Firm':    { title: [{ text: { content: e.firm || '' } }] },
     'Partner': { rich_text: [{ text: { content: e.partner || '' } }] },
-    'Page':    { select: { name: e.page === 'other' ? 'Other' : e.page === 'targets' ? 'Targets' : 'Law Firms' } },
+    'Page':    { select: { name: e.page === 'other' ? 'Other' : 'Law Firms' } },
     'Status':  { select: { name: statusToLabel(e.status) } },
     'Priority':{ select: { name: capitalize(e.priority || 'medium') } },
     'Notes':   { rich_text: [{ text: { content: e.notes || '' } }] }
@@ -123,6 +111,63 @@ function buildNotionPage(e) {
   if (e.date)     props['Date Contacted'] = { date: { start: e.date } };
   if (e.followup) props['Follow-up Due']  = { date: { start: e.followup } };
   return { parent: { database_id: DATABASE_ID }, properties: props };
+}
+
+// TARGET FIRMS (separate database)
+app.use('/targets', requireApiKey);
+
+app.get('/targets', async (req, res) => {
+  try {
+    const results = await queryAll(TARGETS_DB_ID);
+    const targets = results.map(page => ({
+      notionId: page.id,
+      name:     page.properties['Firm']?.title?.[0]?.plain_text || '',
+      notes:    page.properties['Notes']?.rich_text?.[0]?.plain_text || '',
+      applied:  page.properties['Applied']?.checkbox || false
+    }));
+    res.json(targets);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/targets', async (req, res) => {
+  try {
+    const response = await fetch('https://api.notion.com/v1/pages', {
+      method: 'POST', headers: notionHeaders(),
+      body: JSON.stringify(buildTargetPage(req.body))
+    });
+    const data = await response.json();
+    if (!response.ok) return res.status(response.status).json(data);
+    res.json({ notionId: data.id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/targets/:id', async (req, res) => {
+  try {
+    const response = await fetch(`https://api.notion.com/v1/pages/${req.params.id}`, {
+      method: 'PATCH', headers: notionHeaders(),
+      body: JSON.stringify({ properties: buildTargetPage(req.body).properties })
+    });
+    const data = await response.json();
+    if (!response.ok) return res.status(response.status).json(data);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+function buildTargetPage(t) {
+  return {
+    parent: { database_id: TARGETS_DB_ID },
+    properties: {
+      'Firm':    { title: [{ text: { content: t.name || '' } }] },
+      'Notes':   { rich_text: [{ text: { content: t.notes || '' } }] },
+      'Applied': { checkbox: !!t.applied }
+    }
+  };
 }
 
 const STATUS_MAP = {
