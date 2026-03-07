@@ -12,7 +12,7 @@ app.use(express.json());
 
 // Auth middleware — applied to all routes except health check
 function requireApiKey(req, res, next) {
-  if (!API_KEY) return next(); // no key set = open (shouldn't happen in prod)
+  if (!API_KEY) return next();
   const provided = req.headers['x-api-key'];
   if (!provided || provided !== API_KEY) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -26,7 +26,7 @@ const notionHeaders = () => ({
   'Notion-Version': '2022-06-28'
 });
 
-// Health check (no auth — used to verify the proxy is reachable)
+// Health check (no auth)
 app.get('/', (req, res) => res.json({ status: 'ok', message: 'Outreach Tracker proxy running' }));
 
 // All data routes require API key
@@ -95,21 +95,8 @@ app.patch('/entries/:id', async (req, res) => {
   }
 });
 
-// DELETE entry
-app.delete('/entries/:id', async (req, res) => {
-  try {
-    const response = await fetch(`https://api.notion.com/v1/pages/${req.params.id}`, {
-      method: 'PATCH',
-      headers: notionHeaders(),
-      body: JSON.stringify({ archived: true })
-    });
-    const data = await response.json();
-    if (!response.ok) return res.status(response.status).json(data);
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// DELETE endpoint disabled — deletions are local only
+// app.delete('/entries/:id', ...) removed for safety
 
 function buildNotionPage(e) {
   const props = {
