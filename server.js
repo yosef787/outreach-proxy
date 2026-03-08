@@ -5,7 +5,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const NOTION_TOKEN   = process.env.NOTION_TOKEN;
 const DATABASE_ID    = process.env.DATABASE_ID    || '5c87a7f3e3ff4a5fb96bc77c0871fd7e';
-const TARGETS_DB_ID  = process.env.TARGETS_DB_ID  || '169617c99b5e42f09542d1aba892fdaf';
+const TARGETS_DB_ID  = process.env.TARGETS_DB_ID  || '31c83aa2273b804ba2b5000be985113b';
 const API_KEY        = process.env.API_KEY;
 
 app.use(cors());
@@ -63,7 +63,7 @@ app.get('/entries', async (req, res) => {
       priority: (page.properties['Priority']?.select?.name || 'Medium').toLowerCase(),
       date:     page.properties['Date Contacted']?.date?.start || '',
       followup: page.properties['Follow-up Due']?.date?.start || '',
-      notes:    page.properties['Notes']?.rich_text?.[0]?.plain_text || ''
+      notes:    page.properties['Note']?.rich_text?.[0]?.plain_text || ''
     }));
     res.json(entries);
   } catch (err) {
@@ -122,7 +122,7 @@ app.get('/targets', async (req, res) => {
     const targets = results.map(page => ({
       notionId: page.id,
       name:     page.properties['Firm']?.title?.[0]?.plain_text || '',
-      notes:    page.properties['Notes']?.rich_text?.[0]?.plain_text || '',
+      notes:    page.properties['Note']?.rich_text?.[0]?.plain_text || '',
       applied:  page.properties['Applied']?.checkbox || false
     }));
     res.json(targets);
@@ -164,7 +164,7 @@ function buildTargetPage(t) {
     parent: { database_id: TARGETS_DB_ID },
     properties: {
       'Firm':    { title: [{ text: { content: t.name || '' } }] },
-      'Notes':   { rich_text: [{ text: { content: t.notes || '' } }] },
+      'Note':   { rich_text: [{ text: { content: t.notes || '' } }] },
       'Applied': { checkbox: !!t.applied }
     }
   };
