@@ -5,7 +5,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const NOTION_TOKEN   = process.env.NOTION_TOKEN;
 const DATABASE_ID    = process.env.DATABASE_ID    || '5c87a7f3e3ff4a5fb96bc77c0871fd7e';
-const TARGETS_DB_ID  = process.env.TARGETS_DB_ID  || '31c83aa2273b804ba2b5000be985113b';
+const TARGETS_DB_ID  = process.env.TARGETS_DB_ID  || '31c83aa2273b80d59907d255ab6d115c';
 const API_KEY        = process.env.API_KEY;
 
 app.use(cors());
