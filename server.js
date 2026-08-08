@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3000;
 const NOTION_TOKEN   = process.env.NOTION_TOKEN;
@@ -45,8 +48,15 @@ async function queryAll(databaseId) {
   return allResults;
 }
 
+// Compliance Calendar front end (static, no auth)
+app.use('/calendar', express.static(path.join(__dirname, 'public')));
+
 // Health check (no auth)
-app.get('/', (req, res) => res.json({ status: 'ok', message: 'Outreach Tracker proxy running' }));
+app.get('/', (req, res) => res.json({
+  status: 'ok',
+  message: 'Outreach Tracker proxy running',
+  calendar: '/calendar'
+}));
 
 // OUTREACH ENTRIES (Law Firms / Other)
 app.use('/entries', requireApiKey);
