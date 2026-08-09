@@ -739,27 +739,16 @@ footer.foot p{max-width:78ch}
     <label for="syKey">Sync key <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
     <input id="syKey" type="text" placeholder="leave empty if you did not set one" spellcheck="false">
   </div>
+  <div class="warnbox" style="margin:2px 0 14px">
+    Anyone who has that URL can read and change the sheet, so treat it like a password and set a sync key.
+    A page like this cannot keep a secret, so do not use it for data that must not leak.
+  </div>
   <div class="row" style="margin-top:4px">
     <button class="btn solid" id="syConnect">Save &amp; sync now</button>
     <button class="btn" id="syPull">Replace mine with the sheet</button>
     <button class="btn danger" id="syForget">Disconnect</button>
     <button class="btn" id="syClose" style="margin-left:auto">Close</button>
   </div>
-  <details style="margin-top:18px">
-    <summary style="font-size:13px;font-weight:700;cursor:pointer">First time? Set the sheet up (5 minutes)</summary>
-    <ol class="steps" style="margin-top:12px">
-      <li>Upload the workbook to Google Drive and open it as a <b>Google Sheet</b>. Keep the tab named <b>Work Plan</b>.</li>
-      <li>In the sheet: <b>Extensions ▸ Apps Script</b>. Delete what is there, paste the code below, save.</li>
-      <li><b>Deploy ▸ New deployment ▸ Web app</b>. Execute as <b>Me</b>, Who has access <b>Anyone</b>. Authorise it.</li>
-      <li>Copy the <b>/exec</b> URL it gives you and paste it in the box above.</li>
-    </ol>
-    <div class="warnbox" style="margin-top:12px">
-      Anyone who has that URL can read and change the sheet, so treat it like a password and set a sync key.
-      A page like this cannot keep a secret, so do not use it for data that must not leak.
-    </div>
-    <textarea id="syScript" readonly spellcheck="false" style="height:150px;margin-top:12px"></textarea>
-    <div class="row"><button class="btn" id="syCopyScript">Copy the script</button></div>
-  </details>
 </div>
 
 <div class="modal" id="saveModal" hidden role="dialog" aria-modal="true" aria-labelledby="svTitle">
@@ -1870,9 +1859,8 @@ function icsText(){
 const SYNC_KEY_STORE = STORE+".sync";
 /* The sheet this page belongs to. Change it here if you redeploy the web app. */
 const DEFAULT_SYNC_URL = "https://script.google.com/macros/s/AKfycbxOxPLMCo_2eTvXhX04QP8FoHqX5r9WkGHi9lTQGeLXrERMcQqvVmf8pv7BCA6tL44k/exec";
-const APPS_SCRIPT = "/**\n * MASDR Compliance Calendar \u2014 Google Sheet sync endpoint.\n *\n * SETUP (once, by the owner of the sheet)\n *  1. Open the Google Sheet \u25b8 Extensions \u25b8 Apps Script.\n *  2. Delete whatever is there and paste this whole file in. Save.\n *  3. Optional but recommended: set SHARED_KEY below to any phrase.\n *  4. Deploy \u25b8 New deployment \u25b8 type \"Web app\".\n *       Execute as:      Me\n *       Who has access:  Anyone          <- must be \"Anyone\", not \"Anyone with a Google account\"\n *  5. Authorise when prompted, then copy the /exec URL.\n *  6. Paste that URL (and the key) into the calendar page under Sync.\n *\n * After changing this file you must Deploy \u25b8 Manage deployments \u25b8 Edit \u25b8\n * Version: New version, or the web app keeps serving the old code.\n *\n * The sheet needs a tab named \"Work Plan\" with a header row containing\n * \"Activity ID\". Columns are matched by their heading, so their order does\n * not matter and extra columns are left alone. An \"Updated At\" column is\n * added automatically the first time this runs \u2014 it is what lets two people\n * sync without overwriting each other.\n */\n\nvar SHARED_KEY = '';            // e.g. 'masdr-2026'; leave '' for no key\nvar SHEET_NAME = 'Work Plan';\nvar LISTS_NAME = 'Lists';\n\nvar FIELDS = [\n  ['id',         'Activity ID'],\n  ['activity',   'Activity / Deliverable'],\n  ['type',       'Type'],\n  ['owner',      'Owner'],\n  ['department', 'Department'],\n  ['frequency',  'Frequency'],\n  ['start',      'Start Date'],\n  ['end',        'End / Due Date'],\n  ['duration',   'Duration (days)'],\n  ['status',     'Status'],\n  ['progress',   'Progress %'],\n  ['reviewer',   'Reviewer / Approver'],\n  ['approval',   'Approval Status'],\n  ['notes',      'Notes'],\n  ['updatedAt',  'Updated At']\n];\n\n/* \u2500\u2500 entry points \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n\nfunction doGet(e) {\n  try {\n    if (!keyOk_(e && e.parameter ? e.parameter.key : '')) return json_({ ok: false, error: 'Wrong sync key.' });\n    return json_(readAll_());\n  } catch (err) {\n    return json_({ ok: false, error: String(err && err.message || err) });\n  }\n}\n\nfunction doPost(e) {\n  var lock = LockService.getScriptLock();\n  try {\n    lock.waitLock(25000);\n  } catch (err) {\n    return json_({ ok: false, error: 'The sheet is busy with another sync. Try again in a moment.' });\n  }\n  try {\n    var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');\n    if (!keyOk_(body.key)) return json_({ ok: false, error: 'Wrong sync key.' });\n    merge_(body.rows || [], body.deleted || []);\n    return json_(readAll_());\n  } catch (err) {\n    return json_({ ok: false, error: String(err && err.message || err) });\n  } finally {\n    lock.releaseLock();\n  }\n}\n\nfunction keyOk_(k) { return !SHARED_KEY || String(k || '') === SHARED_KEY; }\n\nfunction json_(o) {\n  return ContentService.createTextOutput(JSON.stringify(o))\n    .setMimeType(ContentService.MimeType.JSON);\n}\n\n/* \u2500\u2500 sheet access \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n\nfunction norm_(s) {\n  return String(s == null ? '' : s).toLowerCase()\n    .replace(/[\\s\u00a0]/g, '').replace(/[\u2013\u2014]/g, '-');\n}\n\nfunction ctx_() {\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var sh = ss.getSheetByName(SHEET_NAME) || ss.getSheets()[0];\n  var v = sh.getDataRange().getValues();\n\n  var hdr = -1;\n  for (var r = 0; r < v.length && r < 40 && hdr < 0; r++) {\n    for (var c = 0; c < v[r].length; c++) {\n      if (norm_(v[r][c]) === 'activityid') { hdr = r; break; }\n    }\n  }\n  if (hdr < 0) throw new Error('No \"Activity ID\" heading found on the \"' + sh.getName() + '\" sheet.');\n\n  var map = {};\n  for (var c2 = 0; c2 < v[hdr].length; c2++) {\n    var n = norm_(v[hdr][c2]);\n    for (var i = 0; i < FIELDS.length; i++) {\n      if (norm_(FIELDS[i][1]) === n) map[FIELDS[i][0]] = c2;\n    }\n  }\n  if (map.id === undefined) throw new Error('Could not map the \"Activity ID\" column.');\n\n  if (map.updatedAt === undefined) {\n    var col = v[hdr].length;\n    while (col > 0 && String(v[hdr][col - 1] || '') === '') col--;\n    sh.getRange(hdr + 1, col + 1).setValue('Updated At');\n    SpreadsheetApp.flush();\n    map.updatedAt = col;\n    v = sh.getDataRange().getValues();\n  }\n  return { ss: ss, sh: sh, hdr: hdr, map: map, v: v, tz: ss.getSpreadsheetTimeZone() };\n}\n\nfunction asDate_(v, tz) {\n  if (v instanceof Date) return Utilities.formatDate(v, tz, 'yyyy-MM-dd');\n  var s = String(v == null ? '' : v).trim();\n  return /^\\d{4}-\\d{2}-\\d{2}/.test(s) ? s.slice(0, 10) : '';\n}\nfunction asIso_(v) {\n  if (v instanceof Date) return v.toISOString();\n  return String(v == null ? '' : v).trim();\n}\nfunction asProgress_(v) {\n  var n = Number(v);\n  if (!isFinite(n)) return 0;\n  return n > 1 ? n / 100 : n;\n}\n\nfunction readAll_() {\n  var x = ctx_(), rows = [];\n  for (var r = x.hdr + 1; r < x.v.length; r++) {\n    var id = String(x.v[r][x.map.id] == null ? '' : x.v[r][x.map.id]).trim();\n    if (!id) continue;\n    rows.push(rowFrom_(x.v[r], x.map, x.tz));\n  }\n  return {\n    ok: true,\n    rows: rows,\n    lists: readLists_(),\n    title: x.ss.getName(),\n    syncedAt: new Date().toISOString()\n  };\n}\n\nfunction rowFrom_(row, map, tz) {\n  function g(k) { return map[k] === undefined ? '' : row[map[k]]; }\n  return {\n    id:         String(g('id')).trim(),\n    activity:   String(g('activity') || ''),\n    type:       String(g('type') || ''),\n    owner:      String(g('owner') || ''),\n    department: String(g('department') || ''),\n    frequency:  String(g('frequency') || ''),\n    start:      asDate_(g('start'), tz),\n    end:        asDate_(g('end'), tz),\n    duration:   Number(g('duration')) || 0,\n    status:     String(g('status') || 'Not Started'),\n    progress:   asProgress_(g('progress')),\n    reviewer:   String(g('reviewer') || ''),\n    approval:   String(g('approval') || ''),\n    notes:      String(g('notes') || ''),\n    updatedAt:  asIso_(g('updatedAt'))\n  };\n}\n\nfunction readLists_() {\n  var ss = SpreadsheetApp.getActiveSpreadsheet();\n  var sh = ss.getSheetByName(LISTS_NAME);\n  if (!sh) return null;\n  var v = sh.getDataRange().getValues();\n  var hdr = -1;\n  for (var r = 0; r < v.length && r < 20 && hdr < 0; r++) {\n    for (var c = 0; c < v[r].length; c++) {\n      if (norm_(v[r][c]) === 'activitytype') { hdr = r; break; }\n    }\n  }\n  if (hdr < 0) return null;\n  var out = {};\n  for (var c2 = 0; c2 < v[hdr].length; c2++) {\n    var name = String(v[hdr][c2] || '').trim();\n    if (!name) continue;\n    var vals = [];\n    for (var r2 = hdr + 1; r2 < v.length; r2++) {\n      var cell = String(v[r2][c2] == null ? '' : v[r2][c2]).trim();\n      if (cell) vals.push(cell);\n    }\n    if (vals.length) out[name] = vals;\n  }\n  return out;\n}\n\n/* \u2500\u2500 merge \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */\n\nfunction indexRows_(x) {\n  var idx = {};\n  for (var r = x.hdr + 1; r < x.v.length; r++) {\n    var id = String(x.v[r][x.map.id] == null ? '' : x.v[r][x.map.id]).trim();\n    if (id) idx[id] = { row: r + 1, updatedAt: asIso_(x.v[r][x.map.updatedAt]) };\n  }\n  return idx;\n}\n\nfunction merge_(rows, deleted) {\n  var x = ctx_();\n  var idx = indexRows_(x);\n\n  /* deletions: only if the sheet row has not been touched since the delete */\n  var kill = [];\n  for (var i = 0; i < deleted.length; i++) {\n    var e = idx[String(deleted[i].id || '').trim()];\n    if (e && String(e.updatedAt || '') <= String(deleted[i].at || '')) kill.push(e.row);\n  }\n  if (kill.length) {\n    kill.sort(function (a, b) { return b - a; });\n    for (var k = 0; k < kill.length; k++) x.sh.deleteRow(kill[k]);\n    SpreadsheetApp.flush();\n    x = ctx_();\n    idx = indexRows_(x);\n  }\n\n  /* upserts: newest wins, per row */\n  var width = Math.max(x.v[x.hdr].length, x.sh.getLastColumn());\n  var appendAt = x.sh.getLastRow() + 1;\n  for (var j = 0; j < rows.length; j++) {\n    var a = rows[j];\n    var id = String(a.id || '').trim();\n    if (!id) continue;\n    var cur = idx[id];\n    if (cur) {\n      if (String(a.updatedAt || '') > String(cur.updatedAt || '')) {\n        writeRow_(x, cur.row, a, width);\n      }\n    } else if (String(a.updatedAt || '')) {\n      /* Only rows the sender actually created or edited are added. An\n         untouched row that is missing here was deleted by someone else,\n         and pushing it back would resurrect it. */\n      writeRow_(x, appendAt, a, width);\n      idx[id] = { row: appendAt, updatedAt: a.updatedAt };\n      appendAt++;\n    }\n  }\n  SpreadsheetApp.flush();\n}\n\nfunction writeRow_(x, rowNum, a, width) {\n  var rng = x.sh.getRange(rowNum, 1, 1, width);\n  var vals = rng.getValues()[0];\n  for (var i = 0; i < FIELDS.length; i++) {\n    var k = FIELDS[i][0];\n    if (x.map[k] === undefined) continue;\n    vals[x.map[k]] = toCell_(k, a[k]);\n  }\n  rng.setValues([vals]);\n}\n\nfunction toCell_(k, val) {\n  if (k === 'start' || k === 'end') {\n    var s = String(val == null ? '' : val).slice(0, 10);\n    if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(s)) return '';\n    var p = s.split('-');\n    return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));\n  }\n  if (k === 'progress' || k === 'duration') return Number(val) || 0;\n  return val == null ? '' : val;\n}\n";
 let sync = (function(){ let o={}; try{ o=JSON.parse(localStorage.getItem(SYNC_KEY_STORE)||"{}")||{}; }catch(e){}
-  if(!o.url) o.url = DEFAULT_SYNC_URL;
+  if(!/^https?:\/\//i.test(o.url||"")) o.url = DEFAULT_SYNC_URL;
   return o; })();
 function saveSync(){ try{ localStorage.setItem(SYNC_KEY_STORE, JSON.stringify(sync)); }catch(e){} }
 
@@ -1905,14 +1893,7 @@ function applyRemote(data){
   cursor = null; expandedWeeks = {};
   save(); renderAll();
 }
-function syncErrorText(err){
-  const m = String(err && err.message || err);
-  if(/Failed to fetch|NetworkError|Load failed/i.test(m)){
-    if(FRAMED) return "Sync cannot run inside a panel. Open this page in its own browser tab.";
-    return "Could not reach the sheet. Check the web app URL, and that the deployment is set to “Anyone”.";
-  }
-  return m;
-}
+function syncErrorText(){ return "Sync failed."; }
 async function doSync(){
   if(!sync.url){ openSyncModal(); return; }
   if(syncBusy) return;
@@ -1931,7 +1912,7 @@ async function doSync(){
     toast("Synced — the sheet now holds "+data.rows.length+" activities.");
   }catch(err){
     setSyncUi("bad");
-    toast(syncErrorText(err), true);
+    toast(syncErrorText(), true);
   }finally{ syncBusy=false; }
 }
 async function doPull(){
@@ -1948,13 +1929,12 @@ async function doPull(){
     setSyncUi("ok");
     toast("Loaded "+data.rows.length+" activities from the sheet.");
   }catch(err){
-    setSyncUi("bad"); toast(syncErrorText(err), true);
+    setSyncUi("bad"); toast(syncErrorText(), true);
   }finally{ syncBusy=false; }
 }
 function openSyncModal(){
   $("syUrl").value = sync.url||"";
   $("syKey").value = sync.key||"";
-  $("syScript").value = APPS_SCRIPT;
   $("syFramedWarn").hidden = !FRAMED;
   $("syState").textContent = sync.url
     ? ("Connected to "+(sync.title||"the sheet")+(sync.last?" · last synced "+ago(sync.last):" · not synced yet"))
@@ -1971,13 +1951,13 @@ function closeSyncModal(){
 $("btnSync").addEventListener("click",doSync);
 $("btnSyncCfg").addEventListener("click",openSyncModal);
 $("syClose").addEventListener("click",closeSyncModal);
-$("syPull").addEventListener("click",()=>{ readSyncFields(); closeSyncModal(); doPull(); });
-$("syCopyScript").addEventListener("click",async()=>{
-  try{ await navigator.clipboard.writeText(APPS_SCRIPT); toast("Script copied — paste it into Apps Script."); }
-  catch(e){ const t=$("syScript"); t.focus(); t.select(); toast("Press Ctrl/Cmd + C to copy."); }
+$("syPull").addEventListener("click",()=>{
+  if(!readSyncFields()){ toast("Sync failed.",true); return; }
+  closeSyncModal(); doPull();
 });
 function readSyncFields(){
   const u=$("syUrl").value.trim();
+  if(!/^https?:\/\//i.test(u)) return null;      /* keep the working URL rather than storing junk */
   sync.url = u; sync.key = $("syKey").value.trim(); saveSync();
   return u;
 }
@@ -1987,12 +1967,7 @@ $("syForget").addEventListener("click",()=>{
   toast("Reset to the built-in sheet.");
 });
 $("syConnect").addEventListener("click",()=>{
-  const u=readSyncFields();
-  if(!u){ toast("Paste the web app URL first.",true); return; }
-  if(!/^https?:\/\//i.test(u)){ toast("That is not a web address.",true); return; }
-  if(/script\.google\.com/i.test(u) && !/\/exec(\?|$)/.test(u)){
-    toast("Use the deployment URL that ends in /exec, not the editor link.",true); return;
-  }
+  if(!readSyncFields()){ toast("Sync failed.",true); return; }
   closeSyncModal(); doSync();
 });
 setInterval(()=>{ if(!syncBusy && sync.url && sync.last) setSyncUi("ok"); }, 60000);
