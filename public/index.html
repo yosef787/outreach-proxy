@@ -248,23 +248,42 @@ main{max-width:1600px;margin:0 auto;padding:24px 22px 80px}
 @media (max-width:1000px){.grid-main{grid-template-columns:1fr}}
 .eyebrow{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 
-/* ── hero ───────────────────────────────────────────────────────────── */
-.hero{background:var(--hero);border-radius:var(--r);color:#fff;padding:24px 26px;box-shadow:var(--sh-2);
-  display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center;position:relative;overflow:hidden}
-.hero::after{content:"";position:absolute;right:-70px;top:-90px;width:280px;height:280px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.13),transparent 66%);pointer-events:none}
-.hero .lead{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#D9C6E6}
-.hero h2{font-size:30px;font-weight:700;line-height:1.12;margin-top:5px;letter-spacing:-.02em}
-.hero .sub{color:#D9C6E6;font-size:13px;margin-top:5px}
-.hero-stats{display:flex;gap:26px;flex-wrap:wrap;margin-top:18px}
-.hero-stat .v{font-family:var(--mono);font-size:23px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
-.hero-stat .l{font-size:11px;color:#D0BADF;margin-top:1px}
-.hero-stat.alert .v{color:#FFB4AE}
-.ring{position:relative;width:132px;height:132px;flex:none}
-.ring svg{transform:rotate(-90deg);display:block}
-.ring .mid{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
-.ring .mid b{font-family:var(--mono);font-size:26px;font-weight:600;display:block;line-height:1}
-.ring .mid span{font-size:10px;color:#D0BADF;letter-spacing:.09em;text-transform:uppercase}
+/* ── hero ──────────────────────────────────────────────────────────── */
+.hero{background:var(--hero);border-radius:var(--r);color:#fff;padding:22px 26px;box-shadow:var(--sh-2);
+  display:grid;grid-template-columns:1fr minmax(220px,300px);gap:28px;align-items:center;
+  position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-80px;top:-110px;width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.12),transparent 65%);pointer-events:none}
+.hero-main{min-width:0}
+.hero .lead{font-size:11px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#D3BEE3}
+.hero h2{font-size:32px;font-weight:700;line-height:1.1;margin-top:6px;letter-spacing:-.025em}
+.hero-next{margin-top:14px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.hero-next .hn-when{font-size:12px;font-weight:700;letter-spacing:.03em;color:#FFD9A8}
+.hero-next .hn-flag{font-size:12px;font-weight:700;letter-spacing:.03em;color:#FFB4AE}
+.hero-next .hn-txt{font-size:13.5px;color:#EDE3F4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hero-prog{position:relative;z-index:1}
+.hp-top{font-size:13px;color:#EDE3F4}
+.hp-top span{font-family:var(--mono);font-size:20px;font-weight:600;color:#fff;font-variant-numeric:tabular-nums}
+.hp-bar{height:8px;border-radius:5px;background:rgba(255,255,255,.2);overflow:hidden;margin-top:9px}
+.hp-bar>span{display:block;height:100%;border-radius:5px;background:#fff;min-width:0;transition:width .3s}
+.hp-foot{font-size:11.5px;color:#D3BEE3;margin-top:7px}
+
+/* ── quarter strip ─────────────────────────────────────────────────── */
+.qstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px}
+.qcard{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 13px 11px;
+  text-align:left;display:flex;flex-direction:column;gap:2px;transition:border-color .15s,transform .12s,box-shadow .15s}
+.qcard:hover{border-color:var(--brand-soft);transform:translateY(-2px);box-shadow:var(--sh-2)}
+.qcard.past{opacity:.55}
+.qcard.now{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+.qcard .qh{font-size:11.5px;font-weight:700;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.qcard .qh em{font-style:normal;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  background:var(--brand);color:#fff;border-radius:4px;padding:1px 5px}
+.qcard .qn{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1.05;letter-spacing:-.03em;margin-top:4px}
+.qcard .ql{font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.qcard .qdue{font-size:11.5px;color:var(--ink-2);margin-top:5px}
+.qcard .qtypes{display:flex;gap:3px;flex-wrap:wrap;margin-top:7px;min-height:10px}
+.qcard .qbar{height:4px;border-radius:3px;background:var(--chart-soft);overflow:hidden;margin-top:9px}
+.qcard .qbar>span{display:block;height:100%;background:var(--ok);border-radius:3px}
 
 /* ── KPI ────────────────────────────────────────────────────────────── */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
@@ -315,7 +334,7 @@ main{max-width:1600px;margin:0 auto;padding:24px 22px 80px}
   color:var(--ink-3);text-align:left}
 .dow div.we{color:var(--ink-3);opacity:.65}
 .wk{display:grid;grid-template-columns:repeat(7,1fr);position:relative;gap:1px;background:var(--line);margin-top:1px}
-.day{background:var(--surface);min-height:78px;padding:6px 8px 7px;position:relative}
+.day{background:var(--surface);min-height:70px;padding:5px 7px 6px;position:relative}
 .day.out{background:var(--surface-2)}
 .day.out .dn{color:var(--ink-3);opacity:.5}
 .day.we:not(.out){background:var(--surface-2)}
@@ -327,9 +346,9 @@ main{max-width:1600px;margin:0 auto;padding:24px 22px 80px}
 :root[data-theme="dark"] .day.qstart::before{color:var(--t-quarterly)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .day.qstart::before{color:var(--t-quarterly)}}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .day.qstart::before{color:var(--brand)}}
-.lanes{position:absolute;left:0;right:0;top:30px;display:grid;grid-template-columns:repeat(7,1fr);
+.lanes{position:absolute;left:0;right:0;top:27px;display:grid;grid-template-columns:repeat(7,1fr);
   gap:3px 1px;padding:0 4px;pointer-events:none}
-.ev{pointer-events:auto;height:22px;border-radius:6px;display:flex;align-items:center;gap:5px;
+.ev{pointer-events:auto;height:20px;border-radius:6px;display:flex;align-items:center;gap:5px;
   padding:0 8px;font-size:11px;font-weight:700;overflow:hidden;white-space:nowrap;cursor:pointer;
   border:0;text-align:left;width:100%;transition:filter .12s,transform .12s}
 .ev:hover{filter:brightness(1.07);transform:translateY(-1px)}
@@ -344,6 +363,25 @@ main{max-width:1600px;margin:0 auto;padding:24px 22px 80px}
 .more{pointer-events:auto;border:0;background:transparent;color:var(--ink-3);font-size:10.5px;font-weight:700;
   text-align:left;padding:0 8px;height:18px;border-radius:5px}
 .more:hover{color:var(--brand);background:var(--surface-3)}
+
+.cal-split{display:grid;grid-template-columns:1fr 268px;gap:16px;align-items:start}
+.cal-split.wide{grid-template-columns:1fr}
+@media (max-width:1100px){.cal-split{grid-template-columns:1fr}}
+.cal-side{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface-2)}
+.cal-side h4{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  padding:11px 14px 9px;border-bottom:1px solid var(--line)}
+.cs-item{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-bottom:1px solid var(--line);
+  width:100%;text-align:left;background:transparent;border-left:0;border-right:0;border-top:0}
+.cs-item:last-child{border-bottom:0}
+.cs-item:hover{background:var(--surface-3)}
+.cs-day{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink-2);width:38px;flex:none;
+  text-align:center;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:3px 0}
+.cs-item.due .cs-day{background:var(--magenta);color:#fff;border-color:var(--magenta)}
+.cs-item.od .cs-day{background:var(--crit);color:#fff;border-color:var(--crit)}
+.cs-b{min-width:0;flex:1}
+.cs-b b{display:block;font-size:12.5px;font-weight:600;line-height:1.3}
+.cs-b span{font-size:11px;color:var(--ink-3);display:flex;align-items:center;gap:6px;margin-top:2px}
+.cs-empty{padding:22px 14px;text-align:center;color:var(--ink-3);font-size:12.5px}
 
 /* year view */
 .year{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:14px}
@@ -395,6 +433,14 @@ main{max-width:1600px;margin:0 auto;padding:24px 22px 80px}
   padding:0 7px;font-size:10.5px;font-weight:700;overflow:hidden;white-space:nowrap;cursor:pointer;border:0;position:relative}
 .tl-now{position:absolute;top:0;bottom:0;width:2px;background:var(--now-line);z-index:1;pointer-events:none;opacity:.7}
 
+.filterbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:11px;padding:8px 10px}
+.filterbar .fb-ico{width:16px;height:16px;stroke:var(--ink-3);fill:none;stroke-width:1.8;stroke-linecap:round;flex:none;margin-left:2px}
+.filterbar select,.filterbar input{background:var(--surface);border:1px solid var(--line);border-radius:8px;
+  padding:6px 9px;font-size:12.5px;min-width:132px}
+.filterbar input[type=search]{flex:1;min-width:180px}
+.filterbar .btn{padding:6px 12px;font-size:12px}
+
 /* ── lists / tables ─────────────────────────────────────────────────── */
 .tbl-wrap{overflow-x:auto}
 table.tbl{width:100%;border-collapse:collapse;font-size:13px}
@@ -432,19 +478,6 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13px}
 .up-item.is-od .up-when{color:var(--crit)}
 
 /* ── charts ─────────────────────────────────────────────────────────── */
-.wl{display:flex;flex-direction:column;gap:7px}
-.wl-plot{display:flex;align-items:flex-end;gap:3px;height:118px;
-  background:repeating-linear-gradient(to top,transparent,transparent 28px,var(--grid) 28px,var(--grid) 29px)}
-.wl-col{flex:1 1 0;min-width:0;display:flex;align-items:flex-end;justify-content:center;gap:2px;height:100%;
-  border-radius:5px 5px 0 0;padding:0 1px}
-.wl-col:hover{background:var(--surface-3)}
-.wl-col.now{background:var(--now-bg)}
-.wl-a,.wl-d{width:44%;border-radius:4px 4px 0 0;min-height:2px}
-.wl-a{background:var(--chart)} .wl-d{background:var(--chart-2)}
-.wl-axis{display:flex;gap:3px}
-.wl-tick{flex:1 1 0;min-width:0;text-align:center;font-size:9px;color:var(--ink-3);font-family:var(--mono);
-  overflow:hidden;white-space:nowrap}
-.wl-tick.yr{font-weight:700;color:var(--ink-2)}
 .bars{display:flex;flex-direction:column;gap:11px}
 .bar-row{display:grid;grid-template-columns:1fr auto;gap:8px 10px;align-items:center;cursor:default}
 .bar-row .lab{display:flex;align-items:center;gap:8px;font-size:12.5px;min-width:0}
@@ -523,7 +556,7 @@ footer.foot{max-width:1600px;margin:0 auto;padding:0 22px 40px;color:var(--ink-3
 footer.foot p{max-width:78ch}
 
 @media (max-width:900px){
-  .hero{grid-template-columns:1fr} .ring{margin:0 auto}
+  .hero{grid-template-columns:1fr;gap:18px}
   .day{min-height:96px}
 }
 @media (max-width:700px){
@@ -595,55 +628,50 @@ footer.foot p{max-width:78ch}
   <!-- ══ OVERVIEW ══ -->
   <section class="view stack" id="view-dashboard" role="tabpanel" aria-labelledby="tab-dashboard">
     <div class="hero">
-      <div>
+      <div class="hero-main">
         <div class="lead" id="heroLead">—</div>
         <h2 id="heroTitle">—</h2>
-        <div class="sub" id="heroSub">—</div>
-        <div class="hero-stats" id="heroStats"></div>
+        <div class="hero-next" id="heroNext"></div>
       </div>
-      <div class="ring" id="ring"></div>
+      <div class="hero-prog">
+        <div class="hp-top"><span id="hpDone">0</span> of <span id="hpAll">0</span> complete</div>
+        <div class="hp-bar"><span id="hpFill"></span></div>
+        <div class="hp-foot" id="hpFoot">—</div>
+      </div>
     </div>
 
     <div class="kpis" id="kpis"></div>
 
     <div class="grid-main">
       <div class="card">
-        <div class="card-hd"><h2>Coming up</h2><span class="hint">Next deadlines · click for detail</span></div>
-        <div class="up" id="upcoming"></div>
+        <div class="card-hd"><h2>What needs doing</h2><span class="hint">Overdue first, then by due date</span></div>
+        <div class="up" id="priorities"></div>
       </div>
       <div class="stack">
         <div class="card">
-          <div class="card-hd"><h2>Needs attention</h2><span class="hint">Overdue and in flight</span></div>
-          <div class="up" id="attention"></div>
-        </div>
-        <div class="card">
-          <div class="card-hd"><h2>By activity type</h2><span class="hint">Share of the plan</span></div>
+          <div class="card-hd"><h2>Work by type</h2><span class="hint">Across the whole plan</span></div>
           <div class="card-bd"><div class="bars" id="typeBars"></div></div>
         </div>
+        <div class="card">
+          <div class="card-hd"><h2>Where the plan stands</h2></div>
+          <div class="card-bd stack">
+            <div class="mix" id="statusMix"></div>
+            <div class="legend" id="statusLegend"></div>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-hd"><h2>Workload across the cycle</h2>
-        <div class="legend">
-          <span class="item"><span class="swatch" style="background:var(--chart)"></span>Active in month</span>
-          <span class="item"><span class="swatch" style="background:var(--chart-2)"></span>Falling due</span>
-        </div>
-      </div>
-      <div class="card-bd"><div class="wl" id="workload"></div></div>
+      <div class="card-hd"><h2>The cycle, quarter by quarter</h2>
+        <span class="hint">Click a quarter to open it in the calendar</span></div>
+      <div class="card-bd"><div class="qstrip" id="qstrip"></div></div>
     </div>
 
-    <div class="card">
-      <div class="card-hd"><h2>By department</h2><span class="hint">Ownership across the cycle</span></div>
-      <div class="card-bd stack">
-        <div>
-          <div class="eyebrow" style="margin-bottom:8px">Status mix — whole plan</div>
-          <div class="mix" id="statusMix"></div>
-          <div class="legend" id="statusLegend" style="margin-top:10px"></div>
-        </div>
-        <div class="tbl-wrap"><table class="tbl dense" id="deptTbl"></table></div>
-      </div>
-    </div>
+    <details class="ref">
+      <summary>Breakdown by department</summary>
+      <div class="tbl-wrap"><table class="tbl dense" id="deptTbl"></table></div>
+    </details>
   </section>
 
   <!-- ══ CALENDAR ══ -->
@@ -663,14 +691,18 @@ footer.foot p{max-width:78ch}
         </div>
       </div>
       <div class="card-bd stack">
-        <div class="controls no-print">
-          <div class="fld"><label for="fType">Type</label><select id="fType"></select></div>
-          <div class="fld"><label for="fStatus">Status</label><select id="fStatus"></select></div>
-          <div class="fld"><label for="fDept">Department</label><select id="fDept"></select></div>
-          <div class="fld"><label for="fSearch">Search</label><input type="search" id="fSearch" placeholder="Activity, ID or note"></div>
-          <button class="btn" id="fReset" style="align-self:flex-end">Reset</button>
+        <div class="filterbar no-print">
+          <svg class="fb-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+          <select id="fType" aria-label="Filter by type"></select>
+          <select id="fStatus" aria-label="Filter by status"></select>
+          <select id="fDept" aria-label="Filter by department"></select>
+          <input type="search" id="fSearch" placeholder="Search activity, ID or note" aria-label="Search">
+          <button class="btn" id="fReset">Reset</button>
         </div>
-        <div id="calBody"></div>
+        <div class="cal-split">
+          <div id="calBody"></div>
+          <aside class="cal-side" id="calSide"></aside>
+        </div>
         <div class="legend" id="calLegend"></div>
       </div>
     </div>
@@ -850,6 +882,13 @@ function span(){
   return {from:new Date(Date.UTC(lo.getUTCFullYear(),(qOf(lo)-1)*3,1)),
           to:new Date(Date.UTC(hi.getUTCFullYear(),qOf(hi)*3,0))};
 }
+function quarters(){
+  const sp=span(), out=[];
+  let y=sp.from.getUTCFullYear(), q=qOf(sp.from);
+  const ey=sp.to.getUTCFullYear(), eq=qOf(sp.to);
+  while(y<ey || (y===ey && q<=eq)){ out.push(y+" Q"+q); q++; if(q>4){ q=1; y++; } }
+  return out;
+}
 function isOverdue(a){ const e=d(a.end); return !!e && a.status!=="Complete" && e<today(); }
 function rangeOf(a){ const s=d(a.start)||d(a.end), e=d(a.end)||d(a.start); return (s&&e)?{s,e:(e<s?s:e)}:null; }
 function activeIn(a,from,to){ const r=rangeOf(a); return !!r && r.s<=to && r.e>=from; }
@@ -876,36 +915,27 @@ function filtered(){
 }
 
 /* ══ hero + KPIs ════════════════════════════════════════════════════ */
-function ringSvg(pct){
-  const r=58, c=2*Math.PI*r;
-  return '<svg width="132" height="132" viewBox="0 0 132 132" aria-hidden="true">'+
-    '<circle cx="66" cy="66" r="'+r+'" fill="none" stroke="rgba(255,255,255,.17)" stroke-width="11"/>'+
-    '<circle cx="66" cy="66" r="'+r+'" fill="none" stroke="#fff" stroke-width="11" stroke-linecap="round" '+
-    'stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+(c*(1-pct/100)).toFixed(1)+'"/></svg>'+
-    '<div class="mid"><b>'+pct+'%</b><span>complete</span></div>';
-}
 function renderHero(){
-  const A=acts(), t=today(), s=span();
-  const mFrom=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),1));
-  const mTo=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth()+1,0));
-  const qb=qBounds(qLabel(t));
+  const A=acts(), t=today(), s2=span();
   const done=A.filter(a=>a.status==="Complete").length;
   const pct=A.length?Math.round(done/A.length*100):0;
   const next=A.filter(a=>{const e=d(a.end);return e&&e>=t&&a.status!=="Complete"}).sort((x,y)=>d(x.end)-d(y.end))[0];
-  $("heroLead").textContent = qLabel(t)+" · "+fmtShort(s.from)+" – "+fmtShort(s.to)+" cycle";
+  const od=A.filter(isOverdue);
+  $("heroLead").textContent = "Q"+qOf(t)+" "+t.getUTCFullYear()+" · cycle runs "+fmtShort(s2.from)+" to "+fmtShort(s2.to);
   $("heroTitle").textContent = MONTHS_FULL[t.getUTCMonth()]+" "+t.getUTCFullYear();
-  $("heroSub").textContent = next
-    ? "Next deadline — "+next.id+" "+next.activity+", "+fmt(d(next.end))
-    : "No open deadlines ahead.";
-  const stats=[
-    {v:A.filter(a=>activeIn(a,mFrom,mTo)).length, l:"Active this month"},
-    {v:A.filter(a=>dueIn(a,mFrom,mTo)).length,   l:"Due this month"},
-    {v:qb?A.filter(a=>dueIn(a,qb.start,qb.end)).length:0, l:"Due this quarter"},
-    {v:A.filter(isOverdue).length, l:"Overdue", alert:true}
-  ];
-  $("heroStats").innerHTML = stats.map(x=>'<div class="hero-stat'+(x.alert&&x.v?" alert":"")+'">'+
-    '<div class="v">'+x.v+'</div><div class="l">'+esc(x.l)+'</div></div>').join("");
-  $("ring").innerHTML = ringSvg(pct);
+  if(od.length){
+    $("heroNext").innerHTML='<span class="hn-flag">'+od.length+(od.length===1?" item is":" items are")+' overdue</span>'+
+      '<span class="hn-txt">'+esc(od[0].id)+" — "+esc(od[0].activity)+'</span>';
+  } else if(next){
+    const dd=dayDiff(t,d(next.end));
+    $("heroNext").innerHTML='<span class="hn-when">'+(dd===0?"Due today":dd===1?"Due tomorrow":"Due in "+dd+" days")+'</span>'+
+      '<span class="hn-txt">'+esc(next.id)+" — "+esc(next.activity)+" · "+fmt(d(next.end))+'</span>';
+  } else {
+    $("heroNext").innerHTML='<span class="hn-when">Nothing outstanding</span>';
+  }
+  $("hpDone").textContent=done; $("hpAll").textContent=A.length;
+  $("hpFill").style.width=pct+"%";
+  $("hpFoot").textContent=pct+"% of the plan complete";
 }
 const ICON = {
   clock:'<path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"/>',
@@ -915,20 +945,18 @@ const ICON = {
   list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>'
 };
 function renderKpis(){
-  const A=acts(), t=today(), qb=qBounds(qLabel(t));
-  const soon=addDays(t,30);
+  const A=acts(), t=today();
+  const mFrom=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),1));
+  const mTo=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth()+1,0));
+  const qb=qBounds(qLabel(t));
+  const od=A.filter(isOverdue).length;
   const cards=[
-    {l:"Overdue", v:A.filter(isOverdue).length, c:A.filter(isOverdue).length?"crit":"ok",
-     i:A.filter(isOverdue).length?ICON.alert:ICON.check, f:"Past due and not complete"},
-    {l:"Due in 30 days", v:A.filter(a=>dueIn(a,t,soon)&&a.status!=="Complete").length, c:"warn", i:ICON.clock,
-     f:"To "+fmt(soon)},
-    {l:"In progress", v:A.filter(a=>a.status==="In Progress").length, c:"acc", i:ICON.play, f:"Currently under way"},
-    {l:"Open in "+qLabel(t), v:qb?A.filter(a=>activeIn(a,qb.start,qb.end)&&a.status!=="Complete").length:0,
-     c:"acc", i:ICON.list, f:"Active this quarter"},
-    {l:"Total in plan", v:A.length, c:"acc", i:ICON.list,
-     f:A.filter(a=>a.status==="Complete").length+" complete · "+A.filter(a=>a.status==="Not Started").length+" not started"}
+    {l:"Overdue", v:od, c:od?"crit":"ok", i:od?ICON.alert:ICON.check, f:od?"Needs attention now":"Nothing past due"},
+    {l:"Due this month", v:A.filter(a=>dueIn(a,mFrom,mTo)).length, c:"warn", i:ICON.clock, f:MONTHS_FULL[t.getUTCMonth()]},
+    {l:"In progress", v:A.filter(a=>a.status==="In Progress").length, c:"acc", i:ICON.play, f:"Under way now"},
+    {l:"Active this quarter", v:qb?A.filter(a=>activeIn(a,qb.start,qb.end)).length:0, c:"acc", i:ICON.list, f:qLabel(t)}
   ];
-  $("kpis").innerHTML = cards.map(c=>
+  $("kpis").innerHTML=cards.map(c=>
     '<div class="kpi '+c.c+'"><div class="top"><div class="k-label">'+esc(c.l)+'</div>'+
     '<div class="badge"><svg viewBox="0 0 24 24">'+c.i+'</svg></div></div>'+
     '<div class="k-val">'+c.v+'</div><div class="k-foot">'+esc(c.f)+'</div></div>').join("");
@@ -951,35 +979,34 @@ function upItem(a){
 }
 function renderLists2(){
   const t=today();
-  const up = acts().filter(a=>{const e=d(a.end);return e&&e>=t&&a.status!=="Complete"})
-    .sort((a,b)=>d(a.end)-d(b.end)).slice(0,7);
-  const att = acts().filter(a=>isOverdue(a)||a.status==="In Progress")
-    .sort((a,b)=>(d(a.end)||0)-(d(b.end)||0)).slice(0,7);
-  $("upcoming").innerHTML  = up.length  ? up.map(upItem).join("")  : '<div class="empty">No open deadlines ahead.</div>';
-  $("attention").innerHTML = att.length ? att.map(upItem).join("") : '<div class="empty">Nothing overdue or in flight.</div>';
+  const open=acts().filter(a=>a.status!=="Complete"&&d(a.end));
+  const overdue=open.filter(isOverdue).sort((a,b)=>d(a.end)-d(b.end));
+  const ahead=open.filter(a=>!isOverdue(a)).sort((a,b)=>d(a.end)-d(b.end));
+  const rows=overdue.concat(ahead).slice(0,7);
+  $("priorities").innerHTML = rows.length ? rows.map(upItem).join("")
+    : '<div class="empty">Nothing outstanding — every activity is complete.</div>';
 }
 
 /* ══ workload chart ═════════════════════════════════════════════════ */
-function renderWorkload(){
-  const s=span(), from=mIdx(s.from), to=mIdx(s.to), months=[];
-  for(let i=from;i<=to;i++){
-    const m0=fromMIdx(i), m1=new Date(Date.UTC(m0.getUTCFullYear(),m0.getUTCMonth()+1,0));
-    months.push({date:m0, active:acts().filter(a=>activeIn(a,m0,m1)).length,
-                 due:acts().filter(a=>dueIn(a,m0,m1)).length});
-  }
-  const peak=Math.max(1, ...months.map(m=>Math.max(m.active,m.due)));
-  const nowIdx=mIdx(today())-from;
-  $("workload").innerHTML =
-    '<div class="wl-plot">'+ months.map((m,i)=>
-      '<div class="wl-col'+(i===nowIdx?" now":"")+'" data-tip="<b>'+esc(fmtShort(m.date))+'</b><br>'+
-        m.active+' active · '+m.due+' due">'+
-        '<div class="wl-a" style="height:'+Math.max(2,m.active/peak*100)+'%"></div>'+
-        '<div class="wl-d" style="height:'+Math.max(2,m.due/peak*100)+'%"></div></div>').join("")+
-    '</div><div class="wl-axis">'+ months.map(m=>{
-      const jan=m.date.getUTCMonth()===0, first=m===months[0];
-      return '<div class="wl-tick'+((jan||first)?" yr":"")+'">'+
-        ((jan||first)?m.date.getUTCFullYear():(m.date.getUTCMonth()%3===0?MONTHS[m.date.getUTCMonth()]:""))+'</div>';
-    }).join("")+'</div>';
+function renderQuarterStrip(){
+  const t=today(), nowQ=qLabel(t);
+  $("qstrip").innerHTML = quarters().map(q=>{
+    const b=qBounds(q);
+    const active=acts().filter(a=>activeIn(a,b.start,b.end));
+    const due=acts().filter(a=>dueIn(a,b.start,b.end));
+    const done=active.filter(a=>a.status==="Complete").length;
+    const pct=active.length?Math.round(done/active.length*100):0;
+    const cls=(q===nowQ?" now":"")+(b.end<t&&q!==nowQ?" past":"");
+    const types=[...new Set(active.map(a=>a.type))].filter(Boolean).slice(0,6);
+    return '<button class="qcard'+cls+'" data-q="'+esc(q)+'" data-tip="<b>'+esc(q)+'</b><br>'+
+      active.length+' active · '+due.length+' due<br>'+fmt(b.start)+' → '+fmt(b.end)+'">'+
+      '<div class="qh">'+esc(q.replace(" "," "))+(q===nowQ?'<em>now</em>':'')+'</div>'+
+      '<div class="qn">'+active.length+'</div><div class="ql">active</div>'+
+      '<div class="qdue">'+(due.length?due.length+(due.length===1?" deadline":" deadlines"):"no deadlines")+'</div>'+
+      '<div class="qtypes">'+types.map(x=>typeSwatch(x)).join("")+'</div>'+
+      '<div class="qbar"><span style="width:'+pct+'%"></span></div>'+
+      '</button>';
+  }).join("");
 }
 
 /* ══ breakdowns ═════════════════════════════════════════════════════ */
@@ -1036,6 +1063,24 @@ function packWeek(weekStart, items){
   });
   return segs;
 }
+function renderMonthSide(items, first, last){
+  const t=today();
+  const ev=[];
+  items.forEach(a=>{
+    const st=d(a.start), en=d(a.end);
+    if(st && st>=first && st<=last) ev.push({a, day:st, due:false});
+    if(en && en>=first && en<=last) ev.push({a, day:en, due:true});
+  });
+  ev.sort((x,y)=> x.day-y.day || (x.due?1:0)-(y.due?1:0));
+  $("calSide").innerHTML = '<h4>'+MONTHS_FULL[first.getUTCMonth()]+" "+first.getUTCFullYear()+'</h4>'+
+    (ev.length ? ev.map(e=>
+      '<button class="cs-item'+(e.due?" due":"")+(e.due&&isOverdue(e.a)?" od":"")+'" data-open="'+esc(e.a.id)+'">'+
+        '<span class="cs-day">'+String(e.day.getUTCDate()).padStart(2,"0")+'</span>'+
+        '<span class="cs-b"><b>'+esc(e.a.activity)+'</b>'+
+          '<span>'+typeSwatch(e.a.type)+(e.due?"Due":"Starts")+' · '+esc(e.a.id)+'</span></span>'+
+      '</button>').join("")
+      : '<div class="cs-empty">Nothing starts or falls due this month.</div>');
+}
 function renderMonth(){
   const y=cursor.getUTCFullYear(), m=cursor.getUTCMonth();
   const items=filtered();
@@ -1055,7 +1100,7 @@ function renderMonth(){
     const expanded=!!expandedWeeks[key];
     const cap=expanded?laneCount:Math.min(laneCount,MAX_LANES);
     const hidden=segs.filter(s=>s.lane>=cap);
-    const minH=Math.max(78, 32+cap*25+(hidden.length?20:0));
+    const minH=Math.max(70, 30+cap*23+(hidden.length?18:0));
 
     html+='<div class="wk">';
     for(let i=0;i<7;i++){
@@ -1094,6 +1139,7 @@ function renderMonth(){
   }
   html+='</div>';
   $("calBody").innerHTML=html;
+  renderMonthSide(items, first, last);
   const nDue=items.filter(a=>dueIn(a,first,last)).length;
   const nAct=items.filter(a=>activeIn(a,first,last)).length;
   $("calTitle").innerHTML = MONTHS_FULL[m]+" "+y+'<small>Q'+qOf(cursor)+" "+y+" · "+nAct+" active · "+nDue+' due</small>';
@@ -1191,6 +1237,9 @@ function renderTimeline(){
 function renderCalendar(){
   ["month","year","timeline"].forEach(m=>$("mode-"+m).setAttribute("aria-selected", m===calMode?"true":"false"));
   $("calPrev").parentElement.style.visibility = calMode==="timeline" ? "hidden" : "visible";
+  const split=document.querySelector(".cal-split");
+  if(split) split.classList.toggle("wide", calMode!=="month");
+  if($("calSide")) $("calSide").hidden = calMode!=="month";
   if(calMode==="month") renderMonth();
   else if(calMode==="year") renderYear();
   else renderTimeline();
@@ -1298,6 +1347,10 @@ document.addEventListener("click",e=>{
   const o=e.target.closest("[data-open]"); if(o){ openDrawer(o.getAttribute("data-open")); return; }
   const w=e.target.closest("[data-week]");
   if(w){ const k=w.getAttribute("data-week"); expandedWeeks[k]=!expandedWeeks[k]; renderCalendar(); return; }
+  const qc=e.target.closest("[data-q]");
+  if(qc){ const b=qBounds(qc.getAttribute("data-q"));
+    if(b){ cursor=new Date(Date.UTC(b.start.getUTCFullYear(),b.start.getUTCMonth(),1));
+      calMode="month"; showTab("calendar"); renderCalendar(); } return; }
   const ym=e.target.closest("[data-month]");
   if(ym){ cursor=new Date(Date.UTC(cursor.getUTCFullYear(),+ym.getAttribute("data-month"),1));
     calMode="month"; renderCalendar(); }
@@ -1405,7 +1458,7 @@ function renderAll(){
   if(!cursor){ const t=today(), s=span();
     cursor=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),1));
     if(cursor<s.from||cursor>s.to) cursor=new Date(Date.UTC(s.from.getUTCFullYear(),s.from.getUTCMonth(),1)); }
-  renderChrome(); renderHero(); renderKpis(); renderLists2(); renderWorkload();
+  renderChrome(); renderHero(); renderKpis(); renderLists2(); renderQuarterStrip();
   renderBreakdowns(); renderCalendar(); renderWorkPlan(); renderRef();
 }
 
