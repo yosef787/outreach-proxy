@@ -162,14 +162,15 @@ button{cursor:pointer}
 .lockup .t b{font-size:15px;font-weight:700;letter-spacing:-.005em;white-space:nowrap}
 .lockup .t span{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 
-.segnav{display:flex;gap:3px;background:var(--surface-3);border-radius:999px;padding:3px}
-.segnav button{border:0;background:transparent;color:var(--ink-2);font-size:13px;font-weight:600;
-  padding:7px 16px;border-radius:999px;white-space:nowrap;transition:background .15s,color .15s}
-.segnav button:hover{color:var(--ink)}
-.segnav button[aria-selected="true"]{background:var(--surface);color:var(--brand);box-shadow:var(--sh-1)}
-:root[data-theme="dark"] .segnav button[aria-selected="true"]{color:var(--t-quarterly)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .segnav button[aria-selected="true"]{color:var(--t-quarterly)}}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .segnav button[aria-selected="true"]{color:var(--brand)}}
+.segnav{display:flex;gap:4px;background:var(--surface-3);border:1px solid var(--line);border-radius:12px;padding:4px}
+.segnav button{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--ink-2);
+  font-size:14px;font-weight:700;padding:9px 18px;border-radius:9px;white-space:nowrap;
+  transition:background .15s,color .15s,box-shadow .15s}
+.segnav button svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;flex:none}
+.segnav button:hover{color:var(--ink);background:var(--surface)}
+.segnav button[aria-selected="true"]{background:var(--brand);color:#fff;box-shadow:0 2px 8px -2px rgba(79,32,110,.5)}
+.segnav button[aria-selected="true"]:hover{background:var(--brand-deep)}
 
 .bar-actions{margin-left:auto;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .src{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-3);
@@ -366,6 +367,10 @@ main{max-width:1600px;margin:0 auto;padding:24px 22px 80px}
 .chip.due{background:var(--c);color:var(--ci);box-shadow:none;font-weight:700}
 .chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .chip-more{font-size:10px;font-weight:700;color:var(--ink-3);padding-left:4px}
+.ongoing{display:flex;gap:3px;align-items:center;margin-top:auto;padding-top:5px}
+.ongoing i{height:3px;border-radius:2px;flex:1 1 0;min-width:2px;opacity:.85}
+.ongoing b{font-size:9px;font-weight:700;color:var(--ink-3);flex:none}
+.day.out .ongoing{opacity:.4}
 
 /* year view */
 .year{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:14px}
@@ -482,6 +487,13 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13px}
 .edit-cell{cursor:text;border-radius:5px;padding:2px 5px;margin:-2px -5px;display:inline-block;min-width:26px;
   border:1px dashed transparent}
 .edit-cell:hover{border-color:var(--line-strong);background:var(--surface-2)}
+.dpop{position:absolute;z-index:30;background:var(--surface);border:1px solid var(--line-strong);
+  border-radius:10px;box-shadow:var(--sh-3);padding:9px;min-width:216px;display:flex;flex-direction:column;gap:7px}
+.dseg{display:flex;gap:3px;background:var(--surface-3);border-radius:8px;padding:3px}
+.dseg button{flex:1;border:0;background:transparent;font-size:11.5px;font-weight:600;padding:5px 8px;
+  border-radius:6px;color:var(--ink-2)}
+.dseg button.on{background:var(--surface);color:var(--ink);box-shadow:var(--sh-1)}
+.tbl td{position:relative}
 .wp-input{width:100%;border:1px solid var(--brand);border-radius:7px;padding:5px 7px;background:var(--surface);font-size:13px}
 .row-del{border:0;background:transparent;color:var(--ink-3);font-size:15px;line-height:1;padding:3px 6px;border-radius:5px}
 .row-del:hover{color:var(--crit);background:var(--crit-bg)}
@@ -581,9 +593,15 @@ footer.foot p{max-width:78ch}
     </div>
 
     <nav class="segnav" role="tablist" aria-label="Views">
-      <button role="tab" id="tab-dashboard" aria-controls="view-dashboard" aria-selected="true">Overview</button>
-      <button role="tab" id="tab-calendar"  aria-controls="view-calendar"  aria-selected="false">Calendar</button>
-      <button role="tab" id="tab-plan"      aria-controls="view-plan"      aria-selected="false">Work Plan</button>
+      <button role="tab" id="tab-dashboard" aria-controls="view-dashboard" aria-selected="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Overview</button>
+      <button role="tab" id="tab-calendar" aria-controls="view-calendar" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+        Calendar</button>
+      <button role="tab" id="tab-plan" aria-controls="view-plan" aria-selected="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>
+        Work Plan</button>
     </nav>
 
     <div class="bar-actions">
@@ -693,20 +711,22 @@ footer.foot p{max-width:78ch}
       <ol>
         <li>Enter a brief description of the activity in <em>Activity / Deliverable</em>.</li>
         <li>Categorise it correctly using the <em>Type</em> list so it is reflected in the Calendar. Other entries are optional.</li>
-        <li>If you have an unlisted category, revert to Yosef to amend the conditional formatting.</li>
+        <li>If you have an unlisted category, revert to Yosef to amend CF.</li>
       </ol>
     </div>
     <div class="card">
       <div class="card-hd"><h2>Work Plan</h2>
-        <span class="hint">Click any cell to edit · changes stay in this browser until you export</span></div>
+        <span class="hint">Click any cell to edit · changes stay in this browser until you sync</span></div>
       <div class="card-bd stack">
-        <div class="controls no-print">
-          <div class="fld"><label for="wType">Type</label><select id="wType"></select></div>
-          <div class="fld"><label for="wStatus">Status</label><select id="wStatus"></select></div>
-          <div class="fld"><label for="wSearch">Search</label><input type="search" id="wSearch" placeholder="Activity, ID or note"></div>
-          <button class="btn solid" id="btnAdd" style="align-self:flex-end">Add activity</button>
-          <button class="btn" id="btnCsv" style="align-self:flex-end">CSV</button>
-          <button class="btn danger" id="btnReset" style="align-self:flex-end">Restore workbook data</button>
+        <div class="filterbar no-print">
+          <svg class="fb-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+          <select id="wType" aria-label="Filter by type"></select>
+          <select id="wStatus" aria-label="Filter by status"></select>
+          <input type="search" id="wSearch" placeholder="Search activity, ID or note" aria-label="Search">
+          <button class="btn" id="btnCols">Show all columns</button>
+          <button class="btn solid" id="btnAdd">Add activity</button>
+          <button class="btn" id="btnCsv">CSV</button>
+          <button class="btn danger" id="btnReset">Restore workbook data</button>
         </div>
         <div class="tbl-wrap"><table class="tbl" id="wpTbl"></table></div>
       </div>
@@ -801,11 +821,14 @@ const COLS = [
 ];
 const STORE = "masdr.compliance.v3";
 const MAX_LANES = 4;
+const CORE_COLS = ["activity","type","end"];      /* what the Work Plan shows until you ask for more */
 
 /* ══ state ══════════════════════════════════════════════════════════ */
 let state = load();
 let filters = {type:"All",status:"All",dept:"All",q:""};
 let wpFilters = {type:"All",status:"All",q:""};
+let wpAll = (function(){ try{ return localStorage.getItem(STORE+".wpall")==="1"; }catch(e){ return false; } })();
+function shownCols(){ return wpAll ? COLS : COLS.filter(c=>CORE_COLS.indexOf(c.k)>=0); }
 let calMode = "month";
 let cursor = null;              /* first of the displayed month */
 let expandedWeeks = {};
@@ -1050,14 +1073,14 @@ function renderMonth(){
   const put=(dt,a,kind)=>{ const k=iso(dt); (byDay[k]=byDay[k]||[]).push({a,kind}); };
   items.forEach(a=>{
     const r=rangeOf(a); if(!r) return;
-    const sIn=r.s>=first&&r.s<=last, eIn=r.e>=first&&r.e<=last;
-    if(sIn) put(r.s,a,"start");
-    if(eIn) put(r.e,a,"due");
-    if(!sIn&&!eIn&&r.s<=last&&r.e>=first) running.push(a);
+    if(r.s>=first&&r.s<=last) put(r.s,a,"start");
+    if(r.e>=first&&r.e<=last) put(r.e,a,"due");
+    if(r.s<=last&&r.e>=first) running.push(a);     /* everything under way this month */
   });
+  running.sort((x,y)=>rangeOf(x).s-rangeOf(y).s);
 
   let html="";
-  if(running.length) html+='<div class="running"><span class="run-lbl">Running through</span>'+
+  if(running.length) html+='<div class="running"><span class="run-lbl">Under way this month</span>'+
     running.map(a=>'<button class="run-pill" data-open="'+esc(a.id)+'" style="--c:'+typeColor(a.type)+'" '+
       'data-tip="<b>'+esc(a.id)+'</b> '+esc(a.activity)+'<br>'+fmt(rangeOf(a).s)+' → '+fmt(rangeOf(a).e)+'">'+
       esc(a.id)+'<span>'+esc(a.activity)+'</span></button>').join("")+'</div>';
@@ -1072,6 +1095,7 @@ function renderMonth(){
       const we=day.getUTCDay()===5||day.getUTCDay()===6;
       const ev=(byDay[iso(day)]||[]).sort((x,z)=>(x.kind==="due"?0:1)-(z.kind==="due"?0:1));
       const shown=ev.slice(0,2), extra=ev.length-shown.length;
+      const on=running.filter(a=>{ const r=rangeOf(a); return r.s<=day&&r.e>=day; });
       html+='<div class="day'+(out?" out":"")+(we?" we":"")+(sameDay(day,t)?" today":"")+'">'+
         '<span class="dn">'+day.getUTCDate()+'</span>'+
         (ev.length?'<div class="dev">'+shown.map(e=>
@@ -1080,6 +1104,10 @@ function renderMonth(){
             (e.kind==="due"?"Due ":"Starts ")+fmt(day)+'">'+
             (e.kind==="due"?"◆":"▸")+'<span>'+esc(e.a.activity)+'</span></button>').join("")+
           (extra>0?'<span class="chip-more">+'+extra+' more</span>':"")+'</div>':"")+
+        (on.length?'<div class="ongoing" data-tip="'+esc(on.length+(on.length===1?" activity":" activities")+
+          " under way<br>"+on.map(a=>a.id).join(", "))+'">'+
+          on.slice(0,5).map(a=>'<i style="background:'+typeColor(a.type)+'"></i>').join("")+
+          (on.length>5?'<b>+'+(on.length-5)+'</b>':"")+'</div>':"")+
       '</div>';
     }
     html+='</div>';
@@ -1309,11 +1337,12 @@ function wpRows(){
 }
 function renderWorkPlan(){
   const rows=wpRows();
-  const head='<thead><tr>'+COLS.map(c=>'<th'+(c.t==="calc"||c.t==="pct"?' class="n"':'')+'>'+esc(c.h)+'</th>').join("")+
+  const cols=shownCols();
+  const head='<thead><tr>'+cols.map(c=>'<th'+(c.t==="calc"||c.t==="pct"?' class="n"':'')+'>'+esc(c.h)+'</th>').join("")+
     '<th class="no-print"><span class="sr">Remove</span></th></tr></thead>';
   const body='<tbody>'+(rows.length?rows.map(a=>{
     const bad=d(a.start)&&d(a.end)&&d(a.end)<d(a.start);
-    return '<tr data-id="'+esc(a.id)+'">'+COLS.map(c=>{
+    return '<tr data-id="'+esc(a.id)+'">'+cols.map(c=>{
       const raw=a[c.k]; let disp;
       if(c.t==="date") disp=raw?fmt(d(raw)):"—";
       else if(c.t==="pct") disp=Math.round((+raw||0)*100)+"%";
@@ -1327,8 +1356,9 @@ function renderWorkPlan(){
       return '<td class="'+cls+'"><span class="edit-cell" data-f="'+c.k+'">'+esc(disp)+'</span></td>';
     }).join("")+'<td class="no-print"><button class="row-del" data-del="'+esc(a.id)+
       '" aria-label="Remove '+esc(a.id)+'">&times;</button></td></tr>';
-  }).join(""):'<tr><td colspan="'+(COLS.length+1)+'" class="empty">No activities match these filters.</td></tr>')+'</tbody>';
+  }).join(""):'<tr><td colspan="'+(cols.length+1)+'" class="empty">No activities match these filters.</td></tr>')+'</tbody>';
   $("wpTbl").innerHTML=head+body;
+  $("btnCols").textContent = wpAll ? "Show fewer columns" : "Show all columns";
 }
 function beginEdit(cell){
   if(cell.querySelector("input,select")) return;
@@ -1340,7 +1370,7 @@ function beginEdit(cell){
     const opts=listOf(col.list).slice();
     if(a[f]&&opts.indexOf(a[f])===-1) opts.unshift(a[f]);
     el.innerHTML='<option value=""></option>'+opts.map(o=>'<option'+(o===a[f]?" selected":"")+'>'+esc(o)+'</option>').join("");
-  } else if(col.t==="date"){ el=document.createElement("input"); el.type="date"; el.className="wp-input"; el.value=a[f]||""; }
+  } else if(col.t==="date"){ beginDateEdit(cell,a,f); return; }
   else if(col.t==="pct"){ el=document.createElement("input"); el.type="number"; el.min=0; el.max=100; el.step=5;
     el.className="wp-input"; el.value=Math.round((+a[f]||0)*100); }
   else { el=document.createElement("input"); el.type="text"; el.className="wp-input"; el.value=a[f]||""; }
@@ -1353,6 +1383,43 @@ function beginEdit(cell){
   el.addEventListener("keydown",ev=>{
     if(ev.key==="Enter"){ ev.preventDefault(); finish(); }
     if(ev.key==="Escape"){ closed=true; renderWorkPlan(); }
+  });
+}
+function quarterChoices(){
+  const sp=span(), out=[];
+  for(let y=sp.from.getUTCFullYear()-1; y<=sp.to.getUTCFullYear()+1; y++)
+    for(let q=1;q<=4;q++) out.push(y+" Q"+q);
+  return out;
+}
+/* Dates can be typed exactly, or set by choosing a quarter — which fills the
+   start and the due date with that quarter's first and last day. */
+function beginDateEdit(cell,a,f){
+  const cur=a[f]||"";
+  cell.innerHTML=
+    '<div class="dpop">'+
+      '<div class="dseg"><button type="button" data-m="date" class="on">Exact date</button>'+
+      '<button type="button" data-m="q">Whole quarter</button></div>'+
+      '<input type="date" class="wp-input dp-date" value="'+esc(cur)+'">'+
+      '<select class="wp-input dp-q" hidden><option value="">Choose a quarter…</option>'+
+        quarterChoices().map(q=>'<option'+(cur&&qLabel(d(cur))===q?" selected":"")+'>'+esc(q)+'</option>').join("")+
+      '</select>'+
+    '</div>';
+  const pop=cell.querySelector(".dpop"), di=cell.querySelector(".dp-date"), qs=cell.querySelector(".dp-q");
+  pop.addEventListener("click",e=>e.stopPropagation());
+  pop.querySelectorAll(".dseg button").forEach(btn=>btn.addEventListener("click",()=>{
+    const q=btn.getAttribute("data-m")==="q";
+    pop.querySelectorAll(".dseg button").forEach(x=>x.classList.toggle("on",x===btn));
+    di.hidden=q; qs.hidden=!q; (q?qs:di).focus();
+  }));
+  di.focus();
+  di.addEventListener("change",()=>commit(a,f,di.value));
+  di.addEventListener("keydown",ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); commit(a,f,di.value); }
+    if(ev.key==="Escape") renderWorkPlan(); });
+  qs.addEventListener("change",()=>{
+    const b=qBounds(qs.value); if(!b){ renderWorkPlan(); return; }
+    a.start=iso(b.start); a.end=iso(b.end); a.duration=durationOf(a)||0; touch(a);
+    state.dirty=true; save(); renderAll();
+    toast(a.id+" set to "+qs.value+" — "+fmt(b.start)+" to "+fmt(b.end)+".");
   });
 }
 function commit(a,f,val){
@@ -1387,8 +1454,8 @@ function renderChrome(){
     (state.synced?" on "+new Date(state.synced).toLocaleDateString():"")+(state.dirty?" · edited in this browser":"");
   $("footNote").textContent="Built from the Work Plan and Lists sheets of "+(state.source||"the workbook")+
     ". Dates read as day-month-year. "+(state.dirty
-      ? "You have unsaved edits in this browser — export to .xlsx to take them back to Excel."
-      : "Edits made here stay in this browser until you export.");
+      ? "You have unsaved edits in this browser — they stay here until you sync successfully."
+      : "In step with the sheet as of the last successful sync.");
   const fill=(el,vals,cur,all)=>{ el.innerHTML='<option value="All">'+all+'</option>'+
     vals.map(v=>'<option'+(v===cur?" selected":"")+'>'+esc(v)+'</option>').join(""); };
   fill($("fType"),listOf("Activity Type"),filters.type,"All types");
@@ -1462,6 +1529,10 @@ $("wpTbl").addEventListener("click",e=>{
       state.dirty=true; save(); renderAll(); toast(id+" removed."); }
     return; }
   const cell=e.target.closest(".edit-cell"); if(cell) beginEdit(cell);
+});
+$("btnCols").addEventListener("click",()=>{
+  wpAll=!wpAll; try{ localStorage.setItem(STORE+".wpall", wpAll?"1":"0"); }catch(e){}
+  renderWorkPlan();
 });
 $("btnAdd").addEventListener("click",()=>{
   let i=1,id; do{ id="NEW-"+String(i++).padStart(2,"0"); } while(acts().some(a=>a.id===id));
