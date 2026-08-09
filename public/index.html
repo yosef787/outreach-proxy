@@ -272,6 +272,31 @@ main{max-width:1600px;margin:0 auto;padding:24px 22px 80px}
 .hp-bar>span{display:block;height:100%;border-radius:5px;background:#fff;min-width:0;transition:width .3s}
 .hp-foot{font-size:11.5px;color:#D3BEE3;margin-top:7px}
 
+/* ── reminders ─────────────────────────────────────────────────────── */
+.rem-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:14px 20px 4px}
+.rem-form[hidden]{display:none}
+.rem-form input[type=text]{flex:1;min-width:200px}
+.rem-form input,.rem-form select{border:1px solid var(--line-strong);border-radius:9px;padding:7px 10px;
+  font-size:13px;background:var(--surface)}
+.rem-list{display:flex;flex-direction:column}
+.rem{display:flex;align-items:center;gap:12px;padding:11px 20px;border-top:1px solid var(--line)}
+.rem:first-child{border-top:0}
+.rem-bell{width:30px;height:30px;border-radius:9px;background:var(--brand-tint);color:var(--brand);flex:none;
+  display:grid;place-items:center}
+.rem-bell svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.rem.due-today .rem-bell{background:var(--warn-bg);color:var(--warn)}
+:root[data-theme="dark"] .rem-bell{color:var(--t-quarterly)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .rem-bell{color:var(--t-quarterly)}}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .rem-bell{color:var(--brand)}}
+.rem-b{flex:1;min-width:0}
+.rem-b b{display:block;font-size:13px;font-weight:600}
+.rem-b span{font-size:11.5px;color:var(--ink-3)}
+.rem-next{font-size:11.5px;font-family:var(--mono);color:var(--ink-2);white-space:nowrap}
+.rem.due-today .rem-next{color:var(--warn);font-weight:700}
+.rem-x{border:0;background:transparent;color:var(--ink-3);font-size:15px;line-height:1;padding:3px 6px;border-radius:5px}
+.rem-x:hover{color:var(--crit);background:var(--crit-bg)}
+.rem-empty{padding:20px;text-align:center;color:var(--ink-3);font-size:12.5px}
+
 /* ── quarter strip ─────────────────────────────────────────────────── */
 .qstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px}
 .qcard{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 13px 11px;
@@ -367,6 +392,8 @@ main{max-width:1600px;margin:0 auto;padding:24px 22px 80px}
 .chip.due{background:var(--c);color:var(--ci);box-shadow:none;font-weight:700}
 .chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .chip-more{font-size:10px;font-weight:700;color:var(--ink-3);padding-left:4px}
+.chip.rem-chip{background:var(--surface-3);color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line-strong);
+  font-weight:600;cursor:default}
 .ongoing{display:flex;gap:3px;align-items:center;margin-top:auto;padding-top:5px}
 .ongoing i{height:3px;border-radius:2px;flex:1 1 0;min-width:2px;opacity:.85}
 .ongoing b{font-size:9px;font-weight:700;color:var(--ink-3);flex:none}
@@ -649,6 +676,25 @@ footer.foot p{max-width:78ch}
     </div>
 
     <div class="card">
+      <div class="card-hd"><h2>Reminders</h2>
+        <button class="btn" id="btnRemAdd">Add a reminder</button></div>
+      <form class="rem-form" id="remForm" hidden>
+        <input type="text" id="remText" placeholder="e.g. Follow up with P&amp;C" maxlength="120" required>
+        <select id="remRepeat">
+          <option value="weekly">Every week</option>
+          <option value="monthly">Every month</option>
+          <option value="quarterly">Every quarter</option>
+          <option value="once">Once, on a date</option>
+        </select>
+        <select id="remDay"></select>
+        <input type="date" id="remDate" hidden>
+        <button class="btn solid" type="submit">Add</button>
+        <button class="btn" type="button" id="remCancel">Cancel</button>
+      </form>
+      <div class="rem-list" id="remList"></div>
+    </div>
+
+    <div class="card">
       <div class="card-hd"><h2>The cycle</h2><span class="hint">Click a quarter to open it in the calendar</span></div>
       <div class="card-bd"><div class="qstrip" id="qstrip"></div></div>
     </div>
@@ -821,7 +867,7 @@ const COLS = [
 ];
 const STORE = "masdr.compliance.v3";
 const MAX_LANES = 4;
-const CORE_COLS = ["activity","type","end"];      /* what the Work Plan shows until you ask for more */
+const CORE_COLS = ["activity","type","start","end"];      /* what the Work Plan shows until you ask for more */
 
 /* ══ state ══════════════════════════════════════════════════════════ */
 let state = load();
@@ -846,6 +892,42 @@ function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch
 /* Every edit stamps the row. That stamp is what lets two people sync the
    same sheet without overwriting each other — newest edit per row wins. */
 function touch(a){ a.updatedAt = new Date().toISOString(); }
+
+/* ── reminders ──────────────────────────────────────────────────────
+   Standing prompts that are not work-plan activities: "every Sunday,
+   follow up with P&C". Kept in their own store so syncing or reloading
+   the workbook never disturbs them. */
+const REM_STORE = STORE+".reminders";
+let reminders = (function(){
+  try{ const r=JSON.parse(localStorage.getItem(REM_STORE)||"[]"); return Array.isArray(r)?r:[]; }
+  catch(e){ return []; }
+})();
+function saveReminders(){ try{ localStorage.setItem(REM_STORE, JSON.stringify(reminders)); }catch(e){} }
+function lastDayOf(dt){ return new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth()+1, 0)).getUTCDate(); }
+function remLabel(r){
+  if(r.repeat==="once")      return "On "+fmt(d(r.date));
+  if(r.repeat==="weekly")    return "Every "+["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][r.day];
+  if(r.repeat==="monthly")   return "Every month on day "+r.day;
+  if(r.repeat==="quarterly") return "Every quarter, day "+r.day+" of the first month";
+  return "";
+}
+function remHits(r, from, to){
+  const out=[];
+  if(r.repeat==="once"){ const dt=d(r.date); if(dt&&dt>=from&&dt<=to) out.push(dt); return out; }
+  for(let dt=new Date(from); dt<=to; dt=addDays(dt,1)){
+    const dom=Math.min(r.day, lastDayOf(dt));
+    if(r.repeat==="weekly"    && dt.getUTCDay()===r.day) out.push(new Date(dt));
+    else if(r.repeat==="monthly"   && dt.getUTCDate()===dom) out.push(new Date(dt));
+    else if(r.repeat==="quarterly" && dt.getUTCMonth()%3===0 && dt.getUTCDate()===dom) out.push(new Date(dt));
+  }
+  return out;
+}
+function remNext(r){
+  const t=today();
+  const horizon = r.repeat==="quarterly" ? 400 : r.repeat==="monthly" ? 70 : r.repeat==="weekly" ? 14 : 3650;
+  const hits = remHits(r, t, addDays(t, horizon));
+  return hits.length ? hits[0] : null;
+}
 function tombstone(id){
   state.tombstones = (state.tombstones||[]).filter(t=>t.id!==id);
   state.tombstones.push({id:id, at:new Date().toISOString()});
@@ -1096,6 +1178,7 @@ function renderMonth(){
       const ev=(byDay[iso(day)]||[]).sort((x,z)=>(x.kind==="due"?0:1)-(z.kind==="due"?0:1));
       const shown=ev.slice(0,2), extra=ev.length-shown.length;
       const on=running.filter(a=>{ const r=rangeOf(a); return r.s<=day&&r.e>=day; });
+      const rem=out?[]:reminders.filter(r=>remHits(r,day,day).length);
       html+='<div class="day'+(out?" out":"")+(we?" we":"")+(sameDay(day,t)?" today":"")+'">'+
         '<span class="dn">'+day.getUTCDate()+'</span>'+
         (ev.length?'<div class="dev">'+shown.map(e=>
@@ -1104,6 +1187,8 @@ function renderMonth(){
             (e.kind==="due"?"Due ":"Starts ")+fmt(day)+'">'+
             (e.kind==="due"?"◆":"▸")+'<span>'+esc(e.a.activity)+'</span></button>').join("")+
           (extra>0?'<span class="chip-more">+'+extra+' more</span>':"")+'</div>':"")+
+        (rem.length?'<div class="dev">'+rem.map(r=>'<span class="chip rem-chip" data-tip="'+
+          esc("Reminder — "+r.text)+'">🔔<span>'+esc(r.text)+'</span></span>').join("")+'</div>':"")+
         (on.length?'<div class="ongoing" data-tip="'+esc(on.length+(on.length===1?" activity":" activities")+
           " under way<br>"+on.map(a=>a.id).join(", "))+'">'+
           on.slice(0,5).map(a=>'<i style="background:'+typeColor(a.type)+'"></i>').join("")+
@@ -1446,6 +1531,54 @@ function renderRef(){
     ' ('+["Jan–Mar","Apr–Jun","Jul–Sep","Oct–Dec"][q-1]+')</span>').join("");
 }
 
+/* ══ reminders UI ═══════════════════════════════════════════════════ */
+const DOW_FULL=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+function renderReminders(){
+  const t=today();
+  $("remList").innerHTML = reminders.length ? reminders.map(r=>{
+    const n=remNext(r), isToday=n&&sameDay(n,t);
+    return '<div class="rem'+(isToday?" due-today":"")+'">'+
+      '<span class="rem-bell"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>'+
+      '<span class="rem-b"><b>'+esc(r.text)+'</b><span>'+esc(remLabel(r))+'</span></span>'+
+      '<span class="rem-next">'+(isToday?"today":n?fmt(n):"—")+'</span>'+
+      '<button class="rem-x" data-rem="'+esc(r.id)+'" aria-label="Remove reminder">&times;</button>'+
+    '</div>';
+  }).join("") : '<div class="rem-empty">No reminders yet. Add one to be prompted on the days you choose.</div>';
+}
+function syncRemFields(){
+  const rep=$("remRepeat").value, day=$("remDay"), dt=$("remDate");
+  day.hidden = rep==="once"; dt.hidden = rep!=="once";
+  if(rep==="weekly") day.innerHTML=DOW_FULL.map((n,i)=>'<option value="'+i+'"'+(i===0?" selected":"")+'>'+n+'</option>').join("");
+  else if(rep!=="once"){
+    let o=""; for(let i=1;i<=28;i++) o+='<option value="'+i+'"'+(i===1?" selected":"")+'>Day '+i+'</option>';
+    o+='<option value="31">Last day</option>';
+    day.innerHTML=o;
+  }
+}
+$("btnRemAdd").addEventListener("click",()=>{
+  const f=$("remForm"); f.hidden=!f.hidden;
+  if(!f.hidden){ syncRemFields(); $("remText").focus(); }
+});
+$("remCancel").addEventListener("click",()=>{ $("remForm").hidden=true; $("remText").value=""; });
+$("remRepeat").addEventListener("change",syncRemFields);
+$("remForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const text=$("remText").value.trim(); if(!text) return;
+  const rep=$("remRepeat").value;
+  const r={id:"R"+Date.now().toString(36), text:text, repeat:rep};
+  if(rep==="once"){ if(!$("remDate").value){ toast("Pick a date for the reminder.",true); return; } r.date=$("remDate").value; }
+  else r.day=parseInt($("remDay").value,10);
+  reminders.push(r); saveReminders();
+  $("remText").value=""; $("remForm").hidden=true;
+  renderReminders(); renderCalendar();
+  toast("Reminder added — "+remLabel(r).toLowerCase()+".");
+});
+$("remList").addEventListener("click",e=>{
+  const x=e.target.closest("[data-rem]"); if(!x) return;
+  reminders=reminders.filter(r=>r.id!==x.getAttribute("data-rem"));
+  saveReminders(); renderReminders(); renderCalendar(); toast("Reminder removed.");
+});
+
 /* ══ chrome ═════════════════════════════════════════════════════════ */
 function renderChrome(){
   $("srcName").textContent=state.source||"workbook";
@@ -1468,7 +1601,7 @@ function renderAll(){
   if(!cursor){ const t=today(), s=span();
     cursor=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),1));
     if(cursor<s.from||cursor>s.to) cursor=new Date(Date.UTC(s.from.getUTCFullYear(),s.from.getUTCMonth(),1)); }
-  renderChrome(); renderHero(); renderKpis(); renderLists2(); renderQuarterStrip();
+  renderChrome(); renderHero(); renderKpis(); renderLists2(); renderReminders(); renderQuarterStrip();
   renderBreakdowns(); renderCalendar(); renderWorkPlan(); renderRef();
 }
 
@@ -1912,6 +2045,40 @@ function icsText(){
     if(a.department) L.push(icsFold("CATEGORIES:"+esc2(a.type||"Compliance")));
     L.push("STATUS:"+(a.status==="Complete"?"CONFIRMED":"TENTATIVE"));
     L.push("TRANSP:TRANSPARENT");
+    /* nudges before the deadline, not before the start */
+    if(a.status!=="Complete"){
+      [["-P7D","One week until "],["-P1D","Tomorrow: "]].forEach(function(t2){
+        L.push("BEGIN:VALARM");
+        L.push("ACTION:DISPLAY");
+        L.push(icsFold("DESCRIPTION:"+esc2(t2[1]+a.id+" — "+a.activity)));
+        L.push("TRIGGER;RELATED=END:"+t2[0]);
+        L.push("END:VALARM");
+      });
+    }
+    L.push("END:VEVENT");
+  });
+
+  /* standing reminders become repeating all-day events with an alarm */
+  reminders.forEach(function(r){
+    const first = r.repeat==="once" ? d(r.date) : remNext(r);
+    if(!first) return;
+    L.push("BEGIN:VEVENT");
+    L.push("UID:"+esc2(r.id)+"@masdr-compliance");
+    L.push("DTSTAMP:"+stamp);
+    L.push("DTSTART;VALUE=DATE:"+icsDate(first));
+    L.push("DTEND;VALUE=DATE:"+icsDate(addDays(first,1)));
+    L.push(icsFold("SUMMARY:"+esc2(r.text)));
+    L.push(icsFold("DESCRIPTION:"+esc2("MASDR compliance reminder — "+remLabel(r))));
+    if(r.repeat==="weekly")    L.push("RRULE:FREQ=WEEKLY;BYDAY="+["SU","MO","TU","WE","TH","FR","SA"][r.day]);
+    if(r.repeat==="monthly")   L.push("RRULE:FREQ=MONTHLY;BYMONTHDAY="+(r.day>=31?-1:r.day));
+    if(r.repeat==="quarterly") L.push("RRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY="+(r.day>=31?-1:r.day));
+    L.push("CATEGORIES:Reminder");
+    L.push("TRANSP:TRANSPARENT");
+    L.push("BEGIN:VALARM");
+    L.push("ACTION:DISPLAY");
+    L.push(icsFold("DESCRIPTION:"+esc2(r.text)));
+    L.push("TRIGGER:PT0S");
+    L.push("END:VALARM");
     L.push("END:VEVENT");
   });
   L.push("END:VCALENDAR");

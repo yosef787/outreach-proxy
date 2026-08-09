@@ -22,6 +22,17 @@
  */
 
 var SHARED_KEY = '';            // e.g. 'masdr-2026'; leave '' for no key
+
+/* ── optional: email reminders ─────────────────────────────────────────
+ * Leave REMIND_TO empty and nothing happens. To turn it on:
+ *   1. Put one or more addresses in REMIND_TO.
+ *   2. In Apps Script: Triggers ▸ Add trigger ▸ sendReminders ▸
+ *      Time-driven ▸ Day timer ▸ 7am-8am.
+ * It then mails a short digest of anything overdue or falling due inside
+ * REMIND_DAYS, and stays quiet on days when there is nothing to say.
+ */
+var REMIND_TO   = '';           // 'me@masdr.com, colleague@masdr.com'
+var REMIND_DAYS = 14;
 var SHEET_NAME = 'Work Plan';
 var LISTS_NAME = 'Lists';
 
@@ -271,4 +282,48 @@ function toCell_(k, val) {
   }
   if (k === 'progress' || k === 'duration') return Number(val) || 0;
   return val == null ? '' : val;
+}
+
+
+/* ── email digest ─────────────────────────────────────────────────── */
+
+function sendReminders() {
+  if (!REMIND_TO) return;
+  var rows = readAll_().rows;
+  var today = new Date(); today.setHours(0, 0, 0, 0);
+  var horizon = new Date(today.getTime() + REMIND_DAYS * 86400000);
+
+  var overdue = [], soon = [];
+  rows.forEach(function (r) {
+    if (r.status === 'Complete' || !r.end) return;
+    var due = new Date(r.end + 'T00:00:00');
+    if (due < today) overdue.push({ r: r, due: due });
+    else if (due <= horizon) soon.push({ r: r, due: due });
+  });
+  if (!overdue.length && !soon.length) return;
+
+  var by = function (a, b) { return a.due - b.due; };
+  overdue.sort(by); soon.sort(by);
+
+  var tz = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone();
+  var line = function (x) {
+    var days = Math.round((x.due - today) / 86400000);
+    var when = days < 0 ? Math.abs(days) + ' days late'
+             : days === 0 ? 'today'
+             : 'in ' + days + ' days';
+    return '• ' + x.r.id + ' — ' + x.r.activity +
+           '  (' + Utilities.formatDate(x.due, tz, 'dd-MMM-yyyy') + ', ' + when + ')';
+  };
+
+  var body = [];
+  if (overdue.length) body.push('OVERDUE', overdue.map(line).join('\n'), '');
+  if (soon.length) body.push('DUE WITHIN ' + REMIND_DAYS + ' DAYS', soon.map(line).join('\n'), '');
+  body.push('— MASDR Compliance Calendar');
+
+  MailApp.sendEmail({
+    to: REMIND_TO,
+    subject: 'Compliance calendar — ' + (overdue.length ? overdue.length + ' overdue, ' : '') +
+             soon.length + ' due soon',
+    body: body.join('\n')
+  });
 }
