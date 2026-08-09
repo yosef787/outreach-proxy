@@ -142,7 +142,10 @@ button{cursor:pointer}
   backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .appbar-in{max-width:1600px;margin:0 auto;padding:11px 22px;display:flex;align-items:center;gap:22px;flex-wrap:wrap}
 .lockup{display:flex;align-items:center;gap:11px;flex:none}
+.mark-btn{border:0;background:transparent;padding:0;border-radius:8px;display:block;flex:none;line-height:0}
+.mark-btn:hover{background:var(--surface-3)}
 .lockup .mark{display:block;height:36px;width:auto;flex:none}
+#logoSlot img.mark{height:36px;width:auto;max-width:120px;object-fit:contain}
 :root[data-theme="dark"] .lockup .mark{filter:brightness(1.5) saturate(.95)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lockup .mark{filter:brightness(1.5) saturate(.95)}}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .lockup .mark{filter:none}}
@@ -181,6 +184,31 @@ button{cursor:pointer}
 .btn.solid{background:var(--brand);border-color:var(--brand);color:#fff}
 .btn.solid:hover{background:var(--brand-deep);border-color:var(--brand-deep)}
 .btn.danger:hover{color:var(--crit);border-color:var(--crit);background:var(--crit-bg)}
+
+/* export menu */
+.menu-wrap{position:relative}
+.menu{position:absolute;top:calc(100% + 6px);right:0;z-index:45;background:var(--surface);border:1px solid var(--line);
+  border-radius:12px;box-shadow:var(--sh-3);padding:5px;min-width:266px;display:flex;flex-direction:column;gap:2px}
+.menu[hidden]{display:none}
+.menu button{border:0;background:transparent;text-align:left;padding:9px 11px;border-radius:8px;display:flex;
+  flex-direction:column;gap:1px}
+.menu button:hover{background:var(--surface-2)}
+.menu button b{font-size:13px;font-weight:600}
+.menu button span{font-size:11.5px;color:var(--ink-3)}
+
+/* save fallback */
+.modal{position:fixed;z-index:55;left:50%;top:50%;transform:translate(-50%,-50%);width:min(560px,92vw);
+  max-height:86vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh-3);padding:22px 24px 24px}
+.modal[hidden]{display:none}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:6px}
+.modal p{font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:62ch}
+.modal textarea{width:100%;height:190px;font-family:var(--mono);font-size:11px;line-height:1.45;
+  border:1px solid var(--line-strong);border-radius:10px;padding:10px 12px;background:var(--surface-2);
+  color:var(--ink);resize:vertical}
+.modal .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.modal a.dl{display:inline-flex;align-items:center;border:1px solid var(--brand);background:var(--brand);color:#fff;
+  border-radius:9px;padding:7px 13px;font-size:12.5px;font-weight:600;text-decoration:none}
 
 /* ── layout ─────────────────────────────────────────────────────────── */
 main{max-width:1600px;margin:0 auto;padding:24px 22px 80px}
@@ -493,11 +521,19 @@ footer.foot p{max-width:78ch}
 <header class="appbar">
   <div class="appbar-in">
     <div class="lockup">
-      <!-- ══ MASDR mark — replace this <svg> with the official asset to get it pixel-exact ══ -->
-      <svg class="mark" viewBox="0 0 100 108" role="img" aria-label="MASDR">
-        <path d="M4 30A26 26 0 0 1 30 4h16v100H30A26 26 0 0 1 4 78Z" fill="#4F206E"/>
-        <path d="M56 4h14a26 26 0 0 1 26 26v48a26 26 0 0 1-26 26H56V66l12-12-12-12Z" fill="#C73570"/>
-      </svg>
+      <!-- ══ MASDR mark ══════════════════════════════════════════════════════════════
+           This is a redraw. To use the official artwork instead, either
+             (a) drop the file in beside this page as  public/masdr-logo.svg  — it is
+                 picked up automatically at load, or
+             (b) click the mark and choose an image file (stored in your browser).
+           ═══════════════════════════════════════════════════════════════════════════ -->
+      <button class="mark-btn" id="logoBtn" title="Click to use your own logo file" aria-label="Replace the logo">
+        <span id="logoSlot"><svg class="mark" viewBox="0 0 100 104" role="img" aria-label="MASDR">
+          <path d="M46 2H24A22 22 0 0 0 2 24v56a22 22 0 0 0 22 22h22Z" fill="#5C2483"/>
+          <path d="M54 2h22a22 22 0 0 1 22 22v56a22 22 0 0 1-22 22H54Z" fill="#C7237A"/>
+        </svg></span>
+      </button>
+      <input type="file" id="logoIn" accept="image/*" hidden>
       <div class="mwords"><span class="ar">مصدر</span><span class="la">masdr</span></div>
       <div class="rule"></div>
       <div class="t"><span>Legal &amp; GRC</span><b>Compliance Calendar</b></div>
@@ -513,9 +549,14 @@ footer.foot p{max-width:78ch}
       <span class="src" id="srcChip"><span class="dot"></span><b id="srcName">—</b> · <span id="srcCount">0</span></span>
       <input type="file" id="fileIn" accept=".xlsx" hidden>
       <button class="btn" id="btnImport">Load workbook</button>
-      <button class="btn" id="btnXlsx">Export</button>
-      <button class="ico" id="btnIcs" title="Download .ics calendar file" aria-label="Download calendar file">
-        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></button>
+      <div class="menu-wrap">
+        <button class="btn" id="btnExport" aria-haspopup="true" aria-expanded="false">Export ▾</button>
+        <div class="menu" id="exportMenu" hidden>
+          <button data-x="xlsx"><b>Excel workbook</b><span>.xlsx — the Work Plan, dates as dates</span></button>
+          <button data-x="ics"><b>Calendar file</b><span>.ics — import into Outlook or Google Calendar</span></button>
+          <button data-x="csv"><b>Spreadsheet</b><span>.csv — plain text, opens anywhere</span></button>
+        </div>
+      </div>
       <button class="ico" id="btnTheme" title="Switch light / dark" aria-label="Switch light or dark theme">
         <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
     </div>
@@ -653,6 +694,17 @@ footer.foot p{max-width:78ch}
   </div>
   <div class="dr-bd" id="drBody"></div>
 </aside>
+
+<div class="modal" id="saveModal" hidden role="dialog" aria-modal="true" aria-labelledby="svTitle">
+  <h3 id="svTitle">Save the file</h3>
+  <p id="svMsg"></p>
+  <textarea id="svText" readonly spellcheck="false" hidden></textarea>
+  <div class="row">
+    <a class="dl" id="svLink" download>Download again</a>
+    <button class="btn" id="svCopy" hidden>Copy to clipboard</button>
+    <button class="btn" id="svClose">Close</button>
+  </div>
+</div>
 
 <div id="tip" role="status" aria-live="polite"></div>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -1139,7 +1191,36 @@ function closeDrawer(){
   setTimeout(()=>{ $("drawer").hidden=true; $("scrim").hidden=true; },200);
 }
 $("drClose").addEventListener("click",closeDrawer);
-$("scrim").addEventListener("click",closeDrawer);
+$("scrim").addEventListener("click",()=>{ if(!$("saveModal").hidden) closeSaveModal(); else closeDrawer(); });
+
+/* ══ logo — official artwork wins over the built-in redraw ══════════ */
+const LOGO_KEY=STORE+".logo";
+function setLogoImage(src){
+  const img=document.createElement("img");
+  img.className="mark"; img.alt="MASDR"; img.src=src;
+  $("logoSlot").replaceChildren(img);
+}
+$("logoBtn").addEventListener("click",()=>$("logoIn").click());
+$("logoIn").addEventListener("change",e=>{
+  const f=e.target.files&&e.target.files[0]; e.target.value="";
+  if(!f) return;
+  if(f.size>600000){ toast("That image is over 600 KB — please use a smaller file.",true); return; }
+  const r=new FileReader();
+  r.onload=()=>{ try{ localStorage.setItem(LOGO_KEY,r.result); }catch(err){}
+    setLogoImage(r.result); toast("Logo updated — it stays in this browser."); };
+  r.onerror=()=>toast("That image could not be read.",true);
+  r.readAsDataURL(f);
+});
+(function(){
+  let stored=null;
+  try{ stored=localStorage.getItem(LOGO_KEY); }catch(e){}
+  if(stored){ setLogoImage(stored); return; }
+  /* served alongside the page? use it — silently ignored when there is no such file */
+  if(!/^https?:$/.test(location.protocol)) return;
+  fetch("masdr-logo.svg",{cache:"no-store"}).then(r=>r.ok?r.text():null).then(txt=>{
+    if(txt && /^\s*<svg[\s>]/i.test(txt)) $("logoSlot").innerHTML=txt.replace(/<svg/i,'<svg class="mark"');
+  }).catch(()=>{});
+})();
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&openId) closeDrawer(); });
 document.addEventListener("click",e=>{
   const o=e.target.closest("[data-open]"); if(o){ openDrawer(o.getAttribute("data-open")); return; }
@@ -1559,26 +1640,85 @@ function buildXlsx(){
     ["xl/styles.xml",styles],["xl/worksheets/sheet1.xml",sheet]
   ]);
 }
-function download(blob,name){
-  const url=URL.createObjectURL(blob), a=document.createElement("a");
-  a.href=url; a.download=name; document.body.appendChild(a); a.click();
-  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },800);
+/* Embedded pages (an artifact panel, an iframe) are sandboxed without
+   allow-downloads, so a synthetic <a download> click is silently dropped.
+   Try the download anyway, then offer a route that works when it is blocked. */
+const FRAMED=(function(){ try{ return window.self!==window.top; }catch(e){ return true; } })();
+let lastUrl=null;
+function download(blob,name,text){
+  if(lastUrl){ URL.revokeObjectURL(lastUrl); lastUrl=null; }
+  const url=URL.createObjectURL(blob); lastUrl=url;
+  const a=document.createElement("a");
+  a.href=url; a.download=name; a.rel="noopener";
+  document.body.appendChild(a); a.click(); a.remove();
+  if(FRAMED) openSaveModal(name,url,text);
+  return url;
 }
-$("btnXlsx").addEventListener("click",()=>{
-  try{ download(buildXlsx(),"Work_Plan_"+iso(today())+".xlsx"); toast("Work Plan exported as .xlsx."); }
-  catch(e){ toast("Export failed: "+e.message,true); }
+function openSaveModal(name,url,text){
+  $("svTitle").textContent="Save "+name;
+  $("svMsg").textContent = text
+    ? "If the download did not start, this page is running inside a panel and panels are not allowed to save files. "+
+      "Open it in its own browser tab and the download works normally — or copy the text below and save it as "+name+"."
+    : "If the download did not start, this page is running inside a panel and panels are not allowed to save files. "+
+      "Open it in its own browser tab and the download works normally. A spreadsheet cannot be copied as text — "+
+      "use the CSV export if you need it right now.";
+  const ta=$("svText"), cp=$("svCopy");
+  if(text){ ta.value=text; ta.hidden=false; cp.hidden=false; } else { ta.hidden=true; cp.hidden=true; }
+  const link=$("svLink"); link.href=url; link.setAttribute("download",name);
+  $("saveModal").hidden=false; $("scrim").hidden=false;
+  requestAnimationFrame(()=>$("scrim").classList.add("on"));
+}
+function closeSaveModal(){
+  $("saveModal").hidden=true;
+  if($("drawer").hidden){ $("scrim").classList.remove("on"); setTimeout(()=>{ $("scrim").hidden=true; },200); }
+}
+$("svClose").addEventListener("click",closeSaveModal);
+$("svCopy").addEventListener("click",async()=>{
+  const ta=$("svText");
+  try{ await navigator.clipboard.writeText(ta.value); toast("Copied — paste it into a text editor and save."); }
+  catch(e){ ta.focus(); ta.select(); toast("Press Ctrl/Cmd + C to copy the selected text."); }
 });
-$("btnCsv").addEventListener("click",()=>{
+
+function csvText(){
   const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
-  const lines=[COLS.map(c=>q(c.h)).join(",")].concat(acts().map(a=>COLS.map(c=>{
+  return "﻿"+[COLS.map(c=>q(c.h)).join(",")].concat(acts().map(a=>COLS.map(c=>{
     if(c.t==="date") return q(a[c.k]||"");
     if(c.t==="calc") return q(durationOf(a));
     if(c.t==="pct")  return q(Math.round((+a[c.k]||0)*100)+"%");
     return q(a[c.k]);
-  }).join(",")));
-  download(new Blob(["﻿"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"}),"Work_Plan_"+iso(today())+".csv");
-  toast("Work Plan exported as CSV.");
+  }).join(","))).join("\r\n");
+}
+function runExport(kind){
+  try{
+    /* when framed the download is blocked and openSaveModal() explains — no success toast */
+    if(kind==="xlsx"){
+      download(buildXlsx(),"Work_Plan_"+iso(today())+".xlsx",null);
+      if(!FRAMED) toast("Work Plan exported as .xlsx.");
+    } else if(kind==="csv"){
+      const t=csvText();
+      download(new Blob([t],{type:"text/csv;charset=utf-8"}),"Work_Plan_"+iso(today())+".csv",t);
+      if(!FRAMED) toast("Work Plan exported as CSV.");
+    } else {
+      const t=icsText();
+      download(new Blob([t],{type:"text/calendar;charset=utf-8"}),"MASDR_Compliance_Calendar.ics",t);
+      if(!FRAMED) toast("Calendar file exported — import it into Outlook or Google Calendar.");
+    }
+  }catch(e){ toast("Export failed: "+e.message,true); }
+}
+const exMenu=$("exportMenu");
+function closeMenu(){ exMenu.hidden=true; $("btnExport").setAttribute("aria-expanded","false"); }
+$("btnExport").addEventListener("click",e=>{
+  e.stopPropagation();
+  const open=exMenu.hidden;
+  exMenu.hidden=!open; $("btnExport").setAttribute("aria-expanded",open?"true":"false");
 });
+exMenu.addEventListener("click",e=>{
+  const b2=e.target.closest("[data-x]"); if(!b2) return;
+  closeMenu(); runExport(b2.getAttribute("data-x"));
+});
+document.addEventListener("click",()=>{ if(!exMenu.hidden) closeMenu(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeMenu(); if(!$("saveModal").hidden) closeSaveModal(); } });
+$("btnCsv").addEventListener("click",()=>runExport("csv"));
 
 /* ══ .ics calendar export ═══════════════════════════════════════════ */
 function icsDate(dt){ return dt.toISOString().slice(0,10).replace(/-/g,""); }
@@ -1587,7 +1727,7 @@ function icsFold(line){
   while(s.length>73){ out.push(s.slice(0,73)); s=" "+s.slice(73); }
   out.push(s); return out.join("\r\n");
 }
-function buildIcs(){
+function icsText(){
   const esc2=s=>String(s==null?"":s).replace(/([,;\\])/g,"\\$1").replace(/\n/g,"\\n");
   const stamp=new Date().toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";
   const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//MASDR//Compliance Calendar//EN",
@@ -1609,12 +1749,8 @@ function buildIcs(){
     L.push("END:VEVENT");
   });
   L.push("END:VCALENDAR");
-  return new Blob([L.join("\r\n")+"\r\n"],{type:"text/calendar;charset=utf-8"});
+  return L.join("\r\n")+"\r\n";
 }
-$("btnIcs").addEventListener("click",()=>{
-  download(buildIcs(),"MASDR_Compliance_Calendar.ics");
-  toast("Calendar file downloaded — import it into Outlook or Google Calendar.");
-});
 
 /* ══ go ═════════════════════════════════════════════════════════════ */
 try{ const m=localStorage.getItem(STORE+".mode"); if(m) calMode=m; }catch(e){}
