@@ -35,6 +35,7 @@ var REMIND_TO   = '';           // 'me@masdr.com, colleague@masdr.com'
 var REMIND_DAYS = 14;
 var SHEET_NAME = 'Work Plan';
 var LISTS_NAME = 'Lists';
+var REM_NAME   = 'Reminders';   // created automatically the first time reminders sync
 
 var FIELDS = [
   ['id',         'Activity ID'],
@@ -76,6 +77,7 @@ function doPost(e) {
     var body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     if (!keyOk_(body.key)) return json_({ ok: false, error: 'Wrong sync key.' });
     merge_(body.rows || [], body.deleted || []);
+    if (body.reminders || body.remDeleted) mergeReminders_(body.reminders || [], body.remDeleted || []);
     return json_(readAll_());
   } catch (err) {
     return json_({ ok: false, error: String(err && err.message || err) });
@@ -157,9 +159,14 @@ function readAll_() {
     ok: true,
     rows: rows,
     lists: readLists_(),
+    reminders: readRemindersSafe_(),
     title: x.ss.getName(),
     syncedAt: new Date().toISOString()
   };
+}
+
+function readRemindersSafe_() {
+  try { return readReminders_(); } catch (e) { return null; }
 }
 
 function rowFrom_(row, map, tz) {
@@ -207,6 +214,138 @@ function readLists_() {
     if (vals.length) out[name] = vals;
   }
   return out;
+}
+
+/* ── reminders ────────────────────────────────────────────────────── */
+
+var REM_FIELDS = [
+  ['id',        'Reminder ID'],
+  ['text',      'Reminder'],
+  ['repeat',    'Repeat'],
+  ['day',       'Day'],
+  ['date',      'Date'],
+  ['always',    'Always show'],
+  ['email',     'Email'],
+  ['addr',      'Email address'],
+  ['updatedAt', 'Updated At']
+];
+
+/* The tab is made on first use, so it does not matter whether it exists. */
+function remCtx_() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(REM_NAME);
+  if (!sh) {
+    sh = ss.insertSheet(REM_NAME);
+    sh.getRange(1, 1, 1, REM_FIELDS.length)
+      .setValues([REM_FIELDS.map(function (f) { return f[1]; })])
+      .setFontWeight('bold').setFontColor('#FFFFFF').setBackground('#4F206E');
+    sh.setFrozenRows(1);
+    SpreadsheetApp.flush();
+  }
+  var v = sh.getDataRange().getValues();
+  var hdr = -1;
+  for (var r = 0; r < v.length && r < 20 && hdr < 0; r++) {
+    for (var c = 0; c < v[r].length; c++) {
+      if (norm_(v[r][c]) === 'reminderid' || norm_(v[r][c]) === 'reminder') { hdr = r; break; }
+    }
+  }
+  if (hdr < 0) throw new Error('The "' + REM_NAME + '" tab needs a "Reminder ID" heading.');
+
+  var map = {};
+  for (var c2 = 0; c2 < v[hdr].length; c2++) {
+    var n = norm_(v[hdr][c2]);
+    for (var i = 0; i < REM_FIELDS.length; i++) {
+      if (norm_(REM_FIELDS[i][1]) === n) map[REM_FIELDS[i][0]] = c2;
+    }
+  }
+  /* add any heading the tab is missing, so a hand-made tab still works */
+  for (var j = 0; j < REM_FIELDS.length; j++) {
+    if (map[REM_FIELDS[j][0]] === undefined) {
+      var col = v[hdr].length;
+      while (col > 0 && String(v[hdr][col - 1] || '') === '') col--;
+      sh.getRange(hdr + 1, col + 1).setValue(REM_FIELDS[j][1]);
+      SpreadsheetApp.flush();
+      map[REM_FIELDS[j][0]] = col;
+      v = sh.getDataRange().getValues();
+    }
+  }
+  return { sh: sh, hdr: hdr, map: map, v: v, tz: ss.getSpreadsheetTimeZone() };
+}
+
+function readReminders_() {
+  var x = remCtx_(), out = [];
+  for (var r = x.hdr + 1; r < x.v.length; r++) {
+    var id = String(x.v[r][x.map.id] == null ? '' : x.v[r][x.map.id]).trim();
+    if (!id) continue;
+    var row = x.v[r];
+    out.push({
+      id: id,
+      text: String(row[x.map.text] || ''),
+      repeat: String(row[x.map.repeat] || 'weekly'),
+      day: Number(row[x.map.day]) || 0,
+      date: asDate_(row[x.map.date], x.tz),
+      always: row[x.map.always] === true || String(row[x.map.always]).toUpperCase() === 'TRUE',
+      email: row[x.map.email] === true || String(row[x.map.email]).toUpperCase() === 'TRUE',
+      addr: String(row[x.map.addr] || ''),
+      updatedAt: asIso_(row[x.map.updatedAt])
+    });
+  }
+  return out;
+}
+
+function mergeReminders_(list, deleted) {
+  var x = remCtx_();
+  var idx = {};
+  for (var r = x.hdr + 1; r < x.v.length; r++) {
+    var id = String(x.v[r][x.map.id] == null ? '' : x.v[r][x.map.id]).trim();
+    if (id) idx[id] = { row: r + 1, updatedAt: asIso_(x.v[r][x.map.updatedAt]) };
+  }
+  var kill = [];
+  (deleted || []).forEach(function (d2) {
+    var e = idx[String(d2.id || '').trim()];
+    if (e && String(e.updatedAt || '') <= String(d2.at || '')) kill.push(e.row);
+  });
+  if (kill.length) {
+    kill.sort(function (a, b) { return b - a; });
+    for (var k = 0; k < kill.length; k++) x.sh.deleteRow(kill[k]);
+    SpreadsheetApp.flush();
+    x = remCtx_();
+    idx = {};
+    for (var r2 = x.hdr + 1; r2 < x.v.length; r2++) {
+      var id2 = String(x.v[r2][x.map.id] == null ? '' : x.v[r2][x.map.id]).trim();
+      if (id2) idx[id2] = { row: r2 + 1, updatedAt: asIso_(x.v[r2][x.map.updatedAt]) };
+    }
+  }
+  var width = Math.max(x.v[x.hdr].length, x.sh.getLastColumn());
+  var appendAt = x.sh.getLastRow() + 1;
+  (list || []).forEach(function (r3) {
+    var id3 = String(r3.id || '').trim();
+    if (!id3) return;
+    var cur = idx[id3];
+    if (cur) {
+      if (String(r3.updatedAt || '') > String(cur.updatedAt || '')) writeRem_(x, cur.row, r3, width);
+    } else if (String(r3.updatedAt || '')) {
+      writeRem_(x, appendAt, r3, width);
+      idx[id3] = { row: appendAt, updatedAt: r3.updatedAt };
+      appendAt++;
+    }
+  });
+  SpreadsheetApp.flush();
+}
+
+function writeRem_(x, rowNum, r, width) {
+  var rng = x.sh.getRange(rowNum, 1, 1, width);
+  var vals = rng.getValues()[0];
+  for (var i = 0; i < REM_FIELDS.length; i++) {
+    var k = REM_FIELDS[i][0];
+    if (x.map[k] === undefined) continue;
+    var val = r[k];
+    if (k === 'date') val = toCell_('start', val);
+    if (k === 'always' || k === 'email') val = !!val;
+    if (k === 'day') val = Number(val) || 0;
+    vals[x.map[k]] = val == null ? '' : val;
+  }
+  rng.setValues([vals]);
 }
 
 /* ── merge ────────────────────────────────────────────────────────── */

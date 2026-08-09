@@ -278,7 +278,16 @@ main{max-width:1600px;margin:0 auto;padding:24px 22px 80px}
 .rem-form input[type=text]{flex:1;min-width:200px}
 .rem-form input,.rem-form select{border:1px solid var(--line-strong);border-radius:9px;padding:7px 10px;
   font-size:13px;background:var(--surface)}
+.rem-opt{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);white-space:nowrap}
+.rem-opt input{margin:0}
 .rem-list{display:flex;flex-direction:column}
+.rem-tags{display:flex;gap:5px;align-items:center}
+.rem-tag{font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;
+  padding:1px 6px;background:var(--surface-3);color:var(--ink-3)}
+.rem-tag.on{background:var(--brand-tint);color:var(--brand)}
+:root[data-theme="dark"] .rem-tag.on{color:var(--t-quarterly)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .rem-tag.on{color:var(--t-quarterly)}}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .rem-tag.on{color:var(--brand)}}
 .rem{display:flex;align-items:center;gap:12px;padding:11px 20px;border-top:1px solid var(--line)}
 .rem:first-child{border-top:0}
 .rem-bell{width:30px;height:30px;border-radius:9px;background:var(--brand-tint);color:var(--brand);flex:none;
@@ -671,13 +680,11 @@ footer.foot p{max-width:78ch}
     </div>
 
     <div class="card">
-      <div class="card-hd"><h2>What needs doing</h2><span class="hint">Overdue first, then by due date</span></div>
-      <div class="up" id="priorities"></div>
-    </div>
-
-    <div class="card">
       <div class="card-hd"><h2>Reminders</h2>
-        <button class="btn" id="btnRemAdd">Add a reminder</button></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn" id="btnRemAll" hidden></button>
+          <button class="btn" id="btnRemAdd">Add a reminder</button>
+        </div></div>
       <form class="rem-form" id="remForm" hidden>
         <input type="text" id="remText" placeholder="e.g. Follow up with P&amp;C" maxlength="120" required>
         <select id="remRepeat">
@@ -688,10 +695,18 @@ footer.foot p{max-width:78ch}
         </select>
         <select id="remDay"></select>
         <input type="date" id="remDate" hidden>
+        <label class="rem-opt"><input type="checkbox" id="remAlways"> Always show it</label>
+        <label class="rem-opt"><input type="checkbox" id="remEmail"> Email me</label>
+        <input type="email" id="remAddr" placeholder="name@masdr.com" hidden>
         <button class="btn solid" type="submit">Add</button>
         <button class="btn" type="button" id="remCancel">Cancel</button>
       </form>
       <div class="rem-list" id="remList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><h2>What needs doing</h2><span class="hint">Overdue first, then by due date</span></div>
+      <div class="up" id="priorities"></div>
     </div>
 
     <div class="card">
@@ -902,7 +917,14 @@ let reminders = (function(){
   try{ const r=JSON.parse(localStorage.getItem(REM_STORE)||"[]"); return Array.isArray(r)?r:[]; }
   catch(e){ return []; }
 })();
-function saveReminders(){ try{ localStorage.setItem(REM_STORE, JSON.stringify(reminders)); }catch(e){} }
+let remTombstones = (function(){
+  try{ const r=JSON.parse(localStorage.getItem(REM_STORE+".del")||"[]"); return Array.isArray(r)?r:[]; }
+  catch(e){ return []; }
+})();
+function saveReminders(){
+  try{ localStorage.setItem(REM_STORE, JSON.stringify(reminders));
+       localStorage.setItem(REM_STORE+".del", JSON.stringify(remTombstones)); }catch(e){}
+}
 function lastDayOf(dt){ return new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth()+1, 0)).getUTCDate(); }
 function remLabel(r){
   if(r.repeat==="once")      return "On "+fmt(d(r.date));
@@ -1533,17 +1555,40 @@ function renderRef(){
 
 /* ══ reminders UI ═══════════════════════════════════════════════════ */
 const DOW_FULL=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const LIVE_DAYS = 7;
+let remShowAll = false;
+function remIsLive(r){
+  if(r.always) return true;
+  const n=remNext(r);
+  if(!n) return false;
+  const dd=dayDiff(today(), n);
+  return dd>=0 && dd<=LIVE_DAYS;
+}
 function renderReminders(){
   const t=today();
-  $("remList").innerHTML = reminders.length ? reminders.map(r=>{
+  const live=reminders.filter(remIsLive);
+  const shown=remShowAll?reminders:live;
+  const hidden=reminders.length-live.length;
+  const btn=$("btnRemAll");
+  btn.hidden = hidden<=0;
+  btn.textContent = remShowAll ? "Show live only" : "Show all ("+reminders.length+")";
+  $("remList").innerHTML = shown.length ? shown.map(r=>{
     const n=remNext(r), isToday=n&&sameDay(n,t);
+    const dd=n?dayDiff(t,n):null;
     return '<div class="rem'+(isToday?" due-today":"")+'">'+
       '<span class="rem-bell"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>'+
       '<span class="rem-b"><b>'+esc(r.text)+'</b><span>'+esc(remLabel(r))+'</span></span>'+
-      '<span class="rem-next">'+(isToday?"today":n?fmt(n):"—")+'</span>'+
+      '<span class="rem-tags">'+
+        (r.always?'<span class="rem-tag on">always</span>':"")+
+        (r.email?'<span class="rem-tag on">email</span>':"")+
+      '</span>'+
+      '<span class="rem-next">'+(isToday?"today":dd===1?"tomorrow":n?fmt(n):"—")+'</span>'+
       '<button class="rem-x" data-rem="'+esc(r.id)+'" aria-label="Remove reminder">&times;</button>'+
     '</div>';
-  }).join("") : '<div class="rem-empty">No reminders yet. Add one to be prompted on the days you choose.</div>';
+  }).join("")
+    : '<div class="rem-empty">'+(reminders.length
+        ? "Nothing live in the next "+LIVE_DAYS+" days."
+        : "No reminders yet. Add one to be prompted on the days you choose.")+'</div>';
 }
 function syncRemFields(){
   const rep=$("remRepeat").value, day=$("remDay"), dt=$("remDate");
@@ -1561,21 +1606,39 @@ $("btnRemAdd").addEventListener("click",()=>{
 });
 $("remCancel").addEventListener("click",()=>{ $("remForm").hidden=true; $("remText").value=""; });
 $("remRepeat").addEventListener("change",syncRemFields);
+$("remEmail").addEventListener("change",()=>{
+  const on=$("remEmail").checked;
+  $("remAddr").hidden=!on;
+  if(on){ $("remAddr").value=$("remAddr").value||remEmailAddr(); $("remAddr").focus(); }
+});
+$("btnRemAll").addEventListener("click",()=>{ remShowAll=!remShowAll; renderReminders(); });
+function remEmailAddr(){ try{ return localStorage.getItem(STORE+".remaddr")||""; }catch(e){ return ""; } }
 $("remForm").addEventListener("submit",e=>{
   e.preventDefault();
   const text=$("remText").value.trim(); if(!text) return;
   const rep=$("remRepeat").value;
-  const r={id:"R"+Date.now().toString(36), text:text, repeat:rep};
+  const r={id:"R"+Date.now().toString(36), text:text, repeat:rep,
+           always:$("remAlways").checked, email:$("remEmail").checked,
+           updatedAt:new Date().toISOString()};
   if(rep==="once"){ if(!$("remDate").value){ toast("Pick a date for the reminder.",true); return; } r.date=$("remDate").value; }
   else r.day=parseInt($("remDay").value,10);
+  if(r.email){
+    const addr=$("remAddr").value.trim();
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(addr)){ toast("Enter a valid email address.",true); return; }
+    r.addr=addr; try{ localStorage.setItem(STORE+".remaddr",addr); }catch(e){}
+  }
   reminders.push(r); saveReminders();
-  $("remText").value=""; $("remForm").hidden=true;
+  $("remText").value=""; $("remAlways").checked=false; $("remEmail").checked=false;
+  $("remAddr").hidden=true; $("remForm").hidden=true;
   renderReminders(); renderCalendar();
   toast("Reminder added — "+remLabel(r).toLowerCase()+".");
 });
 $("remList").addEventListener("click",e=>{
   const x=e.target.closest("[data-rem]"); if(!x) return;
-  reminders=reminders.filter(r=>r.id!==x.getAttribute("data-rem"));
+  const rid=x.getAttribute("data-rem");
+  reminders=reminders.filter(r=>r.id!==rid);
+  remTombstones=remTombstones.filter(t=>t.id!==rid);
+  remTombstones.push({id:rid, at:new Date().toISOString()});
   saveReminders(); renderReminders(); renderCalendar(); toast("Reminder removed.");
 });
 
@@ -2118,6 +2181,11 @@ function setSyncUi(kind){
 }
 function applyRemote(data){
   state.activities = data.rows||[];
+  if(Array.isArray(data.reminders)){        /* null means the sheet has no Reminders tab */
+    reminders = data.reminders;
+    remTombstones = [];
+    saveReminders();
+  }
   if(data.lists && Object.keys(data.lists).length) state.lists = data.lists;
   state.tombstones = [];
   state.source = (data.title||"Google Sheet");
@@ -2136,7 +2204,8 @@ async function doSync(){
     const res = await fetch(sync.url, {
       method:"POST",
       headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body: JSON.stringify({key:sync.key||"", rows:acts(), deleted:state.tombstones||[]})
+      body: JSON.stringify({key:sync.key||"", rows:acts(), deleted:state.tombstones||[],
+                            reminders:reminders, remDeleted:remTombstones})
     });
     if(!res.ok) throw new Error("The sheet endpoint returned "+res.status+".");
     const data = await res.json();
