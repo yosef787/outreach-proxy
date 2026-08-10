@@ -224,6 +224,8 @@ var REM_FIELDS = [
   ['repeat',    'Repeat'],
   ['day',       'Day'],
   ['date',      'Date'],
+  ['until',     'Until'],
+  ['link',      'Linked activity'],
   ['always',    'Always show'],
   ['email',     'Email'],
   ['addr',      'Email address'],
@@ -284,6 +286,8 @@ function readReminders_() {
       repeat: String(row[x.map.repeat] || 'weekly'),
       day: Number(row[x.map.day]) || 0,
       date: asDate_(row[x.map.date], x.tz),
+      until: asDate_(row[x.map.until], x.tz),
+      link: String(row[x.map.link] || ''),
       always: row[x.map.always] === true || String(row[x.map.always]).toUpperCase() === 'TRUE',
       email: row[x.map.email] === true || String(row[x.map.email]).toUpperCase() === 'TRUE',
       addr: String(row[x.map.addr] || ''),
@@ -340,7 +344,7 @@ function writeRem_(x, rowNum, r, width) {
     var k = REM_FIELDS[i][0];
     if (x.map[k] === undefined) continue;
     var val = r[k];
-    if (k === 'date') val = toCell_('start', val);
+    if (k === 'date' || k === 'until') val = toCell_('start', val);
     if (k === 'always' || k === 'email') val = !!val;
     if (k === 'day') val = Number(val) || 0;
     vals[x.map[k]] = val == null ? '' : val;
