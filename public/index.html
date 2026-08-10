@@ -278,6 +278,11 @@ main{max-width:1600px;margin:0 auto;padding:24px 22px 80px}
 .rem-form input[type=text]{flex:1;min-width:200px}
 .rem-form input,.rem-form select{border:1px solid var(--line-strong);border-radius:9px;padding:7px 10px;
   font-size:13px;background:var(--surface)}
+.daychips{display:flex;flex-wrap:wrap;gap:4px;max-width:352px}
+.dchip{border:1px solid var(--line-strong);background:var(--surface);border-radius:8px;padding:5px 8px;
+  font-size:11.5px;font-weight:600;color:var(--ink-2);min-width:36px;text-align:center;line-height:1.2}
+.dchip:hover{border-color:var(--brand-soft)}
+.dchip.on{background:var(--brand);border-color:var(--brand);color:#fff}
 .rem-opt{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);white-space:nowrap}
 .rem-opt input{margin:0}
 .rem-list{display:flex;flex-direction:column}
@@ -696,7 +701,7 @@ footer.foot p{max-width:78ch}
           <option value="quarterly">Every quarter</option>
           <option value="once">Once, on a date</option>
         </select>
-        <select id="remDay"></select>
+        <div id="remDays" class="daychips" role="group" aria-label="Days"></div>
         <input type="date" id="remDate" hidden>
         <select id="remLink" aria-label="Link to an activity"></select>
         <label class="rem-opt">Until <input type="date" id="remUntil"></label>
@@ -930,6 +935,11 @@ function saveReminders(){
   try{ localStorage.setItem(REM_STORE, JSON.stringify(reminders));
        localStorage.setItem(REM_STORE+".del", JSON.stringify(remTombstones)); }catch(e){}
 }
+function remDays(r){
+  if(Array.isArray(r.days) && r.days.length) return r.days.slice();
+  if(typeof r.days==="string" && r.days) return r.days.split(",").map(Number).filter(n=>!isNaN(n));
+  return (r.day===undefined||r.day===null||r.day==="") ? [] : [Number(r.day)];
+}
 function lastDayOf(dt){ return new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth()+1, 0)).getUTCDate(); }
 /* A reminder stops on its own Until date; a linked one otherwise stops when
    the activity it belongs to is due. */
@@ -939,12 +949,22 @@ function remEndDate(r){
   const a=remLinked(r);
   return a ? d(a.end) : null;
 }
+function listWords(a){
+  if(!a.length) return "—";
+  if(a.length===1) return a[0];
+  return a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+}
+function dayWords(days){
+  const list=days.slice().sort((a,b)=>a-b).map(n=>n>=31?"the last day":"day "+n);
+  return listWords(list);
+}
 function remLabel(r){
   let base;
   if(r.repeat==="once")           base="On "+fmt(d(r.date));
-  else if(r.repeat==="weekly")    base="Every "+["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][r.day];
-  else if(r.repeat==="monthly")   base="Every month on day "+r.day;
-  else if(r.repeat==="quarterly") base="Every quarter, day "+r.day+" of the first month";
+  else if(r.repeat==="weekly")    base="Every "+listWords(remDays(r).slice().sort((a,b)=>a-b)
+    .map(i=>["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][i]).filter(Boolean));
+  else if(r.repeat==="monthly")   base="Every month on "+dayWords(remDays(r));
+  else if(r.repeat==="quarterly") base="Every quarter, "+dayWords(remDays(r))+" of the first month";
   else base="";
   const a=remLinked(r);
   if(a) base += " · with "+a.id;
@@ -958,11 +978,13 @@ function remHits(r, from, to){
   if(end && to>end) to=new Date(end);
   if(to<from) return out;
   if(r.repeat==="once"){ const dt=d(r.date); if(dt&&dt>=from&&dt<=to) out.push(dt); return out; }
+  const days=remDays(r);
+  if(!days.length) return out;
   for(let dt=new Date(from); dt<=to; dt=addDays(dt,1)){
-    const dom=Math.min(r.day, lastDayOf(dt));
-    if(r.repeat==="weekly"    && dt.getUTCDay()===r.day) out.push(new Date(dt));
-    else if(r.repeat==="monthly"   && dt.getUTCDate()===dom) out.push(new Date(dt));
-    else if(r.repeat==="quarterly" && dt.getUTCMonth()%3===0 && dt.getUTCDate()===dom) out.push(new Date(dt));
+    const doms=days.map(n=>Math.min(n, lastDayOf(dt)));
+    if(r.repeat==="weekly"    && days.indexOf(dt.getUTCDay())>=0) out.push(new Date(dt));
+    else if(r.repeat==="monthly"   && doms.indexOf(dt.getUTCDate())>=0) out.push(new Date(dt));
+    else if(r.repeat==="quarterly" && dt.getUTCMonth()%3===0 && doms.indexOf(dt.getUTCDate())>=0) out.push(new Date(dt));
   }
   return out;
 }
@@ -1629,14 +1651,24 @@ function fillRemLink(){
       esc(a.id)+" — "+esc(a.activity.length>44?a.activity.slice(0,44)+"…":a.activity)+'</option>').join("");
 }
 function syncRemFields(){
-  const rep=$("remRepeat").value, day=$("remDay"), dt=$("remDate");
-  day.hidden = rep==="once"; dt.hidden = rep!=="once";
-  if(rep==="weekly") day.innerHTML=DOW_FULL.map((n,i)=>'<option value="'+i+'"'+(i===0?" selected":"")+'>'+n+'</option>').join("");
-  else if(rep!=="once"){
-    let o=""; for(let i=1;i<=28;i++) o+='<option value="'+i+'"'+(i===1?" selected":"")+'>Day '+i+'</option>';
-    o+='<option value="31">Last day</option>';
-    day.innerHTML=o;
+  const rep=$("remRepeat").value, box=$("remDays"), dt=$("remDate");
+  box.hidden = rep==="once"; dt.hidden = rep!=="once";
+  if(rep==="once"){ box.innerHTML=""; return; }
+  const chip=(v,label,on)=>'<button type="button" class="dchip'+(on?" on":"")+'" data-d="'+v+'">'+label+'</button>';
+  if(rep==="weekly")
+    box.innerHTML=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((n,i)=>chip(i,n,i===0)).join("");
+  else{
+    let o=""; for(let i=1;i<=28;i++) o+=chip(i,i,i===1);
+    o+=chip(31,"Last",false);
+    box.innerHTML=o;
   }
+}
+$("remDays").addEventListener("click",e=>{
+  const b2=e.target.closest(".dchip"); if(!b2) return;
+  b2.classList.toggle("on");
+});
+function chosenDays(){
+  return [...$("remDays").querySelectorAll(".dchip.on")].map(b2=>parseInt(b2.getAttribute("data-d"),10));
 }
 $("btnRemAdd").addEventListener("click",()=>{
   const f=$("remForm"); f.hidden=!f.hidden;
@@ -1660,7 +1692,11 @@ $("remForm").addEventListener("submit",e=>{
            until:$("remUntil").value||"", link:$("remLink").value||"",
            updatedAt:new Date().toISOString()};
   if(rep==="once"){ if(!$("remDate").value){ toast("Pick a date for the reminder.",true); return; } r.date=$("remDate").value; }
-  else r.day=parseInt($("remDay").value,10);
+  else {
+    const ds=chosenDays();
+    if(!ds.length){ toast("Pick at least one day.",true); return; }
+    r.days=ds;
+  }
   if(r.email){
     const addr=$("remAddr").value.trim();
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(addr)){ toast("Enter a valid email address.",true); return; }
@@ -1668,7 +1704,7 @@ $("remForm").addEventListener("submit",e=>{
   }
   reminders.push(r); saveReminders();
   $("remText").value=""; $("remAlways").checked=false; $("remEmail").checked=false;
-  $("remUntil").value=""; $("remLink").value="";
+  $("remUntil").value=""; $("remLink").value=""; $("remRepeat").value="weekly"; syncRemFields();
   $("remAddr").hidden=true; $("remForm").hidden=true;
   renderReminders(); renderCalendar();
   toast("Reminder added — "+remLabel(r).toLowerCase()+".");
@@ -2174,9 +2210,12 @@ function icsText(){
     L.push(icsFold("DESCRIPTION:"+esc2("MASDR compliance reminder — "+remLabel(r))));
     const rEnd=remEndDate(r);
     const untilPart = rEnd ? ";UNTIL="+icsDate(rEnd) : "";
-    if(r.repeat==="weekly")    L.push("RRULE:FREQ=WEEKLY;BYDAY="+["SU","MO","TU","WE","TH","FR","SA"][r.day]+untilPart);
-    if(r.repeat==="monthly")   L.push("RRULE:FREQ=MONTHLY;BYMONTHDAY="+(r.day>=31?-1:r.day)+untilPart);
-    if(r.repeat==="quarterly") L.push("RRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY="+(r.day>=31?-1:r.day)+untilPart);
+    const ds=remDays(r).slice().sort((a,b)=>a-b);
+    const byDay=ds.map(i=>["SU","MO","TU","WE","TH","FR","SA"][i]).filter(Boolean).join(",");
+    const byMonthDay=ds.map(n=>n>=31?-1:n).join(",");
+    if(r.repeat==="weekly")    L.push("RRULE:FREQ=WEEKLY;BYDAY="+byDay+untilPart);
+    if(r.repeat==="monthly")   L.push("RRULE:FREQ=MONTHLY;BYMONTHDAY="+byMonthDay+untilPart);
+    if(r.repeat==="quarterly") L.push("RRULE:FREQ=MONTHLY;INTERVAL=3;BYMONTHDAY="+byMonthDay+untilPart);
     L.push("CATEGORIES:Reminder");
     L.push("TRANSP:TRANSPARENT");
     L.push("BEGIN:VALARM");
@@ -2247,7 +2286,8 @@ async function doSync(){
       method:"POST",
       headers:{"Content-Type":"text/plain;charset=utf-8"},
       body: JSON.stringify({key:sync.key||"", rows:acts(), deleted:state.tombstones||[],
-                            reminders:reminders, remDeleted:remTombstones})
+                            reminders:reminders.map(r=>Object.assign({},r,{days:remDays(r).join(",")})),
+                            remDeleted:remTombstones})
     });
     if(!res.ok) throw new Error("The sheet endpoint returned "+res.status+".");
     const data = await res.json();

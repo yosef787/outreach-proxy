@@ -284,7 +284,7 @@ function readReminders_() {
       id: id,
       text: String(row[x.map.text] || ''),
       repeat: String(row[x.map.repeat] || 'weekly'),
-      day: Number(row[x.map.day]) || 0,
+      day: String(row[x.map.day] == null ? '' : row[x.map.day]).trim(),
       date: asDate_(row[x.map.date], x.tz),
       until: asDate_(row[x.map.until], x.tz),
       link: String(row[x.map.link] || ''),
@@ -346,7 +346,7 @@ function writeRem_(x, rowNum, r, width) {
     var val = r[k];
     if (k === 'date' || k === 'until') val = toCell_('start', val);
     if (k === 'always' || k === 'email') val = !!val;
-    if (k === 'day') val = Number(val) || 0;
+    if (k === 'day') val = "'" + remDayList_(r).join(',');   // leading quote keeps "1,15" as text
     vals[x.map[k]] = val == null ? '' : val;
   }
   rng.setValues([vals]);
@@ -441,6 +441,15 @@ function parseYmd_(s) {
 function lastDayOfMonth_(d) { return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(); }
 
 /* Does this reminder fire on this date? Same rules as the page. */
+/* The Day column holds one day or several, e.g. "0,3" for Sunday and
+   Wednesday. Older rows carrying a single number still read correctly. */
+function remDayList_(r) {
+  var raw = r.days !== undefined && r.days !== null && r.days !== '' ? r.days : r.day;
+  return String(raw == null ? '' : raw).replace(/^'/, '').split(',')
+    .map(function (n) { return parseInt(n, 10); })
+    .filter(function (n) { return !isNaN(n); });
+}
+
 function remFiresOn_(r, date, rowsById) {
   var end = parseYmd_(r.until);
   if (!end && r.link && rowsById[r.link]) end = parseYmd_(rowsById[r.link].end);
@@ -451,11 +460,13 @@ function remFiresOn_(r, date, rowsById) {
     var one = parseYmd_(r.date);
     return !!one && ymd_(one) === ymd_(date);
   }
-  var day = Number(r.day) || 0;
-  if (r.repeat === 'weekly') return date.getDay() === day;
-  var dom = Math.min(day || 1, lastDayOfMonth_(date));
-  if (r.repeat === 'monthly') return date.getDate() === dom;
-  if (r.repeat === 'quarterly') return date.getMonth() % 3 === 0 && date.getDate() === dom;
+  var days = remDayList_(r);
+  if (!days.length) return false;
+  if (r.repeat === 'weekly') return days.indexOf(date.getDay()) >= 0;
+  var last = lastDayOfMonth_(date);
+  var doms = days.map(function (n) { return Math.min(n || 1, last); });
+  if (r.repeat === 'monthly') return doms.indexOf(date.getDate()) >= 0;
+  if (r.repeat === 'quarterly') return date.getMonth() % 3 === 0 && doms.indexOf(date.getDate()) >= 0;
   return false;
 }
 
