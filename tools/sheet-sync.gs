@@ -430,43 +430,141 @@ function toCell_(k, val) {
 
 /* ── email digest ─────────────────────────────────────────────────── */
 
-function sendReminders() {
-  if (!REMIND_TO) return;
+function ymd_(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function parseYmd_(s) {
+  if (!s) return null;
+  var p = String(s).slice(0, 10).split('-');
+  if (p.length !== 3) return null;
+  var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  return isNaN(d) ? null : d;
+}
+function lastDayOfMonth_(d) { return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(); }
+
+/* Does this reminder fire on this date? Same rules as the page. */
+function remFiresOn_(r, date, rowsById) {
+  var end = parseYmd_(r.until);
+  if (!end && r.link && rowsById[r.link]) end = parseYmd_(rowsById[r.link].end);
+  if (end && date > end) return false;
+  if (r.link && rowsById[r.link] && rowsById[r.link].status === 'Complete') return false;
+
+  if (r.repeat === 'once') {
+    var one = parseYmd_(r.date);
+    return !!one && ymd_(one) === ymd_(date);
+  }
+  var day = Number(r.day) || 0;
+  if (r.repeat === 'weekly') return date.getDay() === day;
+  var dom = Math.min(day || 1, lastDayOfMonth_(date));
+  if (r.repeat === 'monthly') return date.getDate() === dom;
+  if (r.repeat === 'quarterly') return date.getMonth() % 3 === 0 && date.getDate() === dom;
+  return false;
+}
+
+/* What today's email would contain. Returns { deadlines, reminders } with
+   nothing sent — handy for checking before you switch the trigger on. */
+function previewReminders() {
+  var out = collect_();
+  Logger.log('Overdue: ' + out.overdue.length + '   Due within ' + REMIND_DAYS + ' days: ' + out.soon.length +
+             '   Reminders firing today: ' + out.rem.length);
+  Logger.log(digestBody_(out) || '(nothing to send today)');
+  return out;
+}
+
+function collect_() {
   var rows = readAll_().rows;
+  var rems = readRemindersSafe_() || [];
   var today = new Date(); today.setHours(0, 0, 0, 0);
   var horizon = new Date(today.getTime() + REMIND_DAYS * 86400000);
+
+  var byId = {};
+  rows.forEach(function (r) { byId[r.id] = r; });
 
   var overdue = [], soon = [];
   rows.forEach(function (r) {
     if (r.status === 'Complete' || !r.end) return;
-    var due = new Date(r.end + 'T00:00:00');
+    var due = parseYmd_(r.end);
+    if (!due) return;
     if (due < today) overdue.push({ r: r, due: due });
     else if (due <= horizon) soon.push({ r: r, due: due });
   });
-  if (!overdue.length && !soon.length) return;
-
   var by = function (a, b) { return a.due - b.due; };
   overdue.sort(by); soon.sort(by);
 
+  var rem = rems.filter(function (x) { return x.email && remFiresOn_(x, today, byId); });
+  return { today: today, overdue: overdue, soon: soon, rem: rem };
+}
+
+function digestBody_(out) {
   var tz = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone();
   var line = function (x) {
-    var days = Math.round((x.due - today) / 86400000);
-    var when = days < 0 ? Math.abs(days) + ' days late'
-             : days === 0 ? 'today'
-             : 'in ' + days + ' days';
+    var days = Math.round((x.due - out.today) / 86400000);
+    var when = days < 0 ? Math.abs(days) + ' days late' : days === 0 ? 'today' : 'in ' + days + ' days';
     return '• ' + x.r.id + ' — ' + x.r.activity +
            '  (' + Utilities.formatDate(x.due, tz, 'dd-MMM-yyyy') + ', ' + when + ')';
   };
-
   var body = [];
-  if (overdue.length) body.push('OVERDUE', overdue.map(line).join('\n'), '');
-  if (soon.length) body.push('DUE WITHIN ' + REMIND_DAYS + ' DAYS', soon.map(line).join('\n'), '');
+  if (out.rem.length) body.push('TODAY', out.rem.map(function (r) { return '• ' + r.text; }).join('\n'), '');
+  if (out.overdue.length) body.push('OVERDUE', out.overdue.map(line).join('\n'), '');
+  if (out.soon.length) body.push('DUE WITHIN ' + REMIND_DAYS + ' DAYS', out.soon.map(line).join('\n'), '');
+  if (!body.length) return '';
   body.push('— MASDR Compliance Calendar');
-
-  MailApp.sendEmail({
-    to: REMIND_TO,
-    subject: 'Compliance calendar — ' + (overdue.length ? overdue.length + ' overdue, ' : '') +
-             soon.length + ' due soon',
-    body: body.join('\n')
-  });
+  return body.join('\n');
 }
+
+/* Sends one mail to REMIND_TO, plus a short one to any reminder that carries
+   its own address. Silent on days with nothing to say. */
+function sendReminders() {
+  var out = collect_();
+
+  if (REMIND_TO) {
+    var mine = {
+      today: out.today, overdue: out.overdue, soon: out.soon,
+      rem: out.rem.filter(function (r) { return !r.addr || r.addr === REMIND_TO; })
+    };
+    var body = digestBody_(mine);
+    if (body) {
+      MailApp.sendEmail({
+        to: REMIND_TO,
+        subject: 'Compliance calendar — ' +
+          (mine.overdue.length ? mine.overdue.length + ' overdue, ' : '') +
+          mine.soon.length + ' due soon' +
+          (mine.rem.length ? ', ' + mine.rem.length + ' reminder(s)' : ''),
+        body: body
+      });
+    }
+  }
+
+  var others = {};
+  out.rem.forEach(function (r) {
+    if (!r.addr || r.addr === REMIND_TO) return;
+    (others[r.addr] = others[r.addr] || []).push(r);
+  });
+  for (var addr in others) {
+    MailApp.sendEmail({
+      to: addr,
+      subject: 'Reminder — ' + others[addr][0].text + (others[addr].length > 1 ? ' (+' + (others[addr].length - 1) + ')' : ''),
+      body: others[addr].map(function (r) { return '• ' + r.text; }).join('\n') +
+            '\n\n— MASDR Compliance Calendar'
+    });
+  }
+}
+
+/* Always sends, even on a quiet day, so you can prove delivery works.
+   Run it once from the Apps Script editor. */
+function sendTestEmail() {
+  var to = REMIND_TO;
+  if (!to) throw new Error('Set REMIND_TO at the top of this file first.');
+  var out = collect_();
+  var body = digestBody_(out);
+  MailApp.sendEmail({
+    to: to,
+    subject: '[TEST] Compliance calendar reminder',
+    body: 'This is a test of the compliance calendar reminder email.\n\n' +
+          (body || 'Nothing is overdue, nothing falls due within ' + REMIND_DAYS +
+                   ' days, and no reminder fires today — so the daily email would stay silent.') +
+          '\n\nQuota left today: ' + MailApp.getRemainingDailyQuota() + ' emails.'
+  });
+  Logger.log('Test email sent to ' + to);
+}
+
+/* ── email digest ─────────────────────────────────────────────────── */
+
