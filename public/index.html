@@ -466,6 +466,11 @@ main{max-width:1600px;margin:0 auto;padding:24px 22px 80px}
   padding:0 7px;font-size:10.5px;font-weight:700;overflow:hidden;white-space:nowrap;cursor:pointer;border:0;position:relative}
 .tl-now{position:absolute;top:0;bottom:0;width:2px;background:var(--now-line);z-index:1;pointer-events:none;opacity:.7}
 
+.ah-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+.ah-row .fldrow input,.ah-row .fldrow select{width:100%}
+#adHocModal p{margin-bottom:16px}
+.day.clickable{cursor:copy}
+.day.clickable:hover{box-shadow:inset 0 0 0 2px var(--brand-soft)}
 .filterbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface-2);
   border:1px solid var(--line);border-radius:11px;padding:8px 10px}
 .filterbar .fb-ico{width:16px;height:16px;stroke:var(--ink-3);fill:none;stroke-width:1.8;stroke-linecap:round;flex:none;margin-left:2px}
@@ -494,18 +499,25 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13px}
 
 /* upcoming list */
 .up{display:flex;flex-direction:column}
-.up-item{display:grid;grid-template-columns:56px 1fr auto;gap:13px;align-items:center;padding:11px 20px;
-  border-bottom:1px solid var(--line);cursor:pointer;background:transparent;border-left:0;border-right:0;border-top:0;
-  width:100%;text-align:left}
+.up-item{display:flex;align-items:stretch;border-bottom:1px solid var(--line)}
 .up-item:last-child{border-bottom:0}
 .up-item:hover{background:var(--surface-2)}
-.up-date{background:var(--surface-3);border-radius:9px;padding:5px 0;text-align:center}
+.up-tick{display:flex;align-items:center;padding:0 4px 0 20px;cursor:pointer}
+.up-tick input{width:17px;height:17px;cursor:pointer;accent-color:var(--ok)}
+.up-open{flex:1;display:grid;grid-template-columns:56px 1fr auto;gap:13px;align-items:center;
+  padding:11px 20px 11px 12px;background:transparent;border:0;text-align:left;cursor:pointer;min-width:0}
+.up-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.up-item.is-done .up-main b{text-decoration:line-through;color:var(--ink-3)}
+.up-item.is-done{opacity:.7}
+.up-date{background:var(--surface-3);border-radius:9px;padding:5px 0;text-align:center;display:block}
 .up-date b{display:block;font-family:var(--mono);font-size:16px;font-weight:600;line-height:1.05}
+.up-main{display:block}
 .up-date span{font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3)}
 .up-item.is-od .up-date{background:var(--crit-bg)} .up-item.is-od .up-date b{color:var(--crit)}
 .up-item.is-soon .up-date{background:var(--warn-bg)} .up-item.is-soon .up-date b{color:var(--warn)}
 .up-main{min-width:0}
 .up-main b{display:block;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.up-item.is-done .up-tick input{accent-color:var(--ok)}
 .up-meta{font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:7px;margin-top:2px}
 .up-when{font-size:11px;font-weight:700;color:var(--ink-3);white-space:nowrap;font-family:var(--mono)}
 .up-item.is-od .up-when{color:var(--crit)}
@@ -705,6 +717,7 @@ footer.foot p{max-width:78ch}
         <input type="date" id="remDate" hidden>
         <select id="remLink" aria-label="Link to an activity"></select>
         <label class="rem-opt">Until <input type="date" id="remUntil"></label>
+        <label class="rem-opt"><input type="checkbox" id="remForever"> No end</label>
         <label class="rem-opt"><input type="checkbox" id="remAlways"> Always show it</label>
         <label class="rem-opt"><input type="checkbox" id="remEmail"> Email me</label>
         <input type="text" id="remAddr" placeholder="name@masdr.com, other@masdr.com" hidden>
@@ -752,6 +765,7 @@ footer.foot p{max-width:78ch}
           <button class="ico" id="calPrev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
           <button class="ico" id="calNext" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
           <button class="btn" id="calToday">Today</button>
+          <button class="btn solid" id="btnAdHoc">+ Add</button>
         </div>
         <div class="cal-title" id="calTitle">—<small id="calSubtitle">—</small></div>
         <div class="cal-modes no-print" role="tablist" aria-label="Calendar mode">
@@ -823,6 +837,49 @@ footer.foot p{max-width:78ch}
   </div>
   <div class="dr-bd" id="drBody"></div>
 </aside>
+
+<div class="modal" id="adHocModal" hidden role="dialog" aria-modal="true" aria-labelledby="ahTitle">
+  <h3 id="ahTitle">Add an activity</h3>
+  <p>For one-off work that is not part of the standing plan. It joins the Work Plan and syncs like everything else.</p>
+  <form id="ahForm">
+    <div class="fldrow">
+      <label for="ahText">What is it</label>
+      <input id="ahText" type="text" maxlength="140" placeholder="e.g. Respond to GOSI query" required
+             style="font-family:'Cairo',system-ui,sans-serif">
+    </div>
+    <div class="ah-row">
+      <div class="fldrow" style="flex:1;margin:0">
+        <label for="ahType">Type</label>
+        <select id="ahType" style="font-family:'Cairo',system-ui,sans-serif"></select>
+      </div>
+      <div class="fldrow" style="flex:1;margin:0">
+        <label for="ahDept">Department</label>
+        <select id="ahDept" style="font-family:'Cairo',system-ui,sans-serif"></select>
+      </div>
+    </div>
+    <div class="fldrow" style="margin-top:12px">
+      <label>When</label>
+      <div class="dseg" style="max-width:280px">
+        <button type="button" data-w="one" class="on">One day</button>
+        <button type="button" data-w="span">Over a period</button>
+      </div>
+    </div>
+    <div class="ah-row">
+      <div class="fldrow" style="flex:1;margin:0">
+        <label for="ahStart"><span id="ahStartLbl">Date</span></label>
+        <input id="ahStart" type="date" required>
+      </div>
+      <div class="fldrow" id="ahEndWrap" style="flex:1;margin:0" hidden>
+        <label for="ahEnd">Ends</label>
+        <input id="ahEnd" type="date">
+      </div>
+    </div>
+    <div class="row">
+      <button class="btn solid" type="submit">Add it</button>
+      <button class="btn" type="button" id="ahClose" style="margin-left:auto">Cancel</button>
+    </div>
+  </form>
+</div>
 
 <div class="modal" id="syncModal" hidden role="dialog" aria-modal="true" aria-labelledby="syTitle">
   <h3 id="syTitle">Sync with the Google Sheet</h3>
@@ -944,10 +1001,12 @@ function lastDayOf(dt){ return new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCM
 /* A reminder stops on its own Until date; a linked one otherwise stops when
    the activity it belongs to is due. */
 function remLinked(r){ return r.link ? byId(r.link) : null; }
+const REM_HORIZON_DAYS = 730;      /* two years: nothing repeats past this unseen */
 function remEndDate(r){
   if(r.until) return d(r.until);
   const a=remLinked(r);
-  return a ? d(a.end) : null;
+  if(a && d(a.end)) return d(a.end);
+  return r.forever ? null : addDays(today(), REM_HORIZON_DAYS);
 }
 function listWords(a){
   if(!a.length) return "—";
@@ -970,6 +1029,7 @@ function remLabel(r){
   if(a) base += " · with "+a.id;
   if(r.until) base += " · until "+fmt(d(r.until));
   else if(a && d(a.end)) base += " · ends "+fmt(d(a.end));
+  else if(r.forever) base += " · no end";
   return base;
 }
 function remHits(r, from, to){
@@ -1110,23 +1170,44 @@ function renderKpis(){
 function upItem(a){
   const e=d(a.end), t=today();
   const dd=e?dayDiff(t,e):null;
-  const od=isOverdue(a);
-  const cls = od?"is-od":(dd!==null&&dd<=30?"is-soon":"");
+  const od=isOverdue(a), done=a.status==="Complete";
+  const cls=(od?"is-od":(dd!==null&&dd<=30?"is-soon":""))+(done?" is-done":"");
   const when = dd===null ? "" : od ? Math.abs(dd)+"d late" : dd===0 ? "today" : "in "+dd+"d";
-  return '<button class="up-item '+cls+'" data-open="'+esc(a.id)+'">'+
-    '<div class="up-date"><b>'+(e?String(e.getUTCDate()).padStart(2,"0"):"—")+'</b>'+
-      '<span>'+(e?MONTHS[e.getUTCMonth()]+" "+String(e.getUTCFullYear()).slice(2):"")+'</span></div>'+
-    '<div class="up-main"><b>'+esc(a.activity)+'</b>'+
-      '<div class="up-meta">'+typeSwatch(a.type)+esc(a.type||"—")+' · '+esc(a.id)+'</div></div>'+
-    '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">'+
-      statusPill(a)+'<span class="up-when">'+when+'</span></div></button>';
+  return '<div class="up-item '+cls+'">'+
+    '<label class="up-tick" title="'+(done?"Mark as not complete":"Mark as complete")+'">'+
+      '<input type="checkbox" data-done="'+esc(a.id)+'"'+(done?" checked":"")+
+      ' aria-label="Mark '+esc(a.id)+' complete"></label>'+
+    '<button class="up-open" data-open="'+esc(a.id)+'">'+
+      '<span class="up-date"><b>'+(e?String(e.getUTCDate()).padStart(2,"0"):"—")+'</b>'+
+        '<span>'+(e?MONTHS[e.getUTCMonth()]+" "+String(e.getUTCFullYear()).slice(2):"")+'</span></span>'+
+      '<span class="up-main"><b>'+esc(a.activity)+'</b>'+
+        '<span class="up-meta">'+typeSwatch(a.type)+esc(a.type||"—")+' · '+esc(a.id)+'</span></span>'+
+      '<span class="up-right">'+statusPill(a)+'<span class="up-when">'+when+'</span></span>'+
+    '</button></div>';
 }
+/* One tick marks it done everywhere — counts, calendar, quarter cards and the
+   sheet on the next sync. Unticking restores the status it had before. */
+function setDone(id, done){
+  const a=byId(id); if(!a) return;
+  if(done){ if(a.status!=="Complete") a.prevStatus=a.status; a.status="Complete"; a.progress=1; }
+  else { a.status=a.prevStatus||"In Progress"; a.prevStatus=""; if(a.progress===1) a.progress=0; }
+  touch(a); state.dirty=true; save(); renderAll();
+  toast(a.id+(done?" marked complete.":" reopened."));
+}
+document.addEventListener("change",e=>{
+  const cb=e.target.closest("[data-done]"); if(!cb) return;
+  setDone(cb.getAttribute("data-done"), cb.checked);
+});
 function renderLists2(){
   const t=today();
-  const open=acts().filter(a=>a.status!=="Complete"&&d(a.end));
+  const dated=acts().filter(a=>d(a.end));
+  const open=dated.filter(a=>a.status!=="Complete");
   const overdue=open.filter(isOverdue).sort((a,b)=>d(a.end)-d(b.end));
   const ahead=open.filter(a=>!isOverdue(a)).sort((a,b)=>d(a.end)-d(b.end));
-  const rows=overdue.concat(ahead).slice(0,5);
+  /* anything ticked in the last week stays visible, so a mistaken tick is easy to undo */
+  const justDone=dated.filter(a=>a.status==="Complete"&&a.updatedAt&&
+    dayDiff(d(a.updatedAt.slice(0,10)), t)<=7).slice(0,2);
+  const rows=overdue.concat(ahead).slice(0,5).concat(justDone);
   $("priorities").innerHTML = rows.length ? rows.map(upItem).join("")
     : '<div class="empty">Nothing outstanding — every activity is complete.</div>';
 }
@@ -1221,7 +1302,8 @@ function renderMonth(){
   const put=(dt,a,kind)=>{ const k=iso(dt); (byDay[k]=byDay[k]||[]).push({a,kind}); };
   items.forEach(a=>{
     const r=rangeOf(a); if(!r) return;
-    if(r.s>=first&&r.s<=last) put(r.s,a,"start");
+    const oneDay=sameDay(r.s,r.e);          /* a single-day item is just "due" */
+    if(!oneDay && r.s>=first&&r.s<=last) put(r.s,a,"start");
     if(r.e>=first&&r.e<=last) put(r.e,a,"due");
     if(r.s<=last&&r.e>=first) running.push(a);     /* everything under way this month */
   });
@@ -1245,7 +1327,8 @@ function renderMonth(){
       const shown=ev.slice(0,2), extra=ev.length-shown.length;
       const on=running.filter(a=>{ const r=rangeOf(a); return r.s<=day&&r.e>=day; });
       const rem=out?[]:reminders.filter(r=>remHits(r,day,day).length);
-      html+='<div class="day'+(out?" out":"")+(we?" we":"")+(sameDay(day,t)?" today":"")+'">'+
+      html+='<div class="day clickable'+(out?" out":"")+(we?" we":"")+(sameDay(day,t)?" today":"")+
+        '" data-day="'+iso(day)+'" title="Click to add an activity on this day">'+
         '<span class="dn">'+day.getUTCDate()+'</span>'+
         (ev.length?'<div class="dev">'+shown.map(e=>
           '<button class="chip '+e.kind+'" data-open="'+esc(e.a.id)+'" style="--c:'+typeColor(e.a.type)+
@@ -1376,6 +1459,68 @@ function renderCalendar(){
   $("calLegend").innerHTML = used.map(t=>'<span class="item">'+typeSwatch(t)+esc(t)+'</span>').join("")+tail;
 }
 
+/* ══ ad-hoc activity ════════════════════════════════════════════════ */
+let ahSpan=false;
+function nextAdHocId(){
+  let i=1,id;
+  do{ id="ADH-"+String(i++).padStart(2,"0"); } while(acts().some(a=>a.id===id));
+  return id;
+}
+function openAdHoc(onDate){
+  const day = onDate || today();
+  $("ahText").value="";
+  fillSel($("ahType"), listOf("Activity Type"), "Monitoring");
+  fillSel($("ahDept"), listOf("Department"), "Legal & GRC");
+  $("ahStart").value=iso(day); $("ahEnd").value=iso(day);
+  setAhSpan(false);
+  $("adHocModal").hidden=false; $("scrim").hidden=false;
+  requestAnimationFrame(()=>{ $("scrim").classList.add("on"); $("ahText").focus(); });
+}
+function fillSel(el, vals, pick){
+  el.innerHTML=vals.map(v=>'<option'+(v===pick?" selected":"")+'>'+esc(v)+'</option>').join("");
+}
+function setAhSpan(on){
+  ahSpan=on;
+  $("ahEndWrap").hidden=!on;
+  $("ahStartLbl").textContent=on?"Starts":"Date";
+  document.querySelectorAll('#adHocModal .dseg button').forEach(b2=>
+    b2.classList.toggle("on", (b2.getAttribute("data-w")==="span")===on));
+}
+function closeAdHoc(){
+  $("adHocModal").hidden=true;
+  if($("drawer").hidden && $("saveModal").hidden && $("syncModal").hidden){
+    $("scrim").classList.remove("on"); setTimeout(()=>{ $("scrim").hidden=true; },200);
+  }
+}
+$("btnAdHoc").addEventListener("click",()=>openAdHoc(cursorDayForAdd()));
+$("ahClose").addEventListener("click",closeAdHoc);
+document.querySelectorAll('#adHocModal .dseg button').forEach(b2=>
+  b2.addEventListener("click",()=>setAhSpan(b2.getAttribute("data-w")==="span")));
+function cursorDayForAdd(){
+  /* today if the month on screen contains it, else the first of that month */
+  const t=today();
+  if(cursor && t.getUTCFullYear()===cursor.getUTCFullYear() && t.getUTCMonth()===cursor.getUTCMonth()) return t;
+  return cursor ? new Date(Date.UTC(cursor.getUTCFullYear(), cursor.getUTCMonth(), 1)) : t;
+}
+$("ahForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const text=$("ahText").value.trim(); if(!text) return;
+  const st=$("ahStart").value;
+  if(!st){ toast("Pick a date.",true); return; }
+  let en = ahSpan ? ($("ahEnd").value||st) : st;
+  if(d(en)<d(st)){ toast("The end date is before the start date.",true); return; }
+  const a={id:nextAdHocId(), activity:text, type:$("ahType").value, owner:"",
+    department:$("ahDept").value, frequency:"One-off", start:st, end:en, duration:0,
+    status:"Not Started", progress:0, reviewer:"", approval:"Pending",
+    notes:"Added from the calendar", updatedAt:new Date().toISOString()};
+  a.duration=durationOf(a)||0;
+  state.activities.push(a);
+  state.dirty=true; save();
+  cursor=new Date(Date.UTC(d(st).getUTCFullYear(), d(st).getUTCMonth(), 1));
+  closeAdHoc(); renderAll();
+  toast(a.id+" added — "+(st===en?fmt(d(st)):fmt(d(st))+" to "+fmt(d(en)))+".");
+});
+
 /* ══ detail drawer ══════════════════════════════════════════════════ */
 function openDrawer(id){
   const a=byId(id); if(!a) return;
@@ -1431,6 +1576,7 @@ $("drClose").addEventListener("click",closeDrawer);
 $("scrim").addEventListener("click",()=>{
   if(!$("saveModal").hidden) closeSaveModal();
   else if(!$("syncModal").hidden) closeSyncModal();
+  else if(!$("adHocModal").hidden) closeAdHoc();
   else closeDrawer();
 });
 
@@ -1473,6 +1619,10 @@ document.addEventListener("click",e=>{
   if(qc){ const b=qBounds(qc.getAttribute("data-q"));
     if(b){ cursor=new Date(Date.UTC(b.start.getUTCFullYear(),b.start.getUTCMonth(),1));
       calMode="month"; showTab("calendar"); renderCalendar(); } return; }
+  const dayCell=e.target.closest("[data-day]");
+  if(dayCell && !e.target.closest(".chip,.run-pill,.ongoing")){
+    openAdHoc(d(dayCell.getAttribute("data-day"))); return;
+  }
   const ym=e.target.closest("[data-month]");
   if(ym){ cursor=new Date(Date.UTC(cursor.getUTCFullYear(),+ym.getAttribute("data-month"),1));
     calMode="month"; renderCalendar(); }
@@ -1672,10 +1822,26 @@ function chosenDays(){
 }
 $("btnRemAdd").addEventListener("click",()=>{
   const f=$("remForm"); f.hidden=!f.hidden;
-  if(!f.hidden){ syncRemFields(); fillRemLink(); $("remText").focus(); }
+  if(!f.hidden){
+    syncRemFields(); fillRemLink();
+    /* an end a year out, so a reminder stops on its own unless you say otherwise */
+    $("remUntil").value = iso(addDays(today(), 365));
+    $("remForever").checked = false; $("remUntil").disabled = false;
+    $("remText").focus();
+  }
 });
 $("remCancel").addEventListener("click",()=>{ $("remForm").hidden=true; $("remText").value=""; });
 $("remRepeat").addEventListener("change",syncRemFields);
+$("remForever").addEventListener("change",()=>{
+  const on=$("remForever").checked;
+  $("remUntil").disabled=on;
+  if(on) $("remUntil").value="";
+  else if(!$("remUntil").value) $("remUntil").value=iso(addDays(today(),365));
+});
+$("remLink").addEventListener("change",()=>{
+  /* a linked reminder takes the activity's due date, so clear the typed one */
+  if($("remLink").value && !$("remForever").checked) $("remUntil").value="";
+});
 $("remEmail").addEventListener("change",()=>{
   const on=$("remEmail").checked;
   $("remAddr").hidden=!on;
@@ -1697,7 +1863,8 @@ $("remForm").addEventListener("submit",e=>{
   const rep=$("remRepeat").value;
   const r={id:"R"+Date.now().toString(36), text:text, repeat:rep,
            always:$("remAlways").checked, email:$("remEmail").checked,
-           until:$("remUntil").value||"", link:$("remLink").value||"",
+           until:$("remForever").checked?"":($("remUntil").value||""),
+           forever:$("remForever").checked, link:$("remLink").value||"",
            updatedAt:new Date().toISOString()};
   if(rep==="once"){ if(!$("remDate").value){ toast("Pick a date for the reminder.",true); return; } r.date=$("remDate").value; }
   else {
@@ -1712,7 +1879,8 @@ $("remForm").addEventListener("submit",e=>{
   }
   reminders.push(r); saveReminders();
   $("remText").value=""; $("remAlways").checked=false; $("remEmail").checked=false;
-  $("remUntil").value=""; $("remLink").value=""; $("remRepeat").value="weekly"; syncRemFields();
+  $("remUntil").value=""; $("remForever").checked=false; $("remUntil").disabled=false;
+  $("remLink").value=""; $("remRepeat").value="weekly"; syncRemFields();
   $("remAddr").hidden=true; $("remForm").hidden=true;
   renderReminders(); renderCalendar();
   toast("Reminder added — "+remLabel(r).toLowerCase()+".");
@@ -2163,7 +2331,8 @@ exMenu.addEventListener("click",e=>{
 document.addEventListener("click",()=>{ if(!exMenu.hidden) closeMenu(); });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeMenu();
   if(!$("saveModal").hidden) closeSaveModal();
-  if(!$("syncModal").hidden) closeSyncModal(); } });
+  if(!$("syncModal").hidden) closeSyncModal();
+  if(!$("adHocModal").hidden) closeAdHoc(); } });
 $("btnCsv").addEventListener("click",()=>runExport("csv"));
 
 /* ══ .ics calendar export ═══════════════════════════════════════════ */
@@ -2369,7 +2538,7 @@ setInterval(()=>{ if(!syncBusy && sync.url && sync.last) setSyncUi("ok"); }, 600
 try{ const m=localStorage.getItem(STORE+".mode"); if(m) calMode=m; }catch(e){}
 /* Overlays always start closed — a stray edit to the markup can otherwise
    leave one showing on load with no obvious way back. */
-["syncModal","saveModal","drawer"].forEach(function(id){ const el=$(id); if(el) el.hidden=true; });
+["syncModal","saveModal","drawer","adHocModal"].forEach(function(id){ const el=$(id); if(el) el.hidden=true; });
 $("scrim").hidden=true; $("scrim").classList.remove("on");
 if($("exportMenu")) $("exportMenu").hidden=true;
 
