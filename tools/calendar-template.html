@@ -205,6 +205,11 @@ button{cursor:pointer}
 .steps b{color:var(--ink)}
 .warnbox{font-size:12.5px;color:var(--ink-2);background:var(--warn-bg);border:1px solid color-mix(in srgb,var(--warn) 30%,transparent);
   border-radius:10px;padding:10px 13px}
+.errbox{font-size:12.5px;color:var(--ink-2);background:var(--crit-bg);border:1px solid color-mix(in srgb,var(--crit) 32%,transparent);
+  border-radius:10px;padding:10px 13px}
+.errbox b{color:var(--crit)}
+.errbox span{display:block;margin-top:5px;font-family:var(--mono);font-size:11px;line-height:1.5;
+  color:var(--ink-2);word-break:break-word}
 .fldrow{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
 .fldrow label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
 .fldrow input{border:1px solid var(--line-strong);border-radius:9px;padding:8px 11px;font-size:13px;
@@ -1094,6 +1099,10 @@ footer.foot p{max-width:78ch}
     <div class="f full">
       <label for="syKey">Sync key <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
       <input id="syKey" type="text" placeholder="leave empty if you did not set one" spellcheck="false">
+    </div>
+    <div class="errbox" id="syLastErr" hidden>
+      <b>The last sync did not go through.</b> What the sheet said:
+      <span id="syErrText"></span>
     </div>
     <div class="warnbox">
       Anyone who has that URL can read and change the sheet, so treat it like a password and set a sync key.
@@ -2886,6 +2895,19 @@ function applyRemote(data){
   save(); renderAll();
 }
 function syncErrorText(){ return "Sync failed."; }
+/* The toast stays a plain "Sync failed" as asked. The reason is kept here
+   and shown only inside the Sync window — the place you open when it fails
+   and the one place where knowing why is the whole point. */
+let lastSyncError = "";
+function noteSyncError(err){
+  const raw = (err && err.message) ? String(err.message) : "Could not reach the sheet.";
+  lastSyncError = raw.slice(0,300)+" · "+new Date().toLocaleTimeString();
+  try{ localStorage.setItem(STORE+".syerr", lastSyncError); }catch(e){}
+}
+try{ lastSyncError = localStorage.getItem(STORE+".syerr")||""; }catch(e){}
+function clearSyncError(){
+  lastSyncError=""; try{ localStorage.removeItem(STORE+".syerr"); }catch(e){}
+}
 async function doSync(){
   if(!sync.url){ openSyncModal(); return; }
   if(syncBusy) return;
@@ -2902,10 +2924,10 @@ async function doSync(){
     const data = await res.json();
     if(!data.ok) throw new Error(data.error||"The sheet refused the sync.");
     applyRemote(data);
-    setSyncUi("ok");
+    setSyncUi("ok"); clearSyncError();
     toast("Synced — the sheet now holds "+data.rows.length+" activities.");
   }catch(err){
-    setSyncUi("bad");
+    setSyncUi("bad"); noteSyncError(err);
     toast(syncErrorText(), true);
   }finally{ syncBusy=false; }
 }
@@ -2920,10 +2942,11 @@ async function doPull(){
     const data = await res.json();
     if(!data.ok) throw new Error(data.error||"The sheet refused the request.");
     applyRemote(data);
-    setSyncUi("ok");
+    setSyncUi("ok"); clearSyncError();
     toast("Loaded "+data.rows.length+" activities from the sheet.");
   }catch(err){
-    setSyncUi("bad"); toast(syncErrorText(), true);
+    setSyncUi("bad"); noteSyncError(err);
+    toast(syncErrorText(), true);
   }finally{ syncBusy=false; }
 }
 function openSyncModal(){
@@ -2933,6 +2956,8 @@ function openSyncModal(){
   $("syState").textContent = sync.url
     ? ("Connected to "+(sync.title||"the sheet")+(sync.last?" · last synced "+ago(sync.last):" · not synced yet"))
     : "Not connected yet. Paste the web app URL below, or follow the setup steps.";
+  $("syLastErr").hidden = !lastSyncError;
+  $("syErrText").textContent = lastSyncError;
   $("syncModal").hidden=false; $("scrim").hidden=false;
   requestAnimationFrame(()=>$("scrim").classList.add("on"));
 }

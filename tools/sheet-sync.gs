@@ -134,21 +134,46 @@ function ctx_() {
   if (map.id === undefined) throw new Error('Could not map the "Activity ID" column.');
 
   /* Any heading this file knows about but the sheet does not gets appended.
-     Existing columns are never moved, so hand-made layouts survive. */
+     Existing columns are never moved, so hand-made layouts survive.
+
+     A sheet trimmed to exactly its used columns has no room on the right,
+     and writing past the last column throws — so widen the grid first.
+     Only "Updated At" is load-bearing (it is what makes two people syncing
+     safe); if any of the optional headings cannot be added, carry on
+     without them rather than failing the whole sync. */
   var added = 0;
   var col = v[hdr].length;
   while (col > 0 && String(v[hdr][col - 1] || '') === '') col--;
   for (var f = 0; f < FIELDS.length; f++) {
-    if (map[FIELDS[f][0]] !== undefined) continue;
-    sh.getRange(hdr + 1, col + 1).setValue(FIELDS[f][1]).setFontWeight('bold');
-    map[FIELDS[f][0]] = col;
-    col++; added++;
+    var key = FIELDS[f][0];
+    if (map[key] !== undefined) continue;
+    try {
+      widenTo_(sh, col + 1);
+      sh.getRange(hdr + 1, col + 1).setValue(FIELDS[f][1]).setFontWeight('bold');
+      map[key] = col;
+      col++; added++;
+    } catch (err) {
+      if (key === 'updatedAt') throw err;
+      /* an optional column the sheet has no room for: it simply will not
+         round-trip, which is better than refusing to sync at all */
+    }
   }
   if (added) {
     SpreadsheetApp.flush();
     v = sh.getDataRange().getValues();
   }
   return { ss: ss, sh: sh, hdr: hdr, map: map, v: v, tz: ss.getSpreadsheetTimeZone() };
+}
+
+/* Grids are a fixed size. Make sure column `n` and row `n` exist before
+   anything writes to them. */
+function widenTo_(sh, n) {
+  var max = sh.getMaxColumns();
+  if (n > max) sh.insertColumnsAfter(max, n - max);
+}
+function deepenTo_(sh, n) {
+  var max = sh.getMaxRows();
+  if (n > max) sh.insertRowsAfter(max, n - max);
 }
 
 function asDate_(v, tz) {
@@ -163,7 +188,9 @@ function asIso_(v) {
 /* A time is stored as text ("09:00"), but Sheets may hand it back as a Date. */
 function asTime_(v, tz) {
   if (v instanceof Date) return Utilities.formatDate(v, tz, 'HH:mm');
-  var s = String(v == null ? '' : v).trim();
+  /* the leading apostrophe that keeps Sheets from typing it as a time is
+     normally stripped on read, but tolerate it either way */
+  var s = String(v == null ? '' : v).trim().replace(/^'/, '');
   var m = s.match(/^(\d{1,2}):(\d{2})/);
   return m ? ('0' + m[1]).slice(-2) + ':' + m[2] : '';
 }
@@ -294,6 +321,7 @@ function remCtx_() {
     if (map[REM_FIELDS[j][0]] === undefined) {
       var col = v[hdr].length;
       while (col > 0 && String(v[hdr][col - 1] || '') === '') col--;
+      widenTo_(sh, col + 1);
       sh.getRange(hdr + 1, col + 1).setValue(REM_FIELDS[j][1]);
       SpreadsheetApp.flush();
       map[REM_FIELDS[j][0]] = col;
@@ -367,6 +395,8 @@ function mergeReminders_(list, deleted) {
 }
 
 function writeRem_(x, rowNum, r, width) {
+  deepenTo_(x.sh, rowNum);
+  widenTo_(x.sh, width);
   var rng = x.sh.getRange(rowNum, 1, 1, width);
   var vals = rng.getValues()[0];
   for (var i = 0; i < REM_FIELDS.length; i++) {
@@ -435,6 +465,8 @@ function merge_(rows, deleted) {
 }
 
 function writeRow_(x, rowNum, a, width) {
+  deepenTo_(x.sh, rowNum);
+  widenTo_(x.sh, width);
   var rng = x.sh.getRange(rowNum, 1, 1, width);
   var vals = rng.getValues()[0];
   for (var i = 0; i < FIELDS.length; i++) {
