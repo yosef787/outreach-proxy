@@ -42,6 +42,7 @@
   --t-governance:#B98400; --t-governance-ink:#FFFFFF;
   --t-monitoring:#0563C1; --t-monitoring-ink:#FFFFFF;
   --t-awareness:#5E8C3A;  --t-awareness-ink:#FFFFFF;
+  --t-other:#6B6076;      --t-other-ink:#FFFFFF;
 
   --q1:#4F206E; --q2:#7A4A96; --q3:#C73570; --q4:#B98400;
   --now-bg:#FFF4D6; --now-ink:#7A5200; --now-line:#C0202B;
@@ -79,6 +80,7 @@
     --t-governance:#E8B53F; --t-governance-ink:#2E2205;
     --t-monitoring:#5AA1EB; --t-monitoring-ink:#06203C;
     --t-awareness:#9DBE7C;  --t-awareness-ink:#16210B;
+    --t-other:#9A8FA8;      --t-other-ink:#1B1622;
 
     --q1:#8E63BD; --q2:#A87FD1; --q3:#E06694; --q4:#D9A32E;
     --now-bg:#3D2E08; --now-ink:#FFD97A; --now-line:#F0736F;
@@ -112,6 +114,7 @@
   --t-governance:#E8B53F; --t-governance-ink:#2E2205;
   --t-monitoring:#5AA1EB; --t-monitoring-ink:#06203C;
   --t-awareness:#9DBE7C;  --t-awareness-ink:#16210B;
+  --t-other:#9A8FA8;      --t-other-ink:#1B1622;
 
   --q1:#8E63BD; --q2:#A87FD1; --q3:#E06694; --q4:#D9A32E;
   --now-bg:#3D2E08; --now-ink:#FFD97A; --now-line:#F0736F;
@@ -135,6 +138,8 @@ body{
 h1,h2,h3,h4,p,ul,ol,figure,table{margin:0}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
+/* say this once, loudly: a display: rule on a class must not beat [hidden] */
+[hidden]{display:none!important}
 :focus-visible{outline:2px solid var(--magenta);outline-offset:2px;border-radius:6px}
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .vis-hidden{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0);pointer-events:none}
@@ -188,6 +193,9 @@ button{cursor:pointer}
 .btn.solid{background:var(--brand);border-color:var(--brand);color:#fff}
 .btn.solid:hover{background:var(--brand-deep);border-color:var(--brand-deep)}
 .btn.danger:hover{color:var(--crit);border-color:var(--crit);background:var(--crit-bg)}
+.btn.on{border-color:var(--brand-soft);background:var(--brand-tint);color:var(--ink)}
+.btn svg.btn-ico{margin-right:1px}
+.btn{display:inline-flex;align-items:center;gap:6px}
 
 /* sync */
 .btn.sync{display:inline-flex;align-items:center;gap:7px}
@@ -221,6 +229,11 @@ button{cursor:pointer}
 .menu button:hover{background:var(--surface-2)}
 .menu button b{font-size:13px;font-weight:600}
 .menu button span{font-size:11.5px;color:var(--ink-3)}
+.menu-note{font-size:11.5px;color:var(--ink-3);padding:7px 11px 8px;border-bottom:1px solid var(--line);margin-bottom:3px}
+.menu-sep{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);
+  padding:9px 11px 4px;border-top:1px solid var(--line);margin-top:3px}
+.btn-ico{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linejoin:round;flex:none}
+.caret{color:var(--ink-3);font-size:10px}
 
 /* ── dialogs ────────────────────────────────────────────────────────
    One shell for everything that opens: a title, an X, a scrolling body
@@ -237,8 +250,12 @@ button{cursor:pointer}
   display:grid;place-items:center;color:var(--ink-3);transition:color .15s,border-color .15s,background .15s}
 .modal-x:hover{color:var(--crit);border-color:var(--crit);background:var(--crit-bg)}
 .modal-x svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
-.modal-bd{padding:18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
-.modal-ft{display:flex;gap:9px;align-items:center;flex-wrap:wrap;padding:14px 20px;
+/* a <form> sits between the shell and its parts, so it has to carry the
+   column too — otherwise the footer is pushed off a short screen */
+.modal > form{display:flex;flex-direction:column;min-height:0;flex:1 1 auto}
+.modal-bd{padding:18px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;
+  flex:1 1 auto;min-height:0}
+.modal-ft{display:flex;gap:9px;align-items:center;flex-wrap:wrap;padding:14px 20px;flex:none;
   border-top:1px solid var(--line);background:var(--surface-2)}
 .modal-ft .spacer{margin-left:auto}
 .modal textarea{width:100%;height:180px;font-family:var(--mono);font-size:11px;line-height:1.45;
@@ -261,6 +278,30 @@ button{cursor:pointer}
   background:var(--surface);width:100%;font-family:'Cairo',system-ui,sans-serif}
 .f input:focus,.f select:focus{border-color:var(--brand);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 15%,transparent)}
 .f .hint{font-size:11.5px;color:var(--ink-3)}
+.f .opt{font-size:9.5px;font-weight:600;letter-spacing:.06em;color:var(--ink-3);opacity:.8;text-transform:none}
+.f textarea.ta{height:auto;border:1px solid var(--line-strong);border-radius:9px;padding:9px 11px;font-size:13.5px;
+  background:var(--surface);width:100%;font-family:'Cairo',system-ui,sans-serif;color:var(--ink);
+  resize:vertical;min-height:56px;line-height:1.5}
+.f textarea.ta:focus{border-color:var(--brand);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 15%,transparent)}
+.f input[type=time]{border:1px solid var(--line-strong);border-radius:9px;padding:9px 11px;font-size:13.5px;
+  background:var(--surface);width:100%;font-family:'Cairo',system-ui,sans-serif}
+
+/* who an email goes to — the same control on a reminder and on an activity */
+.who-box[hidden],.tiles[hidden],.fstack[hidden],.dseg[hidden]{display:none}
+.who-box{border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:var(--surface-2);
+  display:flex;flex-direction:column;gap:9px}
+.who-box > .cap{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.who-row{display:flex;flex-wrap:wrap;gap:8px}
+.who-pick{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);cursor:pointer;
+  border:1px solid var(--line);border-radius:999px;padding:7px 13px 7px 10px;background:var(--surface);
+  transition:border-color .15s,background .15s}
+.who-pick:hover{border-color:var(--line-strong)}
+.who-pick:has(input:checked){border-color:var(--brand-soft);background:var(--brand-tint);color:var(--ink)}
+.who-pick input{width:15px;height:15px;flex:none;accent-color:var(--brand);cursor:pointer}
+.who-pick small{color:var(--ink-3);font-size:11px}
+.who-box input[type=text]{border:1px solid var(--line-strong);border-radius:9px;padding:8px 11px;font-size:13px;
+  background:var(--surface);width:100%;font-family:'Cairo',system-ui,sans-serif}
+.who-box .hint{font-size:11.5px;color:var(--ink-3)}
 .f-check{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--ink-2);cursor:pointer;
   border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--surface-2);transition:border-color .15s}
 .f-check:hover{border-color:var(--line-strong)}
@@ -399,12 +440,16 @@ main{max-width:var(--page);margin:0 auto;padding:24px 28px 80px}
 .legend .item{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-2)}
 
 /* ── calendar ───────────────────────────────────────────────────────── */
-.cal-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:15px 20px 0}
-.cal-nav{display:flex;align-items:center;gap:6px}
+.cal-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:15px 20px 0}
+.cal-nav{display:flex;align-items:center;gap:5px}
 .cal-nav .ico{width:32px;height:32px}
-.cal-title{font-size:20px;font-weight:700;letter-spacing:-.015em;min-width:190px}
+.cal-nav .btn{padding:6px 13px;font-size:12.5px}
+.cal-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
+.cal-title{font-size:20px;font-weight:700;letter-spacing:-.015em;min-width:180px}
 .cal-title small{display:block;font-size:11px;font-weight:600;color:var(--ink-3);letter-spacing:.05em;text-transform:uppercase}
-.cal-modes{display:flex;gap:3px;background:var(--surface-3);border-radius:999px;padding:3px;margin-left:auto}
+.fcount{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 5px;border-radius:999px;
+  background:var(--brand);color:#fff;font-size:10.5px;font-weight:700;margin-left:2px}
+.cal-modes{display:flex;gap:3px;background:var(--surface-3);border-radius:999px;padding:3px}
 .cal-modes button{border:0;background:transparent;color:var(--ink-2);font-size:12px;font-weight:600;
   padding:6px 14px;border-radius:999px}
 .cal-modes button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--sh-1)}
@@ -443,11 +488,12 @@ main{max-width:var(--page);margin:0 auto;padding:24px 28px 80px}
 .chip:hover{transform:translateY(-1px)}
 .chip.due{background:var(--c);color:var(--ci);box-shadow:none;font-weight:700}
 .chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.chip .at{font-style:normal;font-weight:700;opacity:.85;font-family:var(--mono);font-size:9.5px}
 .chip-more{font-size:10px;font-weight:700;color:var(--ink-3);padding-left:4px}
 .chip.rem-chip{background:var(--surface-3);color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line-strong);
   font-weight:600;cursor:default}
-.ongoing{display:flex;gap:3px;align-items:center;margin-top:auto;padding-top:5px}
-.ongoing i{height:3px;border-radius:2px;flex:1 1 0;min-width:2px;opacity:.85}
+.ongoing{display:flex;gap:4px;align-items:center;margin-top:auto;padding-top:6px}
+.ongoing i{height:5px;width:5px;border-radius:50%;flex:none;opacity:.75}
 .ongoing b{font-size:9px;font-weight:700;color:var(--ink-3);flex:none}
 .day.out .ongoing{opacity:.4}
 
@@ -513,6 +559,7 @@ main{max-width:var(--page);margin:0 auto;padding:24px 28px 80px}
   padding:6px 9px;font-size:12.5px;min-width:132px}
 .filterbar input[type=search]{flex:1;min-width:180px}
 .filterbar .btn{padding:6px 12px;font-size:12px}
+.filterbar[hidden]{display:none}
 
 /* ── lists / tables ─────────────────────────────────────────────────── */
 .tbl-wrap{overflow-x:auto}
@@ -567,6 +614,33 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13px}
 .bar-fill{height:100%;border-radius:4px;min-width:3px}
 .mix{display:flex;height:24px;border-radius:7px;overflow:hidden;gap:2px;background:var(--surface-3)}
 .mix>div{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;min-width:2px}
+
+/* ── work plan: the board above the table ───────────────────────────── */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.tile{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;
+  border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:var(--surface-2);
+  transition:border-color .15s,background .15s,transform .12s}
+.tile:hover{border-color:var(--brand-soft);background:var(--surface);transform:translateY(-1px)}
+.tile[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-tint)}
+.tile b{font-size:26px;font-weight:700;line-height:1.05;letter-spacing:-.02em;font-family:var(--mono)}
+.tile span{font-size:11.5px;color:var(--ink-3);display:flex;align-items:center;gap:6px}
+.tile i{width:7px;height:7px;border-radius:50%;flex:none}
+.tile.crit b{color:var(--crit)}
+.gaps{display:flex;flex-direction:column;max-height:290px;overflow-y:auto}
+.gap{display:flex;align-items:flex-start;gap:11px;padding:11px 20px;border-top:1px solid var(--line);
+  width:100%;text-align:left;background:transparent;border-left:0;border-right:0;border-bottom:0}
+.gap:hover{background:var(--surface-2)}
+.gap:first-child{border-top:0}
+.gap .why{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--crit);
+  background:var(--crit-bg);border-radius:5px;padding:3px 7px;flex:none;margin-top:1px}
+.gap .why.mild{color:var(--warn);background:var(--warn-bg)}
+.gap .who{min-width:0}
+.gap .who b{display:block;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gap .who span{font-size:11.5px;color:var(--ink-3)}
+.gaps .none{padding:22px 20px;font-size:12.5px;color:var(--ink-3);text-align:center}
+.fb-gap{flex:1}
+ol.howto{margin:0;padding-left:19px;font-size:12.5px;color:var(--ink-2)}
+ol.howto li{margin-top:4px}
 
 /* ── work plan editing ──────────────────────────────────────────────── */
 .controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center}
@@ -696,16 +770,19 @@ footer.foot p{max-width:78ch}
     </nav>
 
     <div class="bar-actions">
-      <span class="src" id="srcChip"><span class="dot"></span><b id="srcName">—</b> · <span id="srcCount">0</span></span>
       <button class="btn sync" id="btnSync" title="Sync with the Google Sheet">
         <span class="sdot" id="syncDot"></span><span id="syncLabel">Sync</span></button>
       <button class="ico" id="btnSyncCfg" title="Sync settings" aria-label="Sync settings">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H1a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 2.6 7a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H7a1.7 1.7 0 0 0 1-1.5V1a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V7a1.7 1.7 0 0 0 1.5 1H23a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" transform="translate(0.5 0.5) scale(0.92)"/></svg></button>
       <input type="file" id="fileIn" accept=".xlsx" hidden>
-      <button class="btn" id="btnImport">Load workbook</button>
       <div class="menu-wrap">
-        <button class="btn" id="btnExport" aria-haspopup="true" aria-expanded="false">Export ▾</button>
-        <div class="menu" id="exportMenu" hidden>
+        <button class="btn" id="btnFile" aria-haspopup="true" aria-expanded="false">
+          <svg viewBox="0 0 24 24" class="btn-ico" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4h4l2 2.5h7A1.5 1.5 0 0 1 20 8v10a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18z"/></svg>
+          File <span class="caret">▾</span></button>
+        <div class="menu" id="fileMenu" hidden>
+          <div class="menu-note" id="fileNote">—</div>
+          <button data-x="import"><b>Load a workbook</b><span>Read a .xlsx from this computer</span></button>
+          <div class="menu-sep">Save a copy</div>
           <button data-x="xlsx"><b>Excel workbook</b><span>.xlsx — the Work Plan, dates as dates</span></button>
           <button data-x="ics"><b>Calendar file</b><span>.ics — import into Outlook or Google Calendar</span></button>
           <button data-x="csv"><b>Spreadsheet</b><span>.csv — plain text, opens anywhere</span></button>
@@ -777,27 +854,33 @@ footer.foot p{max-width:78ch}
   <section class="view stack" id="view-calendar" role="tabpanel" aria-labelledby="tab-calendar" hidden>
     <div class="card">
       <div class="cal-bar">
+        <div class="cal-title" id="calTitle">—<small id="calSubtitle">—</small></div>
         <div class="cal-nav no-print">
           <button class="ico" id="calPrev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-          <button class="ico" id="calNext" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
           <button class="btn" id="calToday">Today</button>
-          <button class="btn solid" id="btnAdHoc">+ Add</button>
+          <button class="ico" id="calNext" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
         </div>
-        <div class="cal-title" id="calTitle">—<small id="calSubtitle">—</small></div>
-        <div class="cal-modes no-print" role="tablist" aria-label="Calendar mode">
-          <button role="tab" id="mode-month" aria-selected="true">Month</button>
-          <button role="tab" id="mode-year" aria-selected="false">Year</button>
-          <button role="tab" id="mode-timeline" aria-selected="false">Timeline</button>
+        <div class="cal-right no-print">
+          <div class="cal-modes" role="tablist" aria-label="Calendar mode">
+            <button role="tab" id="mode-month" aria-selected="true">Month</button>
+            <button role="tab" id="mode-year" aria-selected="false">Year</button>
+            <button role="tab" id="mode-timeline" aria-selected="false">Timeline</button>
+          </div>
+          <button class="btn" id="btnFilters" aria-expanded="false" aria-controls="calFilters">
+            <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+            Filter<span class="fcount" id="fCount" hidden>0</span></button>
+          <button class="btn solid" id="btnAdHoc">
+            <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Add</button>
         </div>
       </div>
       <div class="card-bd stack">
-        <div class="filterbar no-print">
-          <svg class="fb-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
+        <div class="filterbar no-print" id="calFilters" hidden>
           <select id="fType" aria-label="Filter by type"></select>
           <select id="fStatus" aria-label="Filter by status"></select>
           <select id="fDept" aria-label="Filter by department"></select>
           <input type="search" id="fSearch" placeholder="Search activity, ID or note" aria-label="Search">
-          <button class="btn" id="fReset">Reset</button>
+          <button class="btn" id="fReset">Clear</button>
         </div>
         <div id="calBody"></div>
         <div class="legend" id="calLegend"></div>
@@ -807,28 +890,50 @@ footer.foot p{max-width:78ch}
 
   <!-- ══ WORK PLAN ══ -->
   <section class="view stack" id="view-plan" role="tabpanel" aria-labelledby="tab-plan" hidden>
-    <div class="note">
-      <b>How to use this sheet</b>
-      <ol>
-        <li>Enter a brief description of the activity in <em>Activity / Deliverable</em>.</li>
-        <li>Categorise it correctly using the <em>Type</em> list so it is reflected in the Calendar. Other entries are optional.</li>
-        <li>If you have an unlisted category, revert to Yosef to amend CF.</li>
-      </ol>
+    <div class="card">
+      <div class="card-hd"><h2>The plan at a glance</h2>
+        <span class="hint">Click any figure to filter the table below</span></div>
+      <div class="card-bd"><div class="tiles" id="wpTiles"></div></div>
     </div>
+
+    <div class="grid-main">
+      <div class="card">
+        <div class="card-hd"><h2>Worth a second look</h2>
+          <span class="hint" id="gapCount">—</span></div>
+        <div class="gaps" id="wpGaps"></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><h2>Not yet in the sheet</h2><span class="hint" id="pendCount">—</span></div>
+        <div class="gaps" id="wpPending"></div>
+      </div>
+    </div>
+
     <details class="ref" id="wpFold" open>
-      <summary>Work Plan <span class="hint" style="font-weight:400">click any cell to edit · changes stay in this browser until you sync</span></summary>
+      <summary>Every activity <span class="hint" style="font-weight:400">click any cell to edit · changes stay in this browser until you sync</span></summary>
       <div class="stack">
         <div class="filterbar no-print">
-          <svg class="fb-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
           <select id="wType" aria-label="Filter by type"></select>
           <select id="wStatus" aria-label="Filter by status"></select>
           <input type="search" id="wSearch" placeholder="Search activity, ID or note" aria-label="Search">
           <button class="btn" id="btnCols">Show all columns</button>
-          <button class="btn solid" id="btnAdd">Add activity</button>
-          <button class="btn" id="btnCsv">CSV</button>
+          <span class="fb-gap"></span>
+          <button class="btn solid" id="btnAdd">
+            <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Add activity</button>
           <button class="btn danger" id="btnReset">Restore workbook data</button>
         </div>
         <div class="tbl-wrap"><table class="tbl" id="wpTbl"></table></div>
+      </div>
+    </details>
+
+    <details class="ref">
+      <summary>How to use this sheet</summary>
+      <div>
+        <ol class="howto">
+          <li>Enter a brief description of the activity in <em>Activity / Deliverable</em>.</li>
+          <li>Categorise it correctly using the <em>Type</em> list so it is reflected in the Calendar. Other entries are optional.</li>
+          <li>If you have an unlisted category, revert to Yosef to amend CF.</li>
+        </ol>
       </div>
     </details>
     <details class="ref">
@@ -898,12 +1003,8 @@ footer.foot p{max-width:78ch}
       </div>
       <div class="fsec fstack">
         <label class="f-check"><input type="checkbox" id="remAlways"> Always show it, even when it is not due soon</label>
-        <label class="f-check"><input type="checkbox" id="remEmail"> Email it to me</label>
-        <div class="f" id="remAddrWrap" hidden>
-          <label for="remAddr">Send to</label>
-          <input id="remAddr" type="text" placeholder="name@masdr.com, other@masdr.com">
-          <span class="hint">Several addresses? Separate them with commas.</span>
-        </div>
+        <label class="f-check"><input type="checkbox" id="remEmail"> Email it as well</label>
+        <div id="remWho" hidden></div>
       </div>
     </div>
     <div class="modal-ft">
@@ -925,10 +1026,18 @@ footer.foot p{max-width:78ch}
         <label for="ahText">What is it</label>
         <input id="ahText" type="text" maxlength="140" placeholder="e.g. Respond to GOSI query" required>
       </div>
+      <div class="f full">
+        <label for="ahNotes">Description <span class="opt">optional</span></label>
+        <textarea id="ahNotes" class="ta" rows="2" maxlength="600"
+                  placeholder="Anything the person doing it needs to know"></textarea>
+      </div>
       <div class="fgrid">
         <div class="f"><label for="ahType">Type</label><select id="ahType"></select></div>
         <div class="f"><label for="ahDept">Department</label><select id="ahDept"></select></div>
+        <div class="f"><label for="ahOwner">Owner <span class="opt">optional</span></label><select id="ahOwner"></select></div>
+        <div class="f"><label for="ahStatus">Status</label><select id="ahStatus"></select></div>
       </div>
+
       <div class="fsec">
         <div class="f">
           <label>When</label>
@@ -943,6 +1052,29 @@ footer.foot p{max-width:78ch}
           <div class="f" id="ahEndWrap" hidden><label for="ahEnd">Ends</label>
             <input id="ahEnd" type="date"></div>
         </div>
+        <label class="f-check" style="margin-top:12px"><input type="checkbox" id="ahTimed"> Give it a time — otherwise it runs all day</label>
+        <div class="fgrid" id="ahTimeWrap" hidden style="margin-top:10px">
+          <div class="f"><label for="ahT1">From</label><input id="ahT1" type="time" value="09:00"></div>
+          <div class="f"><label for="ahT2">To</label><input id="ahT2" type="time" value="10:00"></div>
+        </div>
+      </div>
+
+      <div class="fsec">
+        <div class="f">
+          <label for="ahLead">Email an alert</label>
+          <select id="ahLead">
+            <option value="">No alert</option>
+            <option value="0">On the day</option>
+            <option value="1">1 day before</option>
+            <option value="2">2 days before</option>
+            <option value="3">3 days before</option>
+            <option value="7">1 week before</option>
+            <option value="14">2 weeks before</option>
+            <option value="30">1 month before</option>
+          </select>
+          <span class="hint">Counted back from the due date. The sheet sends it each morning.</span>
+        </div>
+        <div id="ahWho" hidden style="margin-top:12px"></div>
       </div>
     </div>
     <div class="modal-ft">
@@ -1006,13 +1138,13 @@ footer.foot p{max-width:78ch}
 
 <script>
 "use strict";
-const SEED = {"activities":[{"id":"GOSI-Q1","activity":"Quarterly compliance report to GOSI — Q3 2026","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2026-10-01","end":"2026-10-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Jul–Sep 2026"},{"id":"GOSI-Q2","activity":"Quarterly compliance report to GOSI — Q4 2026","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-01-01","end":"2027-01-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Oct–Dec 2026"},{"id":"GOSI-Q3","activity":"Quarterly compliance report to GOSI — Q1 2027","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-04-01","end":"2027-04-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Jan–Mar 2027"},{"id":"GOSI-Q4","activity":"Quarterly compliance report to GOSI — Q2 2027","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-07-01","end":"2027-07-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Apr–Jun 2027"},{"id":"GOSI-A1","activity":"Annual compliance report to GOSI — FY2026","type":"Annual Reporting","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2027-01-01","end":"2027-03-31","duration":90,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers FY2026"},{"id":"ASMT-01","activity":"Department assessment — Finance (2026 Q3)","type":"BU Assessment","owner":"","department":"Finance","frequency":"One-off","start":"2026-07-01","end":"2026-09-30","duration":92,"status":"In Progress","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-02","activity":"Department assessment — Mudad (2026 Q4)","type":"BU Assessment","owner":"","department":"Mudad","frequency":"One-off","start":"2026-10-01","end":"2026-12-31","duration":92,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-03","activity":"Department assessment — Product Management (2027 Q1)","type":"BU Assessment","owner":"","department":"Product Management","frequency":"One-off","start":"2027-01-01","end":"2027-03-31","duration":90,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-04","activity":"Department assessment — Tech & Digital Enablement (2027 Q2–Q3)","type":"BU Assessment","owner":"","department":"Tech & Digital Enablement","frequency":"One-off","start":"2027-04-01","end":"2027-09-30","duration":183,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-05","activity":"Department assessment — Delivery (2027 Q4)","type":"BU Assessment","owner":"","department":"Delivery","frequency":"One-off","start":"2027-10-01","end":"2027-12-31","duration":92,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-06","activity":"Department assessment — Commercial (2028 Q1)","type":"BU Assessment","owner":"","department":"Commercial","frequency":"One-off","start":"2028-01-01","end":"2028-03-31","duration":91,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-07","activity":"Department assessment — P&C (2028 Q2–Q3)","type":"BU Assessment","owner":"","department":"P&C","frequency":"One-off","start":"2028-04-01","end":"2028-09-30","duration":183,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-08","activity":"Compliance report — close of assessment cycle (2028 Q4)","type":"Annual Reporting","owner":"","department":"Legal & GRC","frequency":"One-off","start":"2028-10-01","end":"2028-12-31","duration":92,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Closing report for the 10-quarter cycle. Cycle restarts on completion, re-sequenced by risk rating and prior findings."},{"id":"PC-01","activity":"Follow-up on P&C correction plans","type":"Monitoring","owner":"","department":"P&C","frequency":"One-off","start":"2026-08-01","end":"2026-10-31","duration":92,"status":"In Progress","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Open follow-up on correction plans agreed with P&C; remains open until 31-Oct-2026."},{"id":"TRN-01","activity":"Annual compliance training session — 2026","type":"Training","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2026-12-01","end":"2026-12-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"One session per year, held in Q4."},{"id":"TRN-02","activity":"Annual compliance training session — 2027","type":"Training","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2027-12-01","end":"2027-12-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"One session per year, held in Q4."},{"id":"TRN-03","activity":"Annual compliance training session — 2028","type":"Training","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2028-12-01","end":"2028-12-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"One session per year, held in Q4."},{"id":"AWA-02","activity":"Awareness communication — 2027 Q1","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-03-01","end":"2027-03-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-03","activity":"Awareness communication — 2027 Q2","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-06-01","end":"2027-06-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-04","activity":"Awareness communication — 2027 Q3","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-09-01","end":"2027-09-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-05","activity":"Awareness communication — 2028 Q1","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2028-03-01","end":"2028-03-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-06","activity":"Awareness communication — 2028 Q2","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2028-06-01","end":"2028-06-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-07","activity":"Awareness communication — 2028 Q3","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2028-09-01","end":"2028-09-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""}],"lists":{"Activity Type":["Quarterly Reporting","Annual Reporting","BU Assessment","Audit","Regulatory Filing","Training","Governance","Monitoring","Awareness"],"Status":["Not Started","In Progress","Complete","Deferred"],"Frequency":["One-off","Monthly","Quarterly","Semi-Annual","Annual"],"Approval Status":["Pending","Approved","Rejected","N/A"],"Department":["Finance","Legal & GRC","P&C","Internal Audit","Tech & Digital Enablement","Delivery","Product Management","Board Secretariat","Strategy","Commercial","Mudad"],"Owner":["CFO","Financial Controller","Tax Manager","Compliance Officer","Head of Compliance","Risk Manager","Head of Internal Audit","Company Secretary","Legal Counsel","HR Director","Payroll Officer","Facilities Manager"],"Reviewer / Approver":["Board","Audit Committee","Chairman","CFO","Head of Compliance","Legal Counsel","HR Director","Head of Internal Audit","CIO"],"Type Filter":["All","Quarterly Reporting","Annual Reporting","BU Assessment","Audit","Regulatory Filing","Training","Governance","Monitoring","Awareness"],"Status Filter":["All","Not Started","In Progress","Complete","Deferred"],"Quarters":["2026 Q3","2026 Q4","2027 Q1","2027 Q2","2027 Q3","2027 Q4","2028 Q1","2028 Q2","2028 Q3","2028 Q4"]},"source":"Compliance_Calendar.xlsx","synced":"2026-08-17","dirty":false};
+const SEED = {"activities":[{"id":"GOSI-Q1","activity":"Quarterly compliance report to GOSI — Q3 2026","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2026-10-01","end":"2026-10-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Jul–Sep 2026"},{"id":"GOSI-Q2","activity":"Quarterly compliance report to GOSI — Q4 2026","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-01-01","end":"2027-01-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Oct–Dec 2026"},{"id":"GOSI-Q3","activity":"Quarterly compliance report to GOSI — Q1 2027","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-04-01","end":"2027-04-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Jan–Mar 2027"},{"id":"GOSI-Q4","activity":"Quarterly compliance report to GOSI — Q2 2027","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-07-01","end":"2027-07-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Apr–Jun 2027"},{"id":"GOSI-A1","activity":"Annual compliance report to GOSI — FY2026","type":"Annual Reporting","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2027-01-01","end":"2027-03-31","duration":90,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers FY2026"},{"id":"ASMT-01","activity":"Department assessment — Finance (2026 Q3)","type":"BU Assessment","owner":"","department":"Finance","frequency":"One-off","start":"2026-07-01","end":"2026-09-30","duration":92,"status":"In Progress","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-02","activity":"Department assessment — Mudad (2026 Q4)","type":"BU Assessment","owner":"","department":"Mudad","frequency":"One-off","start":"2026-10-01","end":"2026-12-31","duration":92,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-03","activity":"Department assessment — Product Management (2027 Q1)","type":"BU Assessment","owner":"","department":"Product Management","frequency":"One-off","start":"2027-01-01","end":"2027-03-31","duration":90,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-04","activity":"Department assessment — Tech & Digital Enablement (2027 Q2–Q3)","type":"BU Assessment","owner":"","department":"Tech & Digital Enablement","frequency":"One-off","start":"2027-04-01","end":"2027-09-30","duration":183,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-05","activity":"Department assessment — Delivery (2027 Q4)","type":"BU Assessment","owner":"","department":"Delivery","frequency":"One-off","start":"2027-10-01","end":"2027-12-31","duration":92,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-06","activity":"Department assessment — Commercial (2028 Q1)","type":"BU Assessment","owner":"","department":"Commercial","frequency":"One-off","start":"2028-01-01","end":"2028-03-31","duration":91,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-07","activity":"Department assessment — P&C (2028 Q2–Q3)","type":"BU Assessment","owner":"","department":"P&C","frequency":"One-off","start":"2028-04-01","end":"2028-09-30","duration":183,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-08","activity":"Compliance report — close of assessment cycle (2028 Q4)","type":"Annual Reporting","owner":"","department":"Legal & GRC","frequency":"One-off","start":"2028-10-01","end":"2028-12-31","duration":92,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Closing report for the 10-quarter cycle. Cycle restarts on completion, re-sequenced by risk rating and prior findings."},{"id":"PC-01","activity":"Follow-up on P&C correction plans","type":"Monitoring","owner":"","department":"P&C","frequency":"One-off","start":"2026-08-01","end":"2026-10-31","duration":92,"status":"In Progress","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Open follow-up on correction plans agreed with P&C; remains open until 31-Oct-2026."},{"id":"TRN-01","activity":"Annual compliance training session — 2026","type":"Training","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2026-12-01","end":"2026-12-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"One session per year, held in Q4."},{"id":"TRN-02","activity":"Annual compliance training session — 2027","type":"Training","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2027-12-01","end":"2027-12-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"One session per year, held in Q4."},{"id":"TRN-03","activity":"Annual compliance training session — 2028","type":"Training","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2028-12-01","end":"2028-12-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"One session per year, held in Q4."},{"id":"AWA-02","activity":"Awareness communication — 2027 Q1","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-03-01","end":"2027-03-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-03","activity":"Awareness communication — 2027 Q2","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-06-01","end":"2027-06-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-04","activity":"Awareness communication — 2027 Q3","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-09-01","end":"2027-09-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-05","activity":"Awareness communication — 2028 Q1","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2028-03-01","end":"2028-03-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-06","activity":"Awareness communication — 2028 Q2","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2028-06-01","end":"2028-06-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-07","activity":"Awareness communication — 2028 Q3","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2028-09-01","end":"2028-09-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""}],"lists":{"Activity Type":["Quarterly Reporting","Annual Reporting","BU Assessment","Audit","Regulatory Filing","Training","Governance","Monitoring","Awareness"],"Status":["Not Started","In Progress","Complete","Deferred"],"Frequency":["One-off","Monthly","Quarterly","Semi-Annual","Annual"],"Approval Status":["Pending","Approved","Rejected","N/A"],"Department":["Finance","Legal & GRC","P&C","Internal Audit","Tech & Digital Enablement","Delivery","Product Management","Board Secretariat","Strategy","Commercial","Mudad"],"Owner":["CFO","Financial Controller","Tax Manager","Compliance Officer","Head of Compliance","Risk Manager","Head of Internal Audit","Company Secretary","Legal Counsel","HR Director","Payroll Officer","Facilities Manager"],"Reviewer / Approver":["Board","Audit Committee","Chairman","CFO","Head of Compliance","Legal Counsel","HR Director","Head of Internal Audit","CIO"],"Type Filter":["All","Quarterly Reporting","Annual Reporting","BU Assessment","Audit","Regulatory Filing","Training","Governance","Monitoring","Awareness"],"Status Filter":["All","Not Started","In Progress","Complete","Deferred"],"Quarters":["2026 Q3","2026 Q4","2027 Q1","2027 Q2","2027 Q3","2027 Q4","2028 Q1","2028 Q2","2028 Q3","2028 Q4"]},"source":"Compliance_Calendar.xlsx","synced":"2026-08-18","dirty":false};
 
 /* ══ constants ══════════════════════════════════════════════════════ */
 const TYPE_VAR = {
   "Quarterly Reporting":"quarterly","Annual Reporting":"annual","BU Assessment":"assessment",
   "Audit":"audit","Regulatory Filing":"filing","Training":"training",
-  "Governance":"governance","Monitoring":"monitoring","Awareness":"awareness"
+  "Governance":"governance","Monitoring":"monitoring","Awareness":"awareness","Other":"other"
 };
 const STATUS_CLASS = {"Not Started":"st-not","In Progress":"st-prog","Complete":"st-done","Deferred":"st-def"};
 const STATUS_COLOR = {"Not Started":"var(--idle)","In Progress":"var(--warn)","Complete":"var(--ok)","Deferred":"var(--line-strong)"};
@@ -1026,8 +1158,20 @@ const COLS = [
   {k:"start",h:"Start Date",t:"date"},{k:"end",h:"End / Due Date",t:"date"},
   {k:"duration",h:"Duration (days)",t:"calc"},{k:"status",h:"Status",list:"Status"},
   {k:"progress",h:"Progress %",t:"pct"},{k:"reviewer",h:"Reviewer / Approver",list:"Reviewer / Approver"},
-  {k:"approval",h:"Approval Status",list:"Approval Status"},{k:"notes",h:"Notes"}
+  {k:"approval",h:"Approval Status",list:"Approval Status"},{k:"notes",h:"Notes"},
+  /* optional, calendar-like extras — blank on everything that came from the workbook */
+  {k:"startTime",h:"Start Time",t:"time"},{k:"endTime",h:"End Time",t:"time"},
+  {k:"alertLead",h:"Alert (days before)"},{k:"alertTo",h:"Alert Email"}
 ];
+
+/* People an email can go to without typing an address. Add a line to extend it. */
+const PEOPLE = [
+  {key:"y", name:"Yosef",   addr:"yalturaifi@masdr.sa"},
+  {key:"m", name:"Meshari", addr:"mbaselem@masdr.sa"}
+];
+/* How long before the due date an alert goes out. "" means no alert. */
+const LEADS = {"0":"on the day","1":"1 day before","2":"2 days before","3":"3 days before",
+  "7":"1 week before","14":"2 weeks before","30":"1 month before"};
 const STORE = "masdr.compliance.v3";
 const MAX_LANES = 4;
 const CORE_COLS = ["activity","type","start","end"];      /* what the Work Plan shows until you ask for more */
@@ -1035,7 +1179,7 @@ const CORE_COLS = ["activity","type","start","end"];      /* what the Work Plan 
 /* ══ state ══════════════════════════════════════════════════════════ */
 let state = load();
 let filters = {type:"All",status:"All",dept:"All",q:""};
-let wpFilters = {type:"All",status:"All",q:""};
+let wpFilters = {type:"All",status:"All",q:"",view:""};
 let wpAll = (function(){ try{ return localStorage.getItem(STORE+".wpall")==="1"; }catch(e){ return false; } })();
 function shownCols(){ return wpAll ? COLS : COLS.filter(c=>CORE_COLS.indexOf(c.k)>=0); }
 let calMode = "month";
@@ -1049,7 +1193,7 @@ function load(){
       if(!Array.isArray(s.tombstones)) s.tombstones=[];
       return s; } }
   }catch(e){}
-  const s = clone(SEED); s.tombstones = []; return s;
+  const s = clone(SEED); s.tombstones = []; s.baseline = new Date().toISOString(); return s;
 }
 function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){} }
 /* Every edit stamps the row. That stamp is what lets two people sync the
@@ -1163,7 +1307,12 @@ function sameDay(a,b){ return a && b && a.getTime()===b.getTime(); }
 
 /* ══ derived ════════════════════════════════════════════════════════ */
 function acts(){ return state.activities; }
-function listOf(n){ return (state.lists && state.lists[n]) || []; }
+function listOf(n){
+  const v=(state.lists && state.lists[n]) || [];
+  /* "Other" is always available for work that fits none of the sheet's categories */
+  if(n==="Activity Type" && v.indexOf("Other")<0) return v.concat(["Other"]);
+  return v;
+}
 function byId(id){ return acts().find(a=>a.id===id); }
 function span(){
   const all = acts().flatMap(a=>[d(a.start),d(a.end)]).filter(Boolean);
@@ -1414,8 +1563,9 @@ function renderMonth(){
         (ev.length?'<div class="dev">'+shown.map(e=>
           '<button class="chip '+e.kind+'" data-open="'+esc(e.a.id)+'" style="--c:'+typeColor(e.a.type)+
             ';--ci:'+typeInk(e.a.type)+'" data-tip="<b>'+esc(e.a.id)+'</b> '+esc(e.a.activity)+'<br>'+
-            (e.kind==="due"?"Due ":"Starts ")+fmt(day)+'">'+
-            (e.kind==="due"?"◆":"▸")+'<span>'+esc(e.a.activity)+'</span></button>').join("")+
+            (e.kind==="due"?"Due ":"Starts ")+fmt(day)+(e.a.startTime?" · "+esc(e.a.startTime):"")+'">'+
+            (e.kind==="due"?"◆":"▸")+'<span>'+(e.a.startTime?'<em class="at">'+esc(e.a.startTime)+'</em> ':"")+
+            esc(e.a.activity)+'</span></button>').join("")+
           (extra>0?'<span class="chip-more">+'+extra+' more</span>':"")+'</div>':"")+
         (rem.length?'<div class="dev">'+rem.map(r=>'<span class="chip rem-chip" data-tip="'+
           esc("Reminder — "+r.text)+'">🔔<span>'+esc(r.text)+'</span></span>').join("")+'</div>':"")+
@@ -1549,16 +1699,24 @@ function nextAdHocId(){
 }
 function openAdHoc(onDate){
   const day = onDate || cursorDayForAdd();
-  $("ahText").value="";
+  $("ahText").value=""; $("ahNotes").value="";
   fillSel($("ahType"), listOf("Activity Type"), "Monitoring");
   fillSel($("ahDept"), listOf("Department"), "Legal & GRC");
+  fillSel($("ahOwner"), [""].concat(listOf("Owner")), "");
+  fillSel($("ahStatus"), listOf("Status"), "Not Started");
   $("ahStart").value=iso(day); $("ahEnd").value=iso(day);
   setAhSpan(false);
+  $("ahTimed").checked=false; $("ahTimeWrap").hidden=true;
+  $("ahT1").value="09:00"; $("ahT2").value="10:00";
+  $("ahLead").value=""; $("ahWho").hidden=true; whoFill("ahWho", remEmailAddr());
   $("adHocModal").hidden=false; $("scrim").hidden=false;
   requestAnimationFrame(()=>{ $("scrim").classList.add("on"); $("ahText").focus(); });
 }
+$("ahTimed").addEventListener("change",e=>{ $("ahTimeWrap").hidden=!e.target.checked; });
+$("ahLead").addEventListener("change",e=>{ $("ahWho").hidden=!e.target.value; });
 function fillSel(el, vals, pick){
-  el.innerHTML=vals.map(v=>'<option'+(v===pick?" selected":"")+'>'+esc(v)+'</option>').join("");
+  el.innerHTML=vals.map(v=>'<option value="'+esc(v)+'"'+(v===pick?" selected":"")+'>'+
+    esc(v||"— none —")+'</option>').join("");
 }
 function setAhSpan(on){
   ahSpan=on;
@@ -1591,17 +1749,33 @@ $("ahForm").addEventListener("submit",e=>{
   if(!st){ toast("Pick a date.",true); return; }
   let en = ahSpan ? ($("ahEnd").value||st) : st;
   if(d(en)<d(st)){ toast("The end date is before the start date.",true); return; }
-  const a={id:nextAdHocId(), activity:text, type:$("ahType").value, owner:"",
+  const timed=$("ahTimed").checked;
+  if(timed && $("ahT2").value && $("ahT1").value && st===en && $("ahT2").value < $("ahT1").value){
+    toast("The end time is before the start time.",true); return;
+  }
+  const lead=$("ahLead").value;
+  let alertTo="";
+  if(lead){
+    alertTo=whoRead("ahWho");
+    if(alertTo===null){ toast("That email address does not look right.",true); return; }
+    if(!alertTo){ toast("Pick at least one person for the alert.",true); return; }
+    rememberWho(alertTo);
+  }
+  const a={id:nextAdHocId(), activity:text, type:$("ahType").value, owner:$("ahOwner").value||"",
     department:$("ahDept").value, frequency:"One-off", start:st, end:en, duration:0,
-    status:"Not Started", progress:0, reviewer:"", approval:"Pending",
-    notes:"Added from the calendar", updatedAt:new Date().toISOString()};
+    status:$("ahStatus").value||"Not Started", progress:0, reviewer:"", approval:"Pending",
+    notes:$("ahNotes").value.trim(),
+    startTime: timed?$("ahT1").value:"", endTime: timed?$("ahT2").value:"",
+    alertLead: lead, alertTo: alertTo,
+    updatedAt:new Date().toISOString()};
   a.duration=durationOf(a)||0;
   state.activities.push(a);
   state.dirty=true; save();
   cursor=new Date(Date.UTC(d(st).getUTCFullYear(), d(st).getUTCMonth(), 1));
   closeAdHoc(); renderAll();
-  if($("view-plan").hidden===false){ wpFilters={type:"All",status:"All",q:a.id}; $("wSearch").value=a.id; renderWorkPlan(); }
-  toast(a.id+" added — "+(st===en?fmt(d(st)):fmt(d(st))+" to "+fmt(d(en)))+".");
+  if($("view-plan").hidden===false){ wpFilters={type:"All",status:"All",q:a.id,view:""}; $("wSearch").value=a.id; renderWorkPlan(); }
+  toast(a.id+" added — "+(st===en?fmt(d(st)):fmt(d(st))+" to "+fmt(d(en)))+
+    (a.startTime?" at "+a.startTime:"")+(lead?" · alert "+LEADS[lead]:"")+".");
 });
 
 /* ══ detail drawer ══════════════════════════════════════════════════ */
@@ -1645,7 +1819,7 @@ function openDrawer(id){
     touch(a); state.dirty=true; save(); renderAll(); });
   $("drGoCal").addEventListener("click",()=>{ if(r){ cursor=new Date(Date.UTC(r.s.getUTCFullYear(),r.s.getUTCMonth(),1));
     calMode="month"; showTab("calendar"); renderCalendar(); } closeDrawer(); });
-  $("drGoPlan").addEventListener("click",()=>{ wpFilters={type:"All",status:"All",q:a.id}; $("wSearch").value=a.id;
+  $("drGoPlan").addEventListener("click",()=>{ wpFilters={type:"All",status:"All",q:a.id,view:""}; $("wSearch").value=a.id;
     renderWorkPlan(); showTab("plan"); closeDrawer(); });
   $("drawer").hidden=false; $("scrim").hidden=false;
   requestAnimationFrame(()=>{ $("drawer").classList.add("on"); $("scrim").classList.add("on"); });
@@ -1718,8 +1892,86 @@ function wpRows(){
   return acts().filter(a=>
     (wpFilters.type==="All"||a.type===wpFilters.type)&&
     (wpFilters.status==="All"||a.status===wpFilters.status)&&
+    inView(a, wpFilters.view)&&
     (!q||(a.id+" "+a.activity+" "+(a.notes||"")).toLowerCase().indexOf(q)>=0));
 }
+
+/* ══ the board above the table ══════════════════════════════════════
+   The table answers "what exactly", so this answers "what now": five
+   figures that are also the fastest way to filter it. */
+function isOverdue(a){ const e=d(a.end); return !!e && a.status!=="Complete" && e<today(); }
+function dueThisMonth(a){
+  const e=d(a.end), t=today();
+  return !!e && a.status!=="Complete" &&
+    e.getUTCFullYear()===t.getUTCFullYear() && e.getUTCMonth()===t.getUTCMonth();
+}
+const VIEWS = {
+  overdue: {label:"Overdue",         color:"var(--crit)", crit:true, test:isOverdue},
+  month:   {label:"Due this month",  color:"var(--warn)", test:dueThisMonth},
+  prog:    {label:"In progress",     color:"var(--warn)", test:a=>a.status==="In Progress"},
+  not:     {label:"Not started",     color:"var(--idle)", test:a=>a.status==="Not Started"},
+  done:    {label:"Complete",        color:"var(--ok)",   test:a=>a.status==="Complete"}
+};
+function inView(a, v){ return !v || !VIEWS[v] ? true : VIEWS[v].test(a); }
+
+function renderWpBoard(){
+  const all=acts();
+  $("wpTiles").innerHTML=Object.keys(VIEWS).map(k=>{
+    const v=VIEWS[k], n2=all.filter(v.test).length, on=wpFilters.view===k;
+    return '<button class="tile'+(v.crit&&n2?" crit":"")+'" data-view="'+k+'" aria-pressed="'+(on?"true":"false")+'">'+
+      '<b>'+n2+'</b><span><i style="background:'+v.color+'"></i>'+esc(v.label)+'</span></button>';
+  }).join("");
+
+  /* rows that would trip someone up later */
+  const t=today();
+  const flags=[];
+  all.forEach(a=>{
+    if(!d(a.end))                                    flags.push([a,"No due date",false]);
+    else if(d(a.start)&&d(a.end)<d(a.start))         flags.push([a,"Ends first",false]);
+    else if(isOverdue(a))                            flags.push([a,String(dayDiff(d(a.end),t))+"d late",false]);
+    else if(!a.type)                                 flags.push([a,"No type",true]);
+    else if(a.status==="Complete"&&(+a.progress||0)<1) flags.push([a,"Done at "+Math.round((+a.progress||0)*100)+"%",true]);
+  });
+  $("gapCount").textContent = flags.length ? flags.length+(flags.length===1?" row":" rows") : "nothing to fix";
+  $("wpGaps").innerHTML = flags.length
+    ? flags.slice(0,40).map(f=>'<button class="gap" data-goto="'+esc(f[0].id)+'">'+
+        '<span class="why'+(f[2]?" mild":"")+'">'+esc(f[1])+'</span>'+
+        '<span class="who"><b>'+esc(f[0].activity||"—")+'</b><span>'+esc(f[0].id)+
+          (f[0].type?" · "+esc(f[0].type):"")+'</span></span></button>').join("")
+    : '<div class="none">Every activity has a type, a sensible pair of dates and a matching status.</div>';
+
+  /* what this browser is holding that the sheet has not seen */
+  /* the moment this data arrived — anything stamped later was typed here */
+  const since=state.baseline||state.synced||"";
+  const edited=all.filter(a=>String(a.updatedAt||"")>since);
+  const gone=(state.tombstones||[]).filter(t=>String(t.at||"")>since);
+  const total=edited.length+gone.length;
+  $("pendCount").textContent = total ? total+(total===1?" change":" changes")+" waiting" : "in step with the sheet";
+  $("wpPending").innerHTML = total
+    ? gone.map(t=>'<div class="gap"><span class="why">Removed</span>'+
+          '<span class="who"><b>'+esc(t.id)+'</b><span>'+ago(t.at)+'</span></span></div>').join("")+
+      edited.slice(0,40).map(a=>'<button class="gap" data-goto="'+esc(a.id)+'">'+
+          '<span class="why mild">Edited</span><span class="who"><b>'+esc(a.activity||"—")+'</b>'+
+          '<span>'+esc(a.id)+' · '+ago(a.updatedAt)+'</span></span></button>').join("")
+    : '<div class="none">Everything here has been through a successful sync.</div>';
+}
+$("wpTiles").addEventListener("click",e=>{
+  const b2=e.target.closest("[data-view]"); if(!b2) return;
+  const k=b2.getAttribute("data-view");
+  wpFilters.view = wpFilters.view===k ? "" : k;
+  wpFilters.status="All"; $("wStatus").value="All";
+  const f=$("wpFold"); if(wpFilters.view && f) f.open=true;
+  renderWpBoard(); renderWorkPlan();
+});
+["wpGaps","wpPending"].forEach(host=>$(host).addEventListener("click",e=>{
+  const b2=e.target.closest("[data-goto]"); if(!b2) return;
+  const id=b2.getAttribute("data-goto");
+  wpFilters={type:"All",status:"All",q:id,view:""}; $("wSearch").value=id;
+  const f=$("wpFold"); if(f) f.open=true;
+  renderWpBoard(); renderWorkPlan();
+  const row=document.querySelector('#wpTbl tr[data-id="'+id+'"]');
+  if(row) row.scrollIntoView({block:"center",behavior:"smooth"});
+}));
 function renderWorkPlan(){
   const rows=wpRows();
   const cols=shownCols();
@@ -1911,7 +2163,7 @@ function openRemModal(){
   /* an end a year out, so a reminder stops on its own unless you say otherwise */
   $("remUntil").value = iso(addDays(today(), 365));
   $("remForever").checked=false; $("remUntil").disabled=false;
-  $("remAddrWrap").hidden=true; $("remAddr").value=remEmailAddr();
+  $("remWho").hidden=true; whoFill("remWho", remEmailAddr());
   $("remModal").hidden=false; $("scrim").hidden=false;
   requestAnimationFrame(()=>{ $("scrim").classList.add("on"); $("remText").focus(); });
 }
@@ -1935,13 +2187,53 @@ $("remLink").addEventListener("change",()=>{
   if($("remLink").value && !$("remForever").checked) $("remUntil").value="";
 });
 $("remEmail").addEventListener("change",()=>{
-  const on=$("remEmail").checked;
-  $("remAddrWrap").hidden=!on;
-  if(on){ $("remAddr").value=$("remAddr").value||remEmailAddr(); $("remAddr").focus(); }
+  $("remWho").hidden=!$("remEmail").checked;
 });
 $("btnRemAll").addEventListener("click",()=>{ remShowAll=!remShowAll; renderReminders(); });
 /* One address or several, separated by commas or semicolons. Returns them
    tidied and comma-joined, or "" if any one of them is not an address. */
+/* ══ who an email goes to ═══════════════════════════════════════════
+   One control, used by a reminder and by an activity alert: tick the
+   people you want, and type an address for anyone else. */
+function whoFill(hostId, chosen){
+  const known=PEOPLE.map(p=>p.addr.toLowerCase());
+  /* Only the named people are carried over from last time. A one-off address
+     someone typed is not something to attach to the next thing silently. */
+  const picked=String(chosen||"").split(/[,;]/).map(x=>x.trim().toLowerCase())
+    .filter(a=>a && known.indexOf(a)>=0);
+  const extra="";
+  $(hostId).innerHTML=
+    '<div class="who-box">'+
+      '<div class="cap">Who gets it</div>'+
+      '<div class="who-row">'+
+        PEOPLE.map(p=>'<label class="who-pick"><input type="checkbox" data-addr="'+esc(p.addr)+'"'+
+          (picked.indexOf(p.addr.toLowerCase())>=0?" checked":"")+'>'+
+          esc(p.name)+' <small>'+esc(p.addr)+'</small></label>').join("")+
+        '<label class="who-pick"><input type="checkbox" data-else'+(extra?" checked":"")+'>Someone else</label>'+
+      '</div>'+
+      '<input type="text" data-other placeholder="name@masdr.sa, other@masdr.sa" value="'+esc(extra)+'"'+
+        (extra?"":" hidden")+'>'+
+      '<span class="hint">Nobody picked means no email is sent.</span>'+
+    '</div>';
+  const box=$(hostId), other=box.querySelector("[data-other]");
+  box.querySelector("[data-else]").addEventListener("change",e=>{
+    other.hidden=!e.target.checked;
+    if(e.target.checked) other.focus(); else other.value="";
+  });
+}
+/* Everything ticked plus anything typed, comma-joined. "" if a typed
+   address is not an address. */
+function whoRead(hostId){
+  const box=$(hostId);
+  const picked=[...box.querySelectorAll("input[data-addr]:checked")].map(x=>x.getAttribute("data-addr"));
+  const other=box.querySelector("[data-other]");
+  if(!other.hidden && other.value.trim()){
+    const clean=cleanAddrs(other.value);
+    if(!clean) return null;                    /* null = typed something that is not an address */
+    clean.split(", ").forEach(a=>{ if(picked.indexOf(a)<0) picked.push(a); });
+  }
+  return picked.join(", ");
+}
 function cleanAddrs(raw){
   const parts=String(raw||"").split(/[,;]/).map(x=>x.trim()).filter(Boolean);
   if(!parts.length) return "";
@@ -1949,6 +2241,12 @@ function cleanAddrs(raw){
   return parts.every(x=>one.test(x)) ? parts.join(", ") : "";
 }
 function remEmailAddr(){ try{ return localStorage.getItem(STORE+".remaddr")||""; }catch(e){ return ""; } }
+/* remember only the named people, for the same reason */
+function rememberWho(addr){
+  const known=PEOPLE.map(p=>p.addr.toLowerCase());
+  const keep=String(addr||"").split(", ").filter(a=>known.indexOf(a.toLowerCase())>=0).join(", ");
+  try{ localStorage.setItem(STORE+".remaddr",keep); }catch(e){}
+}
 $("remForm").addEventListener("submit",e=>{
   e.preventDefault();
   const text=$("remText").value.trim(); if(!text) return;
@@ -1965,9 +2263,10 @@ $("remForm").addEventListener("submit",e=>{
     r.days=ds;
   }
   if(r.email){
-    const addr=cleanAddrs($("remAddr").value);
-    if(!addr){ toast("Enter a valid email address, or several separated by commas.",true); return; }
-    r.addr=addr; try{ localStorage.setItem(STORE+".remaddr",addr); }catch(e){}
+    const addr=whoRead("remWho");
+    if(addr===null){ toast("That email address does not look right.",true); return; }
+    if(!addr){ toast("Pick at least one person to email it to.",true); return; }
+    r.addr=addr; rememberWho(addr);
   }
   reminders.push(r); saveReminders();
   closeRemModal();
@@ -1985,10 +2284,9 @@ $("remList").addEventListener("click",e=>{
 
 /* ══ chrome ═════════════════════════════════════════════════════════ */
 function renderChrome(){
-  $("srcName").textContent=state.source||"workbook";
-  $("srcCount").textContent=acts().length+" activities";
-  $("srcChip").title="Loaded from "+(state.source||"workbook")+
-    (state.synced?" on "+new Date(state.synced).toLocaleDateString():"")+(state.dirty?" · edited in this browser":"");
+  const nA=acts().length;
+  $("fileNote").textContent=nA+(nA===1?" activity":" activities")+" from "+(state.source||"the workbook")+
+    (state.dirty?" · edited here since the last sync":"");
   $("footNote").textContent="Built from the Work Plan and Lists sheets of "+(state.source||"the workbook")+
     ". Dates read as day-month-year. "+(state.dirty
       ? "You have unsaved edits in this browser — they stay here until you sync successfully."
@@ -2006,7 +2304,7 @@ function renderAll(){
     cursor=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),1));
     if(cursor<s.from||cursor>s.to) cursor=new Date(Date.UTC(s.from.getUTCFullYear(),s.from.getUTCMonth(),1)); }
   renderChrome(); renderHero(); renderKpis(); renderLists2(); renderReminders(); renderQuarterStrip();
-  renderBreakdowns(); renderCalendar(); renderWorkPlan(); renderRef();
+  renderBreakdowns(); renderCalendar(); renderWpBoard(); renderWorkPlan(); renderRef();
 }
 
 /* ══ tabs ═══════════════════════════════════════════════════════════ */
@@ -2059,14 +2357,32 @@ function toast(msg,bad){ const el=$("toast"); el.textContent=msg; el.className="
   clearTimeout(toastT); toastT=setTimeout(()=>el.className=bad?"bad":"",3800); }
 
 /* ══ events ═════════════════════════════════════════════════════════ */
-$("fType").addEventListener("change",e=>{ filters.type=e.target.value; renderCalendar(); });
-$("fStatus").addEventListener("change",e=>{ filters.status=e.target.value; renderCalendar(); });
-$("fDept").addEventListener("change",e=>{ filters.dept=e.target.value; renderCalendar(); });
-$("fSearch").addEventListener("input",e=>{ filters.q=e.target.value; renderCalendar(); });
+$("fType").addEventListener("change",e=>{ filters.type=e.target.value; syncFilterBtn(); renderCalendar(); });
+$("fStatus").addEventListener("change",e=>{ filters.status=e.target.value; syncFilterBtn(); renderCalendar(); });
+$("fDept").addEventListener("change",e=>{ filters.dept=e.target.value; syncFilterBtn(); renderCalendar(); });
+$("fSearch").addEventListener("input",e=>{ filters.q=e.target.value; syncFilterBtn(); renderCalendar(); });
 $("fReset").addEventListener("click",()=>{ filters={type:"All",status:"All",dept:"All",q:""};
-  $("fSearch").value=""; renderChrome(); renderCalendar(); });
+  $("fSearch").value=""; renderChrome(); syncFilterBtn(); renderCalendar(); });
+/* Filters are folded away by default: they are rarely touched, and open they
+   ate the top of the calendar. The button carries a count when any are on. */
+function filterCount(){
+  return (filters.type!=="All")+(filters.status!=="All")+(filters.dept!=="All")+(filters.q?1:0);
+}
+function syncFilterBtn(){
+  const c=filterCount(), b2=$("fCount");
+  b2.hidden=!c; b2.textContent=c;
+  $("btnFilters").classList.toggle("on", c>0 || !$("calFilters").hidden);
+}
+$("btnFilters").addEventListener("click",()=>{
+  const open=$("calFilters").hidden;
+  $("calFilters").hidden=!open;
+  $("btnFilters").setAttribute("aria-expanded", open?"true":"false");
+  try{ localStorage.setItem(STORE+".fopen", open?"1":"0"); }catch(e){}
+  if(open) $("fType").focus();
+  syncFilterBtn();
+});
 $("wType").addEventListener("change",e=>{ wpFilters.type=e.target.value; renderWorkPlan(); });
-$("wStatus").addEventListener("change",e=>{ wpFilters.status=e.target.value; renderWorkPlan(); });
+$("wStatus").addEventListener("change",e=>{ wpFilters.status=e.target.value; wpFilters.view=""; renderWpBoard(); renderWorkPlan(); });
 $("wSearch").addEventListener("input",e=>{ wpFilters.q=e.target.value; renderWorkPlan(); });
 $("wpTbl").addEventListener("click",e=>{
   const del=e.target.closest("[data-del]");
@@ -2091,7 +2407,7 @@ function legacyAdd(){
     frequency:"One-off",start:iso(m0),end:iso(m1),duration:days(m0,m1),status:"Not Started",
     progress:0,reviewer:"Head of Compliance",approval:"Pending",notes:"",
     updatedAt:new Date().toISOString()});
-  state.dirty=true; save(); wpFilters={type:"All",status:"All",q:""}; $("wSearch").value="";
+  state.dirty=true; save(); wpFilters={type:"All",status:"All",q:"",view:""}; $("wSearch").value="";
   renderAll(); showTab("plan");
   const row=document.querySelector('#wpTbl tr[data-id="'+id+'"]');
   if(row){ row.scrollIntoView({block:"center",behavior:"smooth"}); row.querySelector('.edit-cell[data-f="activity"]').click(); }
@@ -2239,9 +2555,9 @@ async function readWorkbook(file){
       if(Object.keys(fresh).length) lists=fresh;
     }
   }
-  return {activities:out,lists,source:file.name,synced:new Date().toISOString(),dirty:false};
+  return {activities:out,lists,source:file.name,synced:new Date().toISOString(),
+          baseline:new Date().toISOString(),dirty:false};
 }
-$("btnImport").addEventListener("click",()=>$("fileIn").click());
 $("fileIn").addEventListener("change",async e=>{
   const file=e.target.files&&e.target.files[0]; if(!file) return;
   try{
@@ -2423,16 +2739,18 @@ function runExport(kind){
     }
   }catch(e){ toast("Export failed: "+e.message,true); }
 }
-const exMenu=$("exportMenu");
-function closeMenu(){ exMenu.hidden=true; $("btnExport").setAttribute("aria-expanded","false"); }
-$("btnExport").addEventListener("click",e=>{
+const exMenu=$("fileMenu");
+function closeMenu(){ exMenu.hidden=true; $("btnFile").setAttribute("aria-expanded","false"); }
+$("btnFile").addEventListener("click",e=>{
   e.stopPropagation();
   const open=exMenu.hidden;
-  exMenu.hidden=!open; $("btnExport").setAttribute("aria-expanded",open?"true":"false");
+  exMenu.hidden=!open; $("btnFile").setAttribute("aria-expanded",open?"true":"false");
 });
 exMenu.addEventListener("click",e=>{
   const b2=e.target.closest("[data-x]"); if(!b2) return;
-  closeMenu(); runExport(b2.getAttribute("data-x"));
+  const what=b2.getAttribute("data-x");
+  closeMenu();
+  if(what==="import") $("fileIn").click(); else runExport(what);
 });
 document.addEventListener("click",()=>{ if(!exMenu.hidden) closeMenu(); });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeMenu();
@@ -2440,10 +2758,14 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeMenu();
   if(!$("syncModal").hidden) closeSyncModal();
   if(!$("adHocModal").hidden) closeAdHoc();
   if(!$("remModal").hidden) closeRemModal(); } });
-$("btnCsv").addEventListener("click",()=>runExport("csv"));
 
 /* ══ .ics calendar export ═══════════════════════════════════════════ */
 function icsDate(dt){ return dt.toISOString().slice(0,10).replace(/-/g,""); }
+/* local ("floating") date-time, e.g. 20260817T090000 */
+function icsStamp(dt, hhmm){
+  const t=String(hhmm||"09:00").split(":");
+  return icsDate(dt)+"T"+String(t[0]||"09").padStart(2,"0")+String(t[1]||"00").padStart(2,"0")+"00";
+}
 function icsFold(line){
   const out=[]; let s=line;
   while(s.length>73){ out.push(s.slice(0,73)); s=" "+s.slice(73); }
@@ -2459,8 +2781,14 @@ function icsText(){
     L.push("BEGIN:VEVENT");
     L.push("UID:"+esc2(a.id)+"@masdr-compliance");
     L.push("DTSTAMP:"+stamp);
-    L.push("DTSTART;VALUE=DATE:"+icsDate(r.s));
-    L.push("DTEND;VALUE=DATE:"+icsDate(addDays(r.e,1)));   /* DTEND is exclusive */
+    if(a.startTime){
+      /* a timed activity: floating local time, so it lands at 09:00 wherever it opens */
+      L.push("DTSTART:"+icsStamp(r.s, a.startTime));
+      L.push("DTEND:"+icsStamp(r.e, a.endTime||a.startTime));
+    } else {
+      L.push("DTSTART;VALUE=DATE:"+icsDate(r.s));
+      L.push("DTEND;VALUE=DATE:"+icsDate(addDays(r.e,1)));   /* DTEND is exclusive */
+    }
     L.push(icsFold("SUMMARY:"+esc2(a.id+" — "+a.activity)));
     L.push(icsFold("DESCRIPTION:"+esc2(
       [a.type,a.department&&"Department: "+a.department,a.owner&&"Owner: "+a.owner,
@@ -2470,7 +2798,12 @@ function icsText(){
     L.push("TRANSP:TRANSPARENT");
     /* nudges before the deadline, not before the start */
     if(a.status!=="Complete"){
-      [["-P7D","One week until "],["-P1D","Tomorrow: "]].forEach(function(t2){
+      const lead = a.alertLead===undefined||a.alertLead===null||a.alertLead==="" ? null : Number(a.alertLead);
+      /* a zero-day lead is "PT0S" — "-P0D" is not a legal iCalendar duration */
+      const leads = lead===null || isNaN(lead)
+        ? [["-P7D","One week until "],["-P1D","Tomorrow: "]]
+        : [[lead>0?"-P"+lead+"D":"PT0S", (LEADS[String(lead)]||"Due")+": "]];
+      leads.forEach(function(t2){
         L.push("BEGIN:VALARM");
         L.push("ACTION:DISPLAY");
         L.push(icsFold("DESCRIPTION:"+esc2(t2[1]+a.id+" — "+a.activity)));
@@ -2555,6 +2888,7 @@ function applyRemote(data){
   state.tombstones = [];
   state.source = (data.title||"Google Sheet");
   state.synced = data.syncedAt || new Date().toISOString();
+  state.baseline = new Date().toISOString();
   state.dirty = false;
   sync.last = state.synced; sync.title = data.title||""; saveSync();
   cursor = null; expandedWeeks = {};
@@ -2647,7 +2981,13 @@ try{ const m=localStorage.getItem(STORE+".mode"); if(m) calMode=m; }catch(e){}
    leave one showing on load with no obvious way back. */
 ["syncModal","saveModal","drawer","adHocModal","remModal"].forEach(function(id){ const el=$(id); if(el) el.hidden=true; });
 $("scrim").hidden=true; $("scrim").classList.remove("on");
-if($("exportMenu")) $("exportMenu").hidden=true;
+if($("fileMenu")) $("fileMenu").hidden=true;
+(function(){
+  let open=false; try{ open=localStorage.getItem(STORE+".fopen")==="1"; }catch(e){}
+  $("calFilters").hidden=!open;
+  $("btnFilters").setAttribute("aria-expanded", open?"true":"false");
+  syncFilterBtn();
+})();
 
 renderAll();
 setSyncUi("");

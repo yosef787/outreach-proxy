@@ -16,9 +16,10 @@
  *
  * The sheet needs a tab named "Work Plan" with a header row containing
  * "Activity ID". Columns are matched by their heading, so their order does
- * not matter and extra columns are left alone. An "Updated At" column is
- * added automatically the first time this runs — it is what lets two people
- * sync without overwriting each other.
+ * not matter and extra columns are left alone. Any heading this file knows
+ * about but the sheet does not is appended on the first run — "Updated At"
+ * (which is what lets two people sync without overwriting each other), plus
+ * "Start Time", "End Time", "Alert (days before)" and "Alert Email".
  */
 
 var SHARED_KEY = '';            // e.g. 'masdr-2026'; leave '' for no key
@@ -30,6 +31,11 @@ var SHARED_KEY = '';            // e.g. 'masdr-2026'; leave '' for no key
  *      Time-driven ▸ Day timer ▸ 7am-8am.
  * It then mails a short digest of anything overdue or falling due inside
  * REMIND_DAYS, and stays quiet on days when there is nothing to say.
+ *
+ * The same daily trigger also sends the per-activity alerts set on the page
+ * ("email these people a week before this is due") and the reminders that
+ * carry their own address. Those work whether or not REMIND_TO is set — but
+ * they still need the sendReminders trigger to exist.
  */
 var REMIND_TO   = '';           // 'me@masdr.com, colleague@masdr.com'
 var REMIND_DAYS = 14;
@@ -52,6 +58,11 @@ var FIELDS = [
   ['reviewer',   'Reviewer / Approver'],
   ['approval',   'Approval Status'],
   ['notes',      'Notes'],
+  /* optional, added automatically the first time a page that uses them syncs */
+  ['startTime',  'Start Time'],
+  ['endTime',    'End Time'],
+  ['alertLead',  'Alert (days before)'],
+  ['alertTo',    'Alert Email'],
   ['updatedAt',  'Updated At']
 ];
 
@@ -122,12 +133,19 @@ function ctx_() {
   }
   if (map.id === undefined) throw new Error('Could not map the "Activity ID" column.');
 
-  if (map.updatedAt === undefined) {
-    var col = v[hdr].length;
-    while (col > 0 && String(v[hdr][col - 1] || '') === '') col--;
-    sh.getRange(hdr + 1, col + 1).setValue('Updated At');
+  /* Any heading this file knows about but the sheet does not gets appended.
+     Existing columns are never moved, so hand-made layouts survive. */
+  var added = 0;
+  var col = v[hdr].length;
+  while (col > 0 && String(v[hdr][col - 1] || '') === '') col--;
+  for (var f = 0; f < FIELDS.length; f++) {
+    if (map[FIELDS[f][0]] !== undefined) continue;
+    sh.getRange(hdr + 1, col + 1).setValue(FIELDS[f][1]).setFontWeight('bold');
+    map[FIELDS[f][0]] = col;
+    col++; added++;
+  }
+  if (added) {
     SpreadsheetApp.flush();
-    map.updatedAt = col;
     v = sh.getDataRange().getValues();
   }
   return { ss: ss, sh: sh, hdr: hdr, map: map, v: v, tz: ss.getSpreadsheetTimeZone() };
@@ -141,6 +159,13 @@ function asDate_(v, tz) {
 function asIso_(v) {
   if (v instanceof Date) return v.toISOString();
   return String(v == null ? '' : v).trim();
+}
+/* A time is stored as text ("09:00"), but Sheets may hand it back as a Date. */
+function asTime_(v, tz) {
+  if (v instanceof Date) return Utilities.formatDate(v, tz, 'HH:mm');
+  var s = String(v == null ? '' : v).trim();
+  var m = s.match(/^(\d{1,2}):(\d{2})/);
+  return m ? ('0' + m[1]).slice(-2) + ':' + m[2] : '';
 }
 function asProgress_(v) {
   var n = Number(v);
@@ -186,6 +211,10 @@ function rowFrom_(row, map, tz) {
     reviewer:   String(g('reviewer') || ''),
     approval:   String(g('approval') || ''),
     notes:      String(g('notes') || ''),
+    startTime:  asTime_(g('startTime'), tz),
+    endTime:    asTime_(g('endTime'), tz),
+    alertLead:  String(g('alertLead') == null ? '' : g('alertLead')).trim(),
+    alertTo:    String(g('alertTo') || '').trim(),
     updatedAt:  asIso_(g('updatedAt'))
   };
 }
@@ -424,6 +453,11 @@ function toCell_(k, val) {
     return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
   }
   if (k === 'progress' || k === 'duration') return Number(val) || 0;
+  /* a leading apostrophe keeps Sheets from reading "09:00" as a time value */
+  if (k === 'startTime' || k === 'endTime') {
+    var t = String(val == null ? '' : val).trim();
+    return t ? "'" + t : '';
+  }
   return val == null ? '' : val;
 }
 
@@ -501,7 +535,20 @@ function collect_() {
   overdue.sort(by); soon.sort(by);
 
   var rem = rems.filter(function (x) { return x.email && remFiresOn_(x, today, byId); });
-  return { today: today, overdue: overdue, soon: soon, rem: rem };
+
+  /* Activities carrying their own alert: "email these people N days before
+     it is due". Fires on exactly that morning, and never once it is done. */
+  var alerts = [];
+  rows.forEach(function (r) {
+    if (r.status === 'Complete' || !r.alertTo || r.alertLead === '') return;
+    var lead = Number(r.alertLead);
+    if (!isFinite(lead) || lead < 0) return;
+    var due = parseYmd_(r.end);
+    if (!due) return;
+    var fire = new Date(due.getTime() - lead * 86400000);
+    if (ymd_(fire) === ymd_(today)) alerts.push({ r: r, due: due, lead: lead });
+  });
+  return { today: today, overdue: overdue, soon: soon, rem: rem, alerts: alerts };
 }
 
 function digestBody_(out) {
@@ -514,6 +561,7 @@ function digestBody_(out) {
   };
   var body = [];
   if (out.rem.length) body.push('TODAY', out.rem.map(function (r) { return '• ' + r.text; }).join('\n'), '');
+  if (out.alerts && out.alerts.length) body.push('COMING UP', out.alerts.map(alertLine_).join('\n'), '');
   if (out.overdue.length) body.push('OVERDUE', out.overdue.map(line).join('\n'), '');
   if (out.soon.length) body.push('DUE WITHIN ' + REMIND_DAYS + ' DAYS', out.soon.map(line).join('\n'), '');
   if (!body.length) return '';
@@ -521,15 +569,25 @@ function digestBody_(out) {
   return body.join('\n');
 }
 
-/* Sends one mail to REMIND_TO, plus a short one to any reminder that carries
-   its own address. Silent on days with nothing to say. */
+function alertLine_(x) {
+  var tz = SpreadsheetApp.getActiveSpreadsheet().getSpreadsheetTimeZone();
+  var when = x.lead === 0 ? 'today' : x.lead === 1 ? 'tomorrow' : 'in ' + x.lead + ' days';
+  return '• ' + x.r.id + ' — ' + x.r.activity + '  (due ' +
+         Utilities.formatDate(x.due, tz, 'dd-MMM-yyyy') + ', ' + when +
+         (x.r.startTime ? ' at ' + x.r.startTime : '') + ')' +
+         (x.r.notes ? '\n    ' + x.r.notes : '');
+}
+
+/* Sends one mail to REMIND_TO, plus a short one to any reminder or activity
+   alert that carries its own address. Silent on days with nothing to say. */
 function sendReminders() {
   var out = collect_();
 
   if (REMIND_TO) {
     var mine = {
       today: out.today, overdue: out.overdue, soon: out.soon,
-      rem: out.rem.filter(function (r) { return !r.addr || r.addr === REMIND_TO; })
+      rem: out.rem.filter(function (r) { return !r.addr || r.addr === REMIND_TO; }),
+      alerts: out.alerts.filter(function (a) { return a.r.alertTo === REMIND_TO; })
     };
     var body = digestBody_(mine);
     if (body) {
@@ -538,23 +596,37 @@ function sendReminders() {
         subject: 'Compliance calendar — ' +
           (mine.overdue.length ? mine.overdue.length + ' overdue, ' : '') +
           mine.soon.length + ' due soon' +
-          (mine.rem.length ? ', ' + mine.rem.length + ' reminder(s)' : ''),
+          (mine.rem.length ? ', ' + mine.rem.length + ' reminder(s)' : '') +
+          (mine.alerts.length ? ', ' + mine.alerts.length + ' alert(s)' : ''),
         body: body
       });
     }
   }
 
+  /* one mail per address, carrying both its reminders and its activity alerts */
   var others = {};
+  var bucket = function (addr) {
+    return (others[addr] = others[addr] || { rem: [], alerts: [] });
+  };
   out.rem.forEach(function (r) {
     if (!r.addr || r.addr === REMIND_TO) return;
-    (others[r.addr] = others[r.addr] || []).push(r);
+    bucket(r.addr).rem.push(r);
+  });
+  out.alerts.forEach(function (a) {
+    if (!a.r.alertTo || a.r.alertTo === REMIND_TO) return;
+    bucket(a.r.alertTo).alerts.push(a);
   });
   for (var addr in others) {
+    var o = others[addr];
+    var lines = [];
+    if (o.rem.length) lines.push(o.rem.map(function (r) { return '• ' + r.text; }).join('\n'));
+    if (o.alerts.length) lines.push('COMING UP', o.alerts.map(alertLine_).join('\n'));
+    var first = o.rem.length ? o.rem[0].text : o.alerts[0].r.id + ' — ' + o.alerts[0].r.activity;
+    var more = o.rem.length + o.alerts.length - 1;
     MailApp.sendEmail({
       to: addr,
-      subject: 'Reminder — ' + others[addr][0].text + (others[addr].length > 1 ? ' (+' + (others[addr].length - 1) + ')' : ''),
-      body: others[addr].map(function (r) { return '• ' + r.text; }).join('\n') +
-            '\n\n— MASDR Compliance Calendar'
+      subject: 'Reminder — ' + first + (more > 0 ? ' (+' + more + ')' : ''),
+      body: lines.join('\n') + '\n\n— MASDR Compliance Calendar'
     });
   }
 }
