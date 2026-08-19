@@ -194,6 +194,12 @@ button{cursor:pointer}
 .btn.solid:hover{background:var(--brand-deep);border-color:var(--brand-deep)}
 .btn.danger:hover{color:var(--crit);border-color:var(--crit);background:var(--crit-bg)}
 .btn.on{border-color:var(--brand-soft);background:var(--brand-tint);color:var(--ink)}
+.btn.big{padding:11px 20px;font-size:14.5px;border-radius:11px;gap:8px;
+  box-shadow:0 3px 10px -3px color-mix(in srgb,var(--brand) 55%,transparent)}
+.btn.big:hover{box-shadow:0 5px 14px -3px color-mix(in srgb,var(--brand) 60%,transparent)}
+.btn-ico.lg{width:17px;height:17px;stroke-width:2.2}
+.btn.warn{border-color:color-mix(in srgb,var(--warn) 45%,transparent);background:var(--warn-bg);color:var(--ink)}
+.btn.warn:hover{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 18%,var(--warn-bg))}
 .btn svg.btn-ico{margin-right:1px}
 .btn{display:inline-flex;align-items:center;gap:6px}
 
@@ -449,7 +455,10 @@ main{max-width:var(--page);margin:0 auto;padding:24px 28px 80px}
 .cal-nav{display:flex;align-items:center;gap:5px}
 .cal-nav .ico{width:32px;height:32px}
 .cal-nav .btn{padding:6px 13px;font-size:12.5px}
-.cal-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
+.cal-left{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.cal-mid{margin-inline:auto}
+.cal-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+@media (max-width:900px){.cal-mid{margin-inline:0}}
 .cal-title{font-size:20px;font-weight:700;letter-spacing:-.015em;min-width:180px}
 .cal-title small{display:block;font-size:11px;font-weight:600;color:var(--ink-3);letter-spacing:.05em;text-transform:uppercase}
 .fcount{display:inline-grid;place-items:center;min-width:17px;height:17px;padding:0 5px;border-radius:999px;
@@ -644,6 +653,9 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13px}
 .gap .who span{font-size:11.5px;color:var(--ink-3)}
 .gaps .none{padding:22px 20px;font-size:12.5px;color:var(--ink-3);text-align:center}
 .fb-gap{flex:1}
+.card-ft{display:flex;gap:9px;flex-wrap:wrap;padding:13px 20px;border-top:1px solid var(--line);
+  background:var(--surface-2);border-radius:0 0 calc(var(--r) - 1px) calc(var(--r) - 1px)}
+p.lede{font-size:12.5px;color:var(--ink-3);margin:-4px 2px 0}
 ol.howto{margin:0;padding-left:19px;font-size:12.5px;color:var(--ink-2)}
 ol.howto li{margin-top:4px}
 
@@ -859,11 +871,18 @@ footer.foot p{max-width:78ch}
   <section class="view stack" id="view-calendar" role="tabpanel" aria-labelledby="tab-calendar" hidden>
     <div class="card">
       <div class="cal-bar">
-        <div class="cal-title" id="calTitle">—<small id="calSubtitle">—</small></div>
-        <div class="cal-nav no-print">
-          <button class="ico" id="calPrev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-          <button class="btn" id="calToday">Today</button>
-          <button class="ico" id="calNext" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+        <div class="cal-left">
+          <div class="cal-title" id="calTitle">—<small id="calSubtitle">—</small></div>
+          <div class="cal-nav no-print">
+            <button class="ico" id="calPrev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+            <button class="btn" id="calToday">Today</button>
+            <button class="ico" id="calNext" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+          </div>
+        </div>
+        <div class="cal-mid no-print">
+          <button class="btn solid big" id="btnAdHoc">
+            <svg class="btn-ico lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Add an activity</button>
         </div>
         <div class="cal-right no-print">
           <div class="cal-modes" role="tablist" aria-label="Calendar mode">
@@ -874,9 +893,6 @@ footer.foot p{max-width:78ch}
           <button class="btn" id="btnFilters" aria-expanded="false" aria-controls="calFilters">
             <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18M6 12h12M10 19h4"/></svg>
             Filter<span class="fcount" id="fCount" hidden>0</span></button>
-          <button class="btn solid" id="btnAdHoc">
-            <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-            Add</button>
         </div>
       </div>
       <div class="card-bd stack">
@@ -910,11 +926,20 @@ footer.foot p{max-width:78ch}
       <div class="card">
         <div class="card-hd"><h2>Not yet in the sheet</h2><span class="hint" id="pendCount">—</span></div>
         <div class="gaps" id="wpPending"></div>
+        <div class="card-ft">
+          <button class="btn solid" id="btnQuickAdd">
+            <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Quick add</button>
+          <button class="btn warn" id="btnQuickFix">
+            <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/></svg>
+            Quick fix</button>
+        </div>
       </div>
     </div>
 
-    <details class="ref" id="wpFold" open>
-      <summary>Every activity <span class="hint" style="font-weight:400">click any cell to edit · changes stay in this browser until you sync</span></summary>
+    <p class="lede">Click any cell to edit. Changes stay in this browser until you sync.</p>
+    <details class="ref" id="wpFold">
+      <summary>Every activity</summary>
       <div class="stack">
         <div class="filterbar no-print">
           <select id="wType" aria-label="Filter by type"></select>
@@ -942,7 +967,7 @@ footer.foot p{max-width:78ch}
       </div>
     </details>
     <details class="ref">
-      <summary>Source lists &amp; colour key <span class="hint" style="font-weight:400">from the Lists sheet</span></summary>
+      <summary>Source lists &amp; colour key</summary>
       <div class="stack">
         <div class="list-grid" id="listGrid"></div>
         <div><div class="eyebrow" style="margin:6px 0 9px">Activity type</div><div class="legend" id="keyTypes"></div></div>
@@ -1147,7 +1172,7 @@ footer.foot p{max-width:78ch}
 
 <script>
 "use strict";
-const SEED = {"activities":[{"id":"GOSI-Q1","activity":"Quarterly compliance report to GOSI — Q3 2026","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2026-10-01","end":"2026-10-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Jul–Sep 2026"},{"id":"GOSI-Q2","activity":"Quarterly compliance report to GOSI — Q4 2026","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-01-01","end":"2027-01-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Oct–Dec 2026"},{"id":"GOSI-Q3","activity":"Quarterly compliance report to GOSI — Q1 2027","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-04-01","end":"2027-04-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Jan–Mar 2027"},{"id":"GOSI-Q4","activity":"Quarterly compliance report to GOSI — Q2 2027","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-07-01","end":"2027-07-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Apr–Jun 2027"},{"id":"GOSI-A1","activity":"Annual compliance report to GOSI — FY2026","type":"Annual Reporting","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2027-01-01","end":"2027-03-31","duration":90,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers FY2026"},{"id":"ASMT-01","activity":"Department assessment — Finance (2026 Q3)","type":"BU Assessment","owner":"","department":"Finance","frequency":"One-off","start":"2026-07-01","end":"2026-09-30","duration":92,"status":"In Progress","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-02","activity":"Department assessment — Mudad (2026 Q4)","type":"BU Assessment","owner":"","department":"Mudad","frequency":"One-off","start":"2026-10-01","end":"2026-12-31","duration":92,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-03","activity":"Department assessment — Product Management (2027 Q1)","type":"BU Assessment","owner":"","department":"Product Management","frequency":"One-off","start":"2027-01-01","end":"2027-03-31","duration":90,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-04","activity":"Department assessment — Tech & Digital Enablement (2027 Q2–Q3)","type":"BU Assessment","owner":"","department":"Tech & Digital Enablement","frequency":"One-off","start":"2027-04-01","end":"2027-09-30","duration":183,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-05","activity":"Department assessment — Delivery (2027 Q4)","type":"BU Assessment","owner":"","department":"Delivery","frequency":"One-off","start":"2027-10-01","end":"2027-12-31","duration":92,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-06","activity":"Department assessment — Commercial (2028 Q1)","type":"BU Assessment","owner":"","department":"Commercial","frequency":"One-off","start":"2028-01-01","end":"2028-03-31","duration":91,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-07","activity":"Department assessment — P&C (2028 Q2–Q3)","type":"BU Assessment","owner":"","department":"P&C","frequency":"One-off","start":"2028-04-01","end":"2028-09-30","duration":183,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-08","activity":"Compliance report — close of assessment cycle (2028 Q4)","type":"Annual Reporting","owner":"","department":"Legal & GRC","frequency":"One-off","start":"2028-10-01","end":"2028-12-31","duration":92,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Closing report for the 10-quarter cycle. Cycle restarts on completion, re-sequenced by risk rating and prior findings."},{"id":"PC-01","activity":"Follow-up on P&C correction plans","type":"Monitoring","owner":"","department":"P&C","frequency":"One-off","start":"2026-08-01","end":"2026-10-31","duration":92,"status":"In Progress","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Open follow-up on correction plans agreed with P&C; remains open until 31-Oct-2026."},{"id":"TRN-01","activity":"Annual compliance training session — 2026","type":"Training","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2026-12-01","end":"2026-12-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"One session per year, held in Q4."},{"id":"TRN-02","activity":"Annual compliance training session — 2027","type":"Training","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2027-12-01","end":"2027-12-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"One session per year, held in Q4."},{"id":"TRN-03","activity":"Annual compliance training session — 2028","type":"Training","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2028-12-01","end":"2028-12-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"One session per year, held in Q4."},{"id":"AWA-02","activity":"Awareness communication — 2027 Q1","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-03-01","end":"2027-03-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-03","activity":"Awareness communication — 2027 Q2","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-06-01","end":"2027-06-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-04","activity":"Awareness communication — 2027 Q3","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-09-01","end":"2027-09-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-05","activity":"Awareness communication — 2028 Q1","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2028-03-01","end":"2028-03-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-06","activity":"Awareness communication — 2028 Q2","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2028-06-01","end":"2028-06-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-07","activity":"Awareness communication — 2028 Q3","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2028-09-01","end":"2028-09-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""}],"lists":{"Activity Type":["Quarterly Reporting","Annual Reporting","BU Assessment","Audit","Regulatory Filing","Training","Governance","Monitoring","Awareness"],"Status":["Not Started","In Progress","Complete","Deferred"],"Frequency":["One-off","Monthly","Quarterly","Semi-Annual","Annual"],"Approval Status":["Pending","Approved","Rejected","N/A"],"Department":["Finance","Legal & GRC","P&C","Internal Audit","Tech & Digital Enablement","Delivery","Product Management","Board Secretariat","Strategy","Commercial","Mudad"],"Owner":["CFO","Financial Controller","Tax Manager","Compliance Officer","Head of Compliance","Risk Manager","Head of Internal Audit","Company Secretary","Legal Counsel","HR Director","Payroll Officer","Facilities Manager"],"Reviewer / Approver":["Board","Audit Committee","Chairman","CFO","Head of Compliance","Legal Counsel","HR Director","Head of Internal Audit","CIO"],"Type Filter":["All","Quarterly Reporting","Annual Reporting","BU Assessment","Audit","Regulatory Filing","Training","Governance","Monitoring","Awareness"],"Status Filter":["All","Not Started","In Progress","Complete","Deferred"],"Quarters":["2026 Q3","2026 Q4","2027 Q1","2027 Q2","2027 Q3","2027 Q4","2028 Q1","2028 Q2","2028 Q3","2028 Q4"]},"source":"Compliance_Calendar.xlsx","synced":"2026-08-18","dirty":false};
+const SEED = {"activities":[{"id":"GOSI-Q1","activity":"Quarterly compliance report to GOSI — Q3 2026","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2026-10-01","end":"2026-10-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Jul–Sep 2026"},{"id":"GOSI-Q2","activity":"Quarterly compliance report to GOSI — Q4 2026","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-01-01","end":"2027-01-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Oct–Dec 2026"},{"id":"GOSI-Q3","activity":"Quarterly compliance report to GOSI — Q1 2027","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-04-01","end":"2027-04-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Jan–Mar 2027"},{"id":"GOSI-Q4","activity":"Quarterly compliance report to GOSI — Q2 2027","type":"Quarterly Reporting","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-07-01","end":"2027-07-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers Apr–Jun 2027"},{"id":"GOSI-A1","activity":"Annual compliance report to GOSI — FY2026","type":"Annual Reporting","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2027-01-01","end":"2027-03-31","duration":90,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Covers FY2026"},{"id":"ASMT-01","activity":"Department assessment — Finance (2026 Q3)","type":"BU Assessment","owner":"","department":"Finance","frequency":"One-off","start":"2026-07-01","end":"2026-09-30","duration":92,"status":"In Progress","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-02","activity":"Department assessment — Mudad (2026 Q4)","type":"BU Assessment","owner":"","department":"Mudad","frequency":"One-off","start":"2026-10-01","end":"2026-12-31","duration":92,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-03","activity":"Department assessment — Product Management (2027 Q1)","type":"BU Assessment","owner":"","department":"Product Management","frequency":"One-off","start":"2027-01-01","end":"2027-03-31","duration":90,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-04","activity":"Department assessment — Tech & Digital Enablement (2027 Q2–Q3)","type":"BU Assessment","owner":"","department":"Tech & Digital Enablement","frequency":"One-off","start":"2027-04-01","end":"2027-09-30","duration":183,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-05","activity":"Department assessment — Delivery (2027 Q4)","type":"BU Assessment","owner":"","department":"Delivery","frequency":"One-off","start":"2027-10-01","end":"2027-12-31","duration":92,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-06","activity":"Department assessment — Commercial (2028 Q1)","type":"BU Assessment","owner":"","department":"Commercial","frequency":"One-off","start":"2028-01-01","end":"2028-03-31","duration":91,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-07","activity":"Department assessment — P&C (2028 Q2–Q3)","type":"BU Assessment","owner":"","department":"P&C","frequency":"One-off","start":"2028-04-01","end":"2028-09-30","duration":183,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"ASMT-08","activity":"Compliance report — close of assessment cycle (2028 Q4)","type":"Annual Reporting","owner":"","department":"Legal & GRC","frequency":"One-off","start":"2028-10-01","end":"2028-12-31","duration":92,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Closing report for the 10-quarter cycle. Cycle restarts on completion, re-sequenced by risk rating and prior findings."},{"id":"PC-01","activity":"Follow-up on P&C correction plans","type":"Monitoring","owner":"","department":"P&C","frequency":"One-off","start":"2026-08-01","end":"2026-10-31","duration":92,"status":"In Progress","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"Open follow-up on correction plans agreed with P&C; remains open until 31-Oct-2026."},{"id":"TRN-01","activity":"Annual compliance training session — 2026","type":"Training","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2026-12-01","end":"2026-12-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"One session per year, held in Q4."},{"id":"TRN-02","activity":"Annual compliance training session — 2027","type":"Training","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2027-12-01","end":"2027-12-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"One session per year, held in Q4."},{"id":"TRN-03","activity":"Annual compliance training session — 2028","type":"Training","owner":"","department":"Legal & GRC","frequency":"Annual","start":"2028-12-01","end":"2028-12-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":"One session per year, held in Q4."},{"id":"AWA-02","activity":"Awareness communication — 2027 Q1","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-03-01","end":"2027-03-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-03","activity":"Awareness communication — 2027 Q2","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-06-01","end":"2027-06-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-04","activity":"Awareness communication — 2027 Q3","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2027-09-01","end":"2027-09-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-05","activity":"Awareness communication — 2028 Q1","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2028-03-01","end":"2028-03-31","duration":31,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-06","activity":"Awareness communication — 2028 Q2","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2028-06-01","end":"2028-06-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""},{"id":"AWA-07","activity":"Awareness communication — 2028 Q3","type":"Awareness","owner":"","department":"Legal & GRC","frequency":"Quarterly","start":"2028-09-01","end":"2028-09-30","duration":30,"status":"Not Started","progress":0.0,"reviewer":"Head of Compliance","approval":"Pending","notes":""}],"lists":{"Activity Type":["Quarterly Reporting","Annual Reporting","BU Assessment","Audit","Regulatory Filing","Training","Governance","Monitoring","Awareness"],"Status":["Not Started","In Progress","Complete","Deferred"],"Frequency":["One-off","Monthly","Quarterly","Semi-Annual","Annual"],"Approval Status":["Pending","Approved","Rejected","N/A"],"Department":["Finance","Legal & GRC","P&C","Internal Audit","Tech & Digital Enablement","Delivery","Product Management","Board Secretariat","Strategy","Commercial","Mudad"],"Owner":["CFO","Financial Controller","Tax Manager","Compliance Officer","Head of Compliance","Risk Manager","Head of Internal Audit","Company Secretary","Legal Counsel","HR Director","Payroll Officer","Facilities Manager"],"Reviewer / Approver":["Board","Audit Committee","Chairman","CFO","Head of Compliance","Legal Counsel","HR Director","Head of Internal Audit","CIO"],"Type Filter":["All","Quarterly Reporting","Annual Reporting","BU Assessment","Audit","Regulatory Filing","Training","Governance","Monitoring","Awareness"],"Status Filter":["All","Not Started","In Progress","Complete","Deferred"],"Quarters":["2026 Q3","2026 Q4","2027 Q1","2027 Q2","2027 Q3","2027 Q4","2028 Q1","2028 Q2","2028 Q3","2028 Q4"]},"source":"Compliance_Calendar.xlsx","synced":"2026-08-19","dirty":false};
 
 /* ══ constants ══════════════════════════════════════════════════════ */
 const TYPE_VAR = {
@@ -1178,6 +1203,8 @@ const PEOPLE = [
   {key:"y", name:"Yosef",   addr:"yalturaifi@masdr.sa"},
   {key:"m", name:"Meshari", addr:"mbaselem@masdr.sa"}
 ];
+/* who a brand-new reminder emails before anyone has chosen otherwise */
+const DEFAULT_TO = "yalturaifi@masdr.sa";
 /* How long before the due date an alert goes out. "" means no alert. */
 const LEADS = {"0":"on the day","1":"1 day before","2":"2 days before","3":"3 days before",
   "7":"1 week before","14":"2 weeks before","30":"1 month before"};
@@ -1921,7 +1948,27 @@ const VIEWS = {
   not:     {label:"Not started",     color:"var(--idle)", test:a=>a.status==="Not Started"},
   done:    {label:"Complete",        color:"var(--ok)",   test:a=>a.status==="Complete"}
 };
-function inView(a, v){ return !v || !VIEWS[v] ? true : VIEWS[v].test(a); }
+function inView(a, v){
+  if(!v) return true;
+  if(v==="gaps") return gapReason(a)!==null;
+  return VIEWS[v] ? VIEWS[v].test(a) : true;
+}
+/* Why this row needs a second look, or null if it does not. One place, so the
+   list and the "Quick fix" filter can never disagree. */
+function gapReason(a){
+  const t=today();
+  if(!d(a.end))                                      return ["No due date",false];
+  if(d(a.start)&&d(a.end)<d(a.start))                return ["Ends first",false];
+  if(isOverdue(a))                                   return [String(dayDiff(d(a.end),t))+"d late",false];
+  if(!a.type)                                        return ["No type",true];
+  if(a.status==="Complete"&&(+a.progress||0)<1)      return ["Done at "+Math.round((+a.progress||0)*100)+"%",true];
+  return null;
+}
+function gapFlags(){
+  const out=[];
+  acts().forEach(a=>{ const r=gapReason(a); if(r) out.push([a,r[0],r[1]]); });
+  return out;
+}
 
 function renderWpBoard(){
   const all=acts();
@@ -1932,15 +1979,7 @@ function renderWpBoard(){
   }).join("");
 
   /* rows that would trip someone up later */
-  const t=today();
-  const flags=[];
-  all.forEach(a=>{
-    if(!d(a.end))                                    flags.push([a,"No due date",false]);
-    else if(d(a.start)&&d(a.end)<d(a.start))         flags.push([a,"Ends first",false]);
-    else if(isOverdue(a))                            flags.push([a,String(dayDiff(d(a.end),t))+"d late",false]);
-    else if(!a.type)                                 flags.push([a,"No type",true]);
-    else if(a.status==="Complete"&&(+a.progress||0)<1) flags.push([a,"Done at "+Math.round((+a.progress||0)*100)+"%",true]);
-  });
+  const flags=gapFlags();
   $("gapCount").textContent = flags.length ? flags.length+(flags.length===1?" row":" rows") : "nothing to fix";
   $("wpGaps").innerHTML = flags.length
     ? flags.slice(0,40).map(f=>'<button class="gap" data-goto="'+esc(f[0].id)+'">'+
@@ -1967,7 +2006,7 @@ function renderWpBoard(){
 $("wpTiles").addEventListener("click",e=>{
   const b2=e.target.closest("[data-view]"); if(!b2) return;
   const k=b2.getAttribute("data-view");
-  wpFilters.view = wpFilters.view===k ? "" : k;
+  wpFilters.view = wpFilters.view===k ? "" : k;   /* also drops a "gaps" view */
   wpFilters.status="All"; $("wStatus").value="All";
   const f=$("wpFold"); if(wpFilters.view && f) f.open=true;
   renderWpBoard(); renderWorkPlan();
@@ -2172,7 +2211,10 @@ function openRemModal(){
   /* an end a year out, so a reminder stops on its own unless you say otherwise */
   $("remUntil").value = iso(addDays(today(), 365));
   $("remForever").checked=false; $("remUntil").disabled=false;
-  $("remWho").hidden=true; whoFill("remWho", remEmailAddr());
+  /* a reminder you cannot see is no reminder, so email is on unless you say
+     otherwise; the people you sent to last time come back ticked */
+  $("remEmail").checked=true;
+  $("remWho").hidden=false; whoFill("remWho", remEmailAddr()||DEFAULT_TO);
   $("remModal").hidden=false; $("scrim").hidden=false;
   requestAnimationFrame(()=>{ $("scrim").classList.add("on"); $("remText").focus(); });
 }
@@ -2199,6 +2241,21 @@ $("remEmail").addEventListener("change",()=>{
   $("remWho").hidden=!$("remEmail").checked;
 });
 $("btnRemAll").addEventListener("click",()=>{ remShowAll=!remShowAll; renderReminders(); });
+
+/* Quick add opens the same window as everywhere else; Quick fix narrows the
+   table to just the rows that need attention and takes you there. */
+$("btnQuickAdd").addEventListener("click",()=>openAdHoc(null));
+$("btnQuickFix").addEventListener("click",()=>{
+  const n2=gapFlags().length;
+  if(!n2){ toast("Nothing needs fixing — every activity checks out."); return; }
+  wpFilters={type:"All",status:"All",q:"",view:"gaps"};
+  $("wSearch").value=""; $("wType").value="All"; $("wStatus").value="All";
+  const f=$("wpFold"); if(f) f.open=true;
+  renderWpBoard(); renderWorkPlan();
+  const tbl=$("wpTbl");
+  if(tbl) tbl.scrollIntoView({block:"start",behavior:"smooth"});
+  toast(n2+(n2===1?" row needs":" rows need")+" a second look — showing just those.");
+});
 /* One address or several, separated by commas or semicolons. Returns them
    tidied and comma-joined, or "" if any one of them is not an address. */
 /* ══ who an email goes to ═══════════════════════════════════════════
@@ -2439,7 +2496,10 @@ $("btnTheme").addEventListener("click",()=>{
 /* remember whether the Work Plan is folded away */
 (function(){
   const f=$("wpFold"); if(!f) return;
-  try{ if(localStorage.getItem(STORE+".wpfold")==="0") f.open=false; }catch(e){}
+  /* the table is folded away to begin with, so both answers have to be
+     restored — only handling "0" would lose every time you opened it */
+  try{ const v=localStorage.getItem(STORE+".wpfold");
+       if(v==="1") f.open=true; else if(v==="0") f.open=false; }catch(e){}
   f.addEventListener("toggle",()=>{ try{ localStorage.setItem(STORE+".wpfold", f.open?"1":"0"); }catch(e){} });
 })();
 
