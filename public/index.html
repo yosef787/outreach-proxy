@@ -152,8 +152,13 @@ button{cursor:pointer}
 .lockup{display:flex;align-items:center;gap:11px;flex:none}
 .mark-btn{border:0;background:transparent;padding:0;border-radius:8px;display:block;flex:none;line-height:0}
 .mark-btn:hover{background:var(--surface-3)}
-.lockup .mark{display:block;height:36px;width:auto;flex:none}
-#logoSlot img.mark{height:36px;width:auto;max-width:120px;object-fit:contain}
+.lockup .mark{display:block;height:46px;width:auto;flex:none}
+/* a real logo file is usually a wordmark, so it gets height and width to breathe */
+#logoSlot img.mark{height:50px;width:auto;max-width:190px;object-fit:contain}
+@media (max-width:700px){
+  .lockup .mark{height:36px}
+  #logoSlot img.mark{height:38px;max-width:130px}
+}
 :root[data-theme="dark"] .lockup .mark{filter:brightness(1.5) saturate(.95)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .lockup .mark{filter:brightness(1.5) saturate(.95)}}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .lockup .mark{filter:none}}
@@ -163,7 +168,7 @@ button{cursor:pointer}
 :root[data-theme="dark"] .mwords .ar{color:var(--t-quarterly)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mwords .ar{color:var(--t-quarterly)}}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .mwords .ar{color:var(--brand)}}
-.lockup .rule{width:1px;height:30px;background:var(--line);flex:none}
+.lockup .rule{width:1px;height:36px;background:var(--line);flex:none}
 .lockup .t{display:flex;flex-direction:column;line-height:1.15}
 .lockup .t b{font-size:15px;font-weight:700;letter-spacing:-.005em;white-space:nowrap}
 .lockup .t span{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
@@ -173,9 +178,9 @@ button{cursor:pointer}
 .segnav{display:flex;gap:5px;padding:5px;border-radius:14px;
   background:linear-gradient(180deg,var(--surface-3),var(--surface-2));
   border:1px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.04)}
-.segnav button{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:0;
-  background:transparent;color:var(--ink-2);font-size:14px;font-weight:700;letter-spacing:-.005em;
-  padding:10px 30px;min-width:152px;border-radius:10px;white-space:nowrap;
+.segnav button{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;
+  background:transparent;color:var(--ink-2);font-size:14.5px;font-weight:700;letter-spacing:-.005em;
+  padding:11px 42px;min-width:186px;border-radius:10px;white-space:nowrap;
   transition:background .18s,color .18s,box-shadow .18s}
 .segnav button svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;
   stroke-linecap:round;stroke-linejoin:round;flex:none;opacity:.85}
@@ -184,7 +189,8 @@ button{cursor:pointer}
   background:linear-gradient(165deg,var(--brand-mid),var(--brand))}
 .segnav button[aria-selected="true"] svg{opacity:1}
 .segnav button[aria-selected="true"]:hover{background:linear-gradient(165deg,var(--brand),var(--brand-deep))}
-@media (max-width:1240px){.segnav button{min-width:0;padding:10px 18px}}
+@media (max-width:1420px){.segnav button{min-width:150px;padding:10px 26px}}
+@media (max-width:1180px){.segnav button{min-width:0;padding:10px 16px;font-size:13.5px}}
 
 .bar-actions{margin-left:auto;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .src{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-3);
@@ -329,6 +335,16 @@ button{cursor:pointer}
 .fstack{display:flex;flex-direction:column;gap:10px}
 .fsec{border-top:1px solid var(--line);padding-top:15px}
 .fsec:first-child{border-top:0;padding-top:0}
+/* a form long enough to need signposting gets numbered steps */
+.step{border-top:1px solid var(--line);padding-top:16px}
+.step:first-child{border-top:0;padding-top:0}
+.step-h{display:flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;color:var(--ink);
+  margin-bottom:12px}
+.step-n{width:20px;height:20px;border-radius:50%;background:var(--brand-tint);color:var(--brand);
+  font-size:11px;font-weight:700;display:grid;place-items:center;flex:none;font-family:var(--mono)}
+:root[data-theme="dark"] .step-n{color:var(--t-quarterly)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .step-n{color:var(--t-quarterly)}}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .step-n{color:var(--brand)}}
 
 /* ── layout ─────────────────────────────────────────────────────────── */
 main{max-width:var(--page);margin:0 auto;padding:24px 28px 80px}
@@ -370,6 +386,45 @@ main{max-width:var(--page);margin:0 auto;padding:24px 28px 80px}
 /* ── reminders ─────────────────────────────────────────────────────── */
 .rem-form{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:14px 20px 4px}
 .rem-form[hidden]{display:none}
+/* the "these need a decision" bar above the list */
+.decide-bar{display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  padding:12px 20px;border:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  background:var(--crit-bg);transition:background .15s}
+.decide-bar:hover{background:color-mix(in srgb,var(--crit) 14%,var(--crit-bg))}
+.decide-bar .db-dot{width:9px;height:9px;border-radius:50%;background:var(--crit);flex:none;
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--crit) 18%,transparent)}
+.decide-bar .db-t{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.decide-bar .db-t b{font-size:13px;color:var(--ink)}
+.decide-bar .db-t span{font-size:11.5px;color:var(--ink-2)}
+.decide-bar .db-go{font-size:12px;font-weight:700;color:var(--crit);white-space:nowrap}
+.dc-card{display:flex;flex-direction:column;gap:5px;border:1px solid var(--line);border-radius:12px;
+  padding:15px 16px;background:var(--surface-2)}
+.dc-card b{font-size:15px;line-height:1.35}
+.dc-card > span:last-child{font-size:12px;color:var(--ink-3)}
+.dc-late{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--crit);
+  background:var(--crit-bg);border-radius:5px;padding:3px 8px;align-self:flex-start}
+.dc-late.due{color:var(--warn);background:var(--warn-bg)}
+.btn.ok{border-color:color-mix(in srgb,var(--ok) 45%,transparent);background:var(--ok-bg);color:var(--ink)}
+.btn.ok:hover{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,var(--ok-bg))}
+.rem-note-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--brand-soft);
+  margin-left:7px;vertical-align:middle}
+.rem[data-rcard]{cursor:pointer}
+.rc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.rc-f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.rc-f .k{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.rc-f .v{font-size:13.5px;color:var(--ink);word-break:break-word}
+.linkish{border:0;background:transparent;padding:0;font-size:13.5px;color:var(--brand);
+  text-align:left;text-decoration:underline;text-underline-offset:2px;text-decoration-thickness:1px}
+.linkish:hover{color:var(--brand-deep)}
+:root[data-theme="dark"] .linkish{color:var(--t-quarterly)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .linkish{color:var(--t-quarterly)}}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .linkish{color:var(--brand)}}
+.rc-notes{font-size:13px;color:var(--ink-2);line-height:1.6;background:var(--surface-2);
+  border:1px solid var(--line);border-radius:11px;padding:12px 14px;white-space:pre-wrap}
+.rc-dates{display:flex;flex-wrap:wrap;gap:7px}
+.rc-dates span{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);background:var(--surface-2);
+  border:1px solid var(--line);border-radius:999px;padding:4px 11px}
+.rc-dates span.first{border-color:var(--brand-soft);background:var(--brand-tint);color:var(--ink)}
 .rem-form input[type=text]{flex:1;min-width:200px}
 .rem-form input,.rem-form select{border:1px solid var(--line-strong);border-radius:9px;padding:7px 10px;
   font-size:13px;background:var(--surface)}
@@ -538,8 +593,8 @@ main{max-width:var(--page);margin:0 auto;padding:24px 28px 80px}
 .chip-more{font-size:10px;font-weight:700;color:var(--ink-3);padding-left:4px}
 .chip.rem-chip{background:var(--surface-3);color:var(--ink-2);box-shadow:inset 0 0 0 1px var(--line-strong);
   font-weight:600;cursor:default}
-.ongoing{display:flex;gap:4px;align-items:center;margin-top:auto;padding-top:6px}
-.ongoing i{height:5px;width:5px;border-radius:50%;flex:none;opacity:.75}
+.ongoing{display:flex;gap:3px;align-items:center;margin-top:auto;padding-top:6px}
+.ongoing i{height:3px;border-radius:2px;flex:1 1 0;min-width:2px;opacity:.8}
 .ongoing b{font-size:9px;font-weight:700;color:var(--ink-3);flex:none}
 .day.out .ongoing{opacity:.4}
 
@@ -728,8 +783,17 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13px}
 .fx-head .fx-id{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
 .fx-head b{font-size:14.5px}
 .quickbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.quickbar .btn{min-width:190px;justify-content:center}
 .quickbar .qb-note{font-size:12px;color:var(--ink-3)}
-p.lede{font-size:12.5px;color:var(--ink-3);margin:-4px 2px 0}
+p.lede{font-size:12.5px;color:var(--ink-3);margin:0}
+/* the three panels read as one stack rather than three floating cards */
+.panelgroup{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--sh-1);overflow:hidden}
+.panelgroup > details.ref{background:transparent;border:0;border-radius:0;box-shadow:none;
+  border-top:1px solid var(--line)}
+.panelgroup > details.ref:first-child{border-top:0}
+.panelgroup > details.ref[open]{background:var(--surface-2)}
+.panelgroup > details.ref[open] > summary{border-bottom:1px solid var(--line)}
 ol.howto{margin:0;padding-left:19px;font-size:12.5px;color:var(--ink-2)}
 ol.howto li{margin-top:4px}
 
@@ -922,6 +986,11 @@ footer.foot p{max-width:78ch}
       <div class="card">
         <div class="card-hd"><h2>What needs doing</h2>
           <span class="hint">Tick one off and it updates everywhere</span></div>
+        <button class="decide-bar" id="decideBar" hidden>
+          <span class="db-dot"></span>
+          <span class="db-t"><b id="decideCount">—</b><span id="decideSub">—</span></span>
+          <span class="db-go">Review them</span>
+        </button>
         <div class="up" id="priorities"></div>
       </div>
 
@@ -1027,8 +1096,9 @@ footer.foot p{max-width:78ch}
         Quick fix</button>
       <span class="qb-note">Add something in a hurry, or find an activity and amend it.</span>
     </div>
+    <div class="panelgroup">
     <details class="ref">
-      <summary>How to use this sheet</summary>
+      <summary>How to use — entry and addition</summary>
       <div>
         <ol class="howto">
           <li>Enter a brief description of the activity in <em>Activity / Deliverable</em>.</li>
@@ -1037,10 +1107,10 @@ footer.foot p{max-width:78ch}
         </ol>
       </div>
     </details>
-    <p class="lede">Click any cell to edit. Changes stay in this browser until you sync.</p>
     <details class="ref" id="wpFold">
       <summary>Every activity</summary>
       <div class="stack">
+        <p class="lede">Click any cell to edit. Changes stay in this browser until you sync.</p>
         <div class="filterbar no-print">
           <select id="wType" aria-label="Filter by type"></select>
           <select id="wStatus" aria-label="Filter by status"></select>
@@ -1064,6 +1134,7 @@ footer.foot p{max-width:78ch}
         <div><div class="eyebrow" style="margin:6px 0 9px">Quarter</div><div class="legend" id="keyQ"></div></div>
       </div>
     </details>
+    </div>
   </section>
 </main>
 
@@ -1081,16 +1152,28 @@ footer.foot p{max-width:78ch}
 <div class="modal" id="remModal" hidden role="dialog" aria-modal="true" aria-labelledby="remTitle">
   <div class="modal-hd">
     <div><h3 id="remTitle">Add a reminder</h3>
-      <p>A standing prompt that is not a work-plan activity — "every Sunday, follow up with P&amp;C".</p></div>
+      <p>A standing nudge for work that never appears in the plan — chasing a department, checking an
+         inbox, a weekly catch-up. It shows on the days you choose and can email whoever needs it.</p></div>
     <button type="button" class="modal-x" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   </div>
   <form id="remForm">
     <div class="modal-bd">
-      <div class="f full">
-        <label for="remText">Remind me to</label>
-        <input id="remText" type="text" maxlength="120" placeholder="e.g. Follow up with P&amp;C" required>
-      </div>
-      <div class="fsec">
+      <section class="step">
+        <div class="step-h"><span class="step-n">1</span>What is the nudge</div>
+        <div class="f full">
+          <label for="remText">Remind me to</label>
+          <input id="remText" type="text" maxlength="120" placeholder="e.g. Follow up with P&amp;C" required>
+        </div>
+        <div class="f full" style="margin-top:12px">
+          <label for="remNotes">Details <span class="opt">optional</span></label>
+          <textarea id="remNotes" class="ta" rows="2" maxlength="600"
+                    placeholder="What exactly to do, who to speak to, where the file lives"></textarea>
+          <span class="hint">Shown on the reminder card when you open it.</span>
+        </div>
+      </section>
+
+      <section class="step">
+        <div class="step-h"><span class="step-n">2</span>When it should appear</div>
         <div class="fgrid">
           <div class="f"><label for="remRepeat">How often</label>
             <select id="remRepeat">
@@ -1108,8 +1191,10 @@ footer.foot p{max-width:78ch}
           <div id="remDays" class="daychips" role="group" aria-label="Days"></div>
           <span class="hint">Pick as many as you need.</span>
         </div>
-      </div>
-      <div class="fsec">
+      </section>
+
+      <section class="step">
+        <div class="step-h"><span class="step-n">3</span>When it should stop</div>
         <div class="fgrid">
           <div class="f"><label for="remUntil">Stop after</label>
             <input id="remUntil" type="date">
@@ -1117,15 +1202,19 @@ footer.foot p{max-width:78ch}
           </div>
           <div class="f"><label for="remLink">Belongs to</label>
             <select id="remLink"></select>
-            <span class="hint">Linking ends the reminder when that activity is due or done.</span>
+            <span class="hint">Linking ends it when that activity is due or done.</span>
           </div>
         </div>
-      </div>
-      <div class="fsec fstack">
-        <label class="f-check"><input type="checkbox" id="remAlways"> Always show it, even when it is not due soon</label>
-        <label class="f-check"><input type="checkbox" id="remEmail"> Email it as well</label>
-        <div id="remWho" hidden></div>
-      </div>
+      </section>
+
+      <section class="step">
+        <div class="step-h"><span class="step-n">4</span>Who hears about it</div>
+        <div class="fstack">
+          <label class="f-check"><input type="checkbox" id="remAlways"> Always show it, even when it is not due soon</label>
+          <label class="f-check"><input type="checkbox" id="remEmail"> Email it as well</label>
+          <div id="remWho" hidden></div>
+        </div>
+      </section>
     </div>
     <div class="modal-ft">
       <button class="btn solid" type="submit">Add reminder</button>
@@ -1192,6 +1281,46 @@ footer.foot p{max-width:78ch}
       <button class="btn" type="button" data-close>Cancel</button>
     </div>
   </form>
+</div>
+
+<div class="modal" id="decideModal" hidden role="dialog" aria-modal="true" aria-labelledby="dcTitle">
+  <div class="modal-hd">
+    <div><h3 id="dcTitle">Is this done?</h3>
+      <p id="dcProgress">—</p></div>
+    <button type="button" class="modal-x" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="modal-bd">
+    <div class="dc-card">
+      <span class="dc-late" id="dcLate">—</span>
+      <b id="dcName">—</b>
+      <span id="dcMeta">—</span>
+    </div>
+    <div class="f full" id="dcDeferWrap" hidden>
+      <label for="dcDate">Move the due date to</label>
+      <input id="dcDate" type="date">
+      <span class="hint">It is marked deferred and stops counting as overdue until then.</span>
+    </div>
+  </div>
+  <div class="modal-ft">
+    <button class="btn ok" id="dcDone">Yes, it is done</button>
+    <button class="btn warn" id="dcDefer">Defer it</button>
+    <button class="btn" id="dcSkip">Leave it</button>
+    <span class="spacer"></span>
+    <button class="btn" type="button" data-close>Stop reviewing</button>
+  </div>
+</div>
+
+<div class="modal" id="remCard" hidden role="dialog" aria-modal="true" aria-labelledby="rcTitle">
+  <div class="modal-hd">
+    <div><h3 id="rcTitle">—</h3><p id="rcWhen">—</p></div>
+    <button type="button" class="modal-x" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="modal-bd" id="rcBody"></div>
+  <div class="modal-ft">
+    <button class="btn" type="button" data-close>Close</button>
+    <span class="spacer"></span>
+    <button class="btn danger" id="rcDelete">Delete this reminder</button>
+  </div>
 </div>
 
 <div class="modal" id="fixModal" hidden role="dialog" aria-modal="true" aria-labelledby="fxTitle">
@@ -1619,6 +1748,75 @@ function renderLists2(){
     : '<div class="empty">Nothing outstanding — every activity is complete.</div>';
 }
 
+/* ══ deciding on what has come due ══════════════════════════════════
+   Anything overdue or due today is waiting on an answer: did it happen,
+   or has it moved? The bar counts them and the window walks through them
+   one at a time. */
+function needsDecision(){
+  const t=today();
+  return acts().filter(a=>{
+    if(a.status==="Complete"||a.status==="Deferred") return false;
+    const e=d(a.end);
+    return !!e && e<=t;
+  }).sort((a,b)=>d(a.end)-d(b.end));
+}
+function renderDecideBar(){
+  const list=needsDecision(), bar=$("decideBar");
+  if(!bar) return;
+  bar.hidden=!list.length;
+  if(!list.length) return;
+  const late=list.filter(a=>d(a.end)<today()).length;
+  $("decideCount").textContent=list.length+(list.length===1?" activity needs a decision":" activities need a decision");
+  $("decideSub").textContent=late
+    ? late+(late===1?" is overdue":" are overdue")+" — say whether they are done or have moved"
+    : "due today — say whether they are done or have moved";
+}
+let decideQueue=[], decideAt=0;
+$("decideBar").addEventListener("click",()=>{
+  decideQueue=needsDecision(); decideAt=0;
+  if(!decideQueue.length){ toast("Nothing is waiting on a decision."); return; }
+  showDecide();
+});
+function showDecide(){
+  while(decideAt<decideQueue.length && !byId(decideQueue[decideAt].id)) decideAt++;
+  if(decideAt>=decideQueue.length){ closeDecide(); toast("All caught up."); return; }
+  const a=decideQueue[decideAt], t=today(), e=d(a.end), late=dayDiff(e,t);
+  $("dcProgress").textContent=(decideAt+1)+" of "+decideQueue.length;
+  $("dcLate").textContent = late>0 ? late+(late===1?" day late":" days late") : "due today";
+  $("dcLate").className = "dc-late"+(late>0?"":" due");
+  $("dcName").textContent=a.activity||"—";
+  $("dcMeta").textContent=a.id+" · "+(a.type||"no type")+" · was due "+fmt(e);
+  $("dcDeferWrap").hidden=true;
+  $("dcDate").value=iso(addDays(t,14));
+  $("decideModal").hidden=false; $("scrim").hidden=false;
+  requestAnimationFrame(()=>$("scrim").classList.add("on"));
+}
+function closeDecide(){
+  $("decideModal").hidden=true;
+  if($("drawer").hidden && $("saveModal").hidden && $("syncModal").hidden &&
+     $("adHocModal").hidden && $("remModal").hidden && $("fixModal").hidden && $("remCard").hidden){
+    $("scrim").classList.remove("on"); setTimeout(()=>{ $("scrim").hidden=true; },200);
+  }
+}
+function decideNext(){ decideAt++; if(decideAt<decideQueue.length) showDecide(); else { closeDecide(); renderAll(); toast("All caught up."); } }
+$("dcDone").addEventListener("click",()=>{
+  const a=decideQueue[decideAt]; if(!a) return;
+  setDone(a.id, true);            /* stamps, saves and re-renders */
+  decideAt++;
+  if(decideAt<decideQueue.length) showDecide(); else closeDecide();
+});
+$("dcDefer").addEventListener("click",()=>{
+  if($("dcDeferWrap").hidden){ $("dcDeferWrap").hidden=false; $("dcDate").focus(); return; }
+  const a=byId(decideQueue[decideAt].id); if(!a) return;
+  const to=$("dcDate").value;
+  if(!to || d(to)<=today()){ toast("Pick a date in the future.",true); return; }
+  a.end=to; a.status="Deferred"; a.duration=durationOf(a)||0;
+  touch(a); state.dirty=true; save();
+  toast(a.id+" deferred to "+fmt(d(to))+".");
+  decideNext();
+});
+$("dcSkip").addEventListener("click",decideNext);
+
 /* ══ workload across the cycle ══════════════════════════════════════
    How much falls in each quarter. One measure, one hue — the current
    quarter is the only thing picked out. */
@@ -1956,7 +2154,7 @@ function setAhSpan(on){
 }
 function closeAdHoc(){
   $("adHocModal").hidden=true;
-  if($("drawer").hidden && $("saveModal").hidden && $("syncModal").hidden && $("fixModal").hidden){
+  if($("drawer").hidden && $("saveModal").hidden && $("syncModal").hidden && $("fixModal").hidden && $("remCard").hidden){
     $("scrim").classList.remove("on"); setTimeout(()=>{ $("scrim").hidden=true; },200);
   }
 }
@@ -2354,10 +2552,10 @@ function renderReminders(){
     const dd=n?dayDiff(t,n):null;
     const end=remEndDate(r), ended=end&&end<t;
     const la=remLinked(r);
-    return '<div class="rem'+(isToday?" due-today":"")+(ended?" ended":"")+
-      (la?'" data-open="'+esc(la.id):"")+'">'+
+    return '<div class="rem'+(isToday?" due-today":"")+(ended?" ended":"")+'" data-rcard="'+esc(r.id)+'">'+
       '<span class="rem-bell"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8M13.7 21a2 2 0 0 1-3.4 0"/></svg></span>'+
-      '<span class="rem-b"><b>'+esc(r.text)+'</b><span>'+esc(remLabel(r))+'</span></span>'+
+      '<span class="rem-b"><b>'+esc(r.text)+(r.notes?'<i class="rem-note-dot" title="Has details"></i>':"")+'</b>'+
+        '<span>'+esc(remLabel(r))+'</span></span>'+
       '<span class="rem-tags">'+
         (ended?'<span class="rem-tag">ended</span>':"")+
         (r.always?'<span class="rem-tag on">always</span>':"")+
@@ -2402,6 +2600,7 @@ function chosenDays(){
 }
 function openRemModal(){
   $("remForm").reset();
+  $("remNotes").value="";
   syncRemFields(); fillRemLink();
   /* an end a year out, so a reminder stops on its own unless you say otherwise */
   $("remUntil").value = iso(addDays(today(), 365));
@@ -2415,7 +2614,7 @@ function openRemModal(){
 }
 function closeRemModal(){
   $("remModal").hidden=true;
-  if($("drawer").hidden && $("saveModal").hidden && $("syncModal").hidden && $("adHocModal").hidden && $("fixModal").hidden){
+  if($("drawer").hidden && $("saveModal").hidden && $("syncModal").hidden && $("adHocModal").hidden && $("fixModal").hidden && $("remCard").hidden){
     $("scrim").classList.remove("on"); setTimeout(()=>{ $("scrim").hidden=true; },200);
   }
 }
@@ -2455,7 +2654,7 @@ function openFix(){
 function closeFix(){
   $("fixModal").hidden=true;
   if($("drawer").hidden && $("saveModal").hidden && $("syncModal").hidden &&
-     $("adHocModal").hidden && $("remModal").hidden){
+     $("adHocModal").hidden && $("remModal").hidden && $("remCard").hidden){
     $("scrim").classList.remove("on"); setTimeout(()=>{ $("scrim").hidden=true; },200);
   }
 }
@@ -2595,7 +2794,7 @@ $("remForm").addEventListener("submit",e=>{
   e.preventDefault();
   const text=$("remText").value.trim(); if(!text) return;
   const rep=$("remRepeat").value;
-  const r={id:"R"+Date.now().toString(36), text:text, repeat:rep,
+  const r={id:"R"+Date.now().toString(36), text:text, repeat:rep, notes:$("remNotes").value.trim(),
            always:$("remAlways").checked, email:$("remEmail").checked,
            until:$("remForever").checked?"":($("remUntil").value||""),
            forever:$("remForever").checked, link:$("remLink").value||"",
@@ -2618,12 +2817,66 @@ $("remForm").addEventListener("submit",e=>{
   toast("Reminder added — "+remLabel(r).toLowerCase()+".");
 });
 $("remList").addEventListener("click",e=>{
-  const x=e.target.closest("[data-rem]"); if(!x) return;
-  const rid=x.getAttribute("data-rem");
+  const x=e.target.closest("[data-rem]");
+  if(x){ deleteReminder(x.getAttribute("data-rem")); return; }
+  const card=e.target.closest("[data-rcard]");
+  if(card) openRemCard(card.getAttribute("data-rcard"));
+});
+function deleteReminder(rid){
   reminders=reminders.filter(r=>r.id!==rid);
   remTombstones=remTombstones.filter(t=>t.id!==rid);
   remTombstones.push({id:rid, at:new Date().toISOString()});
   saveReminders(); renderReminders(); renderCalendar(); toast("Reminder removed.");
+}
+
+/* The card behind a reminder: what it says, when it next lands, how long it
+   runs, and who hears about it. */
+let remCardId=null;
+function openRemCard(rid){
+  const r=reminders.find(x=>x.id===rid); if(!r) return;
+  remCardId=rid;
+  const t=today(), end=remEndDate(r), la=remLinked(r);
+  $("rcTitle").textContent=r.text;
+  $("rcWhen").textContent=remLabel(r);
+  const next=remHits(r, t, addDays(t, 400)).slice(0,5);
+  const f=(k,v)=>'<div class="rc-f"><div class="k">'+esc(k)+'</div><div class="v">'+v+'</div></div>';
+  $("rcBody").innerHTML=
+    (r.notes?'<div class="rc-notes">'+esc(r.notes)+'</div>':"")+
+    '<div class="rc-grid">'+
+      f("Repeats", esc(remLabel(r).split(" · ")[0]))+
+      f("Runs until", end?esc(fmt(end)):"no end set")+
+      f("Belongs to", la
+        ? '<button class="linkish" data-goact="'+esc(la.id)+'">'+esc(la.id)+" — "+
+          esc(la.activity.slice(0,40))+'</button>'
+        : "nothing")+
+      f("Emails", r.email&&r.addr?esc(r.addr):"nobody")+
+      f("On the dashboard", r.always?"always shown":"shown when it is close")+
+    '</div>'+
+    '<div class="f full"><label>Next few times</label>'+
+      (next.length
+        ? '<div class="rc-dates">'+next.map((dt,i)=>'<span'+(i===0?' class="first"':'')+'>'+
+            esc(fmt(dt))+'</span>').join("")+'</div>'
+        : '<span class="hint">It has no dates left to run.</span>')+
+    '</div>';
+  $("remCard").hidden=false; $("scrim").hidden=false;
+  requestAnimationFrame(()=>$("scrim").classList.add("on"));
+}
+function closeRemCard(){
+  $("remCard").hidden=true;
+  if($("drawer").hidden && $("saveModal").hidden && $("syncModal").hidden &&
+     $("adHocModal").hidden && $("remModal").hidden && $("fixModal").hidden){
+    $("scrim").classList.remove("on"); setTimeout(()=>{ $("scrim").hidden=true; },200);
+  }
+}
+/* the linked activity is still one click away, now from inside the card */
+$("rcBody").addEventListener("click",e=>{
+  const g=e.target.closest("[data-goact]"); if(!g) return;
+  const id=g.getAttribute("data-goact");
+  closeRemCard(); setTimeout(()=>openDrawer(id),210);
+});
+$("rcDelete").addEventListener("click",()=>{
+  if(!remCardId) return;
+  const id=remCardId; closeRemCard(); deleteReminder(id);
 });
 
 /* ══ chrome ═════════════════════════════════════════════════════════ */
@@ -2647,7 +2900,7 @@ function renderAll(){
   if(!cursor){ const t=today(), s=span();
     cursor=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),1));
     if(cursor<s.from||cursor>s.to) cursor=new Date(Date.UTC(s.from.getUTCFullYear(),s.from.getUTCMonth(),1)); }
-  renderChrome(); renderHero(); renderKpis(); renderLists2(); renderReminders(); renderQuarterStrip();
+  renderChrome(); renderHero(); renderKpis(); renderLists2(); renderDecideBar(); renderReminders(); renderQuarterStrip();
   renderBreakdowns(); renderCalendar(); renderWpBoard(); renderWorkload(); renderWorkPlan(); renderRef();
 }
 
@@ -2682,6 +2935,8 @@ document.addEventListener("click",e=>{
   else if(dlg.id==="adHocModal") closeAdHoc();
   else if(dlg.id==="remModal") closeRemModal();
   else if(dlg.id==="fixModal") closeFix();
+  else if(dlg.id==="remCard") closeRemCard();
+  else if(dlg.id==="decideModal"){ closeDecide(); renderAll(); }
 });
 
 /* ══ tooltip / toast ════════════════════════════════════════════════ */
@@ -3106,7 +3361,9 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeMenu();
   if(!$("syncModal").hidden) closeSyncModal();
   if(!$("adHocModal").hidden) closeAdHoc();
   if(!$("remModal").hidden) closeRemModal();
-  if(!$("fixModal").hidden) closeFix(); } });
+  if(!$("fixModal").hidden) closeFix();
+  if(!$("remCard").hidden) closeRemCard();
+  if(!$("decideModal").hidden){ closeDecide(); renderAll(); } } });
 
 /* ══ .ics calendar export ═══════════════════════════════════════════ */
 function icsDate(dt){ return dt.toISOString().slice(0,10).replace(/-/g,""); }
@@ -3312,7 +3569,7 @@ function openSyncModal(){
 }
 function closeSyncModal(){
   $("syncModal").hidden=true;
-  if($("drawer").hidden && $("saveModal").hidden && $("fixModal").hidden){
+  if($("drawer").hidden && $("saveModal").hidden && $("fixModal").hidden && $("remCard").hidden){
     $("scrim").classList.remove("on"); setTimeout(()=>{ $("scrim").hidden=true; },200);
   }
 }
@@ -3344,7 +3601,7 @@ setInterval(()=>{ if(!syncBusy && sync.url && sync.last) setSyncUi("ok"); }, 600
 try{ const m=localStorage.getItem(STORE+".mode"); if(m) calMode=m; }catch(e){}
 /* Overlays always start closed — a stray edit to the markup can otherwise
    leave one showing on load with no obvious way back. */
-["syncModal","saveModal","drawer","adHocModal","remModal","fixModal"].forEach(function(id){ const el=$(id); if(el) el.hidden=true; });
+["syncModal","saveModal","drawer","adHocModal","remModal","fixModal","remCard","decideModal"].forEach(function(id){ const el=$(id); if(el) el.hidden=true; });
 $("scrim").hidden=true; $("scrim").classList.remove("on");
 if($("fileMenu")) $("fileMenu").hidden=true;
 (function(){

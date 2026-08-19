@@ -277,6 +277,7 @@ function readLists_() {
 var REM_FIELDS = [
   ['id',        'Reminder ID'],
   ['text',      'Reminder'],
+  ['notes',     'Details'],
   ['repeat',    'Repeat'],
   ['day',       'Day'],
   ['date',      'Date'],
@@ -340,6 +341,7 @@ function readReminders_() {
     out.push({
       id: id,
       text: String(row[x.map.text] || ''),
+      notes: String(row[x.map.notes] || ''),
       repeat: String(row[x.map.repeat] || 'weekly'),
       day: String(row[x.map.day] == null ? '' : row[x.map.day]).trim(),
       date: asDate_(row[x.map.date], x.tz),
