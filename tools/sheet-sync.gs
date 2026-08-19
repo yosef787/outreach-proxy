@@ -516,6 +516,13 @@ function remDayList_(r) {
     .filter(function (n) { return !isNaN(n); });
 }
 
+/* "7,1" -> [7, 1]. One number still reads correctly. */
+function leadList_(r) {
+  return String(r.alertLead == null ? '' : r.alertLead).replace(/^'/, '').split(',')
+    .map(function (n) { return parseInt(n, 10); })
+    .filter(function (n) { return !isNaN(n) && n >= 0; });
+}
+
 function remFiresOn_(r, date, rowsById) {
   var end = parseYmd_(r.until);
   if (!end && r.link && rowsById[r.link]) end = parseYmd_(rowsById[r.link].end);
@@ -573,12 +580,13 @@ function collect_() {
   var alerts = [];
   rows.forEach(function (r) {
     if (r.status === 'Complete' || !r.alertTo || r.alertLead === '') return;
-    var lead = Number(r.alertLead);
-    if (!isFinite(lead) || lead < 0) return;
     var due = parseYmd_(r.end);
     if (!due) return;
-    var fire = new Date(due.getTime() - lead * 86400000);
-    if (ymd_(fire) === ymd_(today)) alerts.push({ r: r, due: due, lead: lead });
+    /* an activity can ask for several — "a week before" and again "on the day" */
+    leadList_(r).forEach(function (lead) {
+      var fire = new Date(due.getTime() - lead * 86400000);
+      if (ymd_(fire) === ymd_(today)) alerts.push({ r: r, due: due, lead: lead });
+    });
   });
   return { today: today, overdue: overdue, soon: soon, rem: rem, alerts: alerts };
 }

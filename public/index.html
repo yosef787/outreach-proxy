@@ -168,15 +168,23 @@ button{cursor:pointer}
 .lockup .t b{font-size:15px;font-weight:700;letter-spacing:-.005em;white-space:nowrap}
 .lockup .t span{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
 
-.segnav{display:flex;gap:4px;background:var(--surface-3);border:1px solid var(--line);border-radius:12px;padding:4px}
-.segnav button{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:var(--ink-2);
-  font-size:14px;font-weight:700;padding:9px 18px;border-radius:9px;white-space:nowrap;
-  transition:background .15s,color .15s,box-shadow .15s}
+/* The three views are the spine of the page, so the bar carrying them is
+   given room and a little depth rather than sitting flush with the chrome. */
+.segnav{display:flex;gap:5px;padding:5px;border-radius:14px;
+  background:linear-gradient(180deg,var(--surface-3),var(--surface-2));
+  border:1px solid var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.04)}
+.segnav button{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:0;
+  background:transparent;color:var(--ink-2);font-size:14px;font-weight:700;letter-spacing:-.005em;
+  padding:10px 30px;min-width:152px;border-radius:10px;white-space:nowrap;
+  transition:background .18s,color .18s,box-shadow .18s}
 .segnav button svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;
-  stroke-linecap:round;stroke-linejoin:round;flex:none}
+  stroke-linecap:round;stroke-linejoin:round;flex:none;opacity:.85}
 .segnav button:hover{color:var(--ink);background:var(--surface)}
-.segnav button[aria-selected="true"]{background:var(--brand);color:#fff;box-shadow:0 2px 8px -2px rgba(79,32,110,.5)}
-.segnav button[aria-selected="true"]:hover{background:var(--brand-deep)}
+.segnav button[aria-selected="true"]{color:#fff;box-shadow:0 3px 10px -3px rgba(79,32,110,.55);
+  background:linear-gradient(165deg,var(--brand-mid),var(--brand))}
+.segnav button[aria-selected="true"] svg{opacity:1}
+.segnav button[aria-selected="true"]:hover{background:linear-gradient(165deg,var(--brand),var(--brand-deep))}
+@media (max-width:1240px){.segnav button{min-width:0;padding:10px 18px}}
 
 .bar-actions{margin-left:auto;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .src{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-3);
@@ -402,21 +410,45 @@ main{max-width:var(--page);margin:0 auto;padding:24px 28px 80px}
 .rem-empty{padding:20px;text-align:center;color:var(--ink-3);font-size:12.5px}
 
 /* ── quarter strip ─────────────────────────────────────────────────── */
-.qstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px}
-.qcard{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 13px 11px;
-  text-align:left;display:flex;flex-direction:column;gap:2px;transition:border-color .15s,transform .12s,box-shadow .15s}
-.qcard:hover{border-color:var(--brand-soft);transform:translateY(-2px);box-shadow:var(--sh-2)}
-.qcard.past{opacity:.55}
-.qcard.now{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
-.qcard .qh{font-size:11.5px;font-weight:700;color:var(--ink-2);display:flex;align-items:center;gap:6px}
-.qcard .qh em{font-style:normal;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+/* ── the cycle, as a rail ──────────────────────────────────────────
+   The quarters are a sequence, so they are drawn as one: a line with a
+   stop on it per quarter and the one you are in marked. */
+.qrail{display:grid;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));gap:10px;
+  position:relative;padding-top:15px}
+.qrail::before{content:"";position:absolute;top:5px;left:14px;right:14px;height:2px;
+  background:linear-gradient(90deg,var(--line),var(--line-strong),var(--line));border-radius:2px}
+.qstop{position:relative;border:1px solid var(--line);background:var(--surface);border-radius:12px;
+  padding:12px 13px 11px;text-align:left;display:flex;flex-direction:column;gap:2px;
+  transition:border-color .15s,transform .12s,box-shadow .15s}
+.qstop:hover{border-color:var(--brand-soft);transform:translateY(-2px);box-shadow:var(--sh-2)}
+.qstop.past{opacity:.6}
+.qstop.now{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+.qs-node{position:absolute;top:-15px;left:50%;transform:translate(-50%,-50%);width:9px;height:9px;
+  border-radius:50%;background:var(--line-strong);border:2px solid var(--surface);box-sizing:content-box}
+.qstop.past .qs-node{background:var(--ink-3)}
+.qstop.now .qs-node{background:var(--brand);width:11px;height:11px;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 22%,transparent)}
+.qs-h{font-size:11.5px;font-weight:700;color:var(--ink-2);display:flex;align-items:center;gap:6px}
+.qs-h em{font-style:normal;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
   background:var(--brand);color:#fff;border-radius:4px;padding:1px 5px}
-.qcard .qn{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1.05;letter-spacing:-.03em;margin-top:4px}
-.qcard .ql{font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
-.qcard .qdue{font-size:11.5px;color:var(--ink-2);margin-top:5px}
-.qcard .qtypes{display:flex;gap:3px;flex-wrap:wrap;margin-top:7px;min-height:10px}
-.qcard .qbar{height:4px;border-radius:3px;background:var(--chart-soft);overflow:hidden;margin-top:9px}
-.qcard .qbar>span{display:block;height:100%;background:var(--ok);border-radius:3px}
+.qs-n{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1.05;letter-spacing:-.03em;
+  margin-top:4px;display:flex;align-items:baseline;gap:6px}
+.qs-n small{font-family:'Cairo',system-ui,sans-serif;font-size:10.5px;color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.qs-due{font-size:11.5px;color:var(--ink-2);margin-top:4px}
+.qs-types{display:flex;gap:3px;flex-wrap:wrap;margin-top:7px;min-height:10px}
+.qs-bar{display:block;height:4px;border-radius:3px;background:var(--chart-soft);overflow:hidden;margin-top:9px}
+.qs-bar>i{display:block;height:100%;background:var(--ok);border-radius:3px}
+
+/* ── what needs doing: grouped by how much time is left ───────────── */
+.up-grp{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 20px 8px;background:var(--surface-2);border-top:1px solid var(--line);
+  font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.up-grp:first-child{border-top:0}
+.up-grp em{font-style:normal;font-family:var(--mono);letter-spacing:0;font-size:10.5px}
+.up-grp.od{color:var(--crit);background:var(--crit-bg)}
+.up-grp.soon{color:var(--warn);background:var(--warn-bg)}
+.up-grp.done{color:var(--ok);background:var(--ok-bg)}
 
 /* ── KPI ────────────────────────────────────────────────────────────── */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
@@ -631,6 +663,32 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13px}
 
 /* ── work plan: the board above the table ───────────────────────────── */
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+
+/* ── workload columns ──────────────────────────────────────────────
+   One measure across an ordered sequence, so: columns, one hue, the
+   quarter you are in picked out. Values are on the tallest and on now;
+   the rest are a hover away. */
+.chart-bd{border-top:1px solid var(--line);padding-top:14px}
+.chart-hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+.wl{display:flex;align-items:flex-end;gap:6px;height:104px;padding-bottom:22px;position:relative}
+.wl::after{content:"";position:absolute;left:0;right:0;bottom:21px;height:1px;background:var(--line)}
+.wl-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;
+  align-items:center;gap:0;height:100%;position:relative;background:transparent;border:0;padding:0}
+/* one hue, three steps — and --chart is the one token that already carries
+   a value that reads on both grounds, so the emphasis survives dark mode */
+.wl-bar{width:100%;max-width:46px;border-radius:4px 4px 0 0;min-height:2px;transition:background .15s;
+  background:color-mix(in srgb,var(--chart) 62%,var(--surface))}
+.wl-col:hover .wl-bar{background:var(--chart)}
+.wl-col.now .wl-bar{background:var(--chart)}
+.wl-col.past .wl-bar{background:color-mix(in srgb,var(--chart) 32%,var(--surface))}
+.wl-v{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--ink-2);line-height:1;margin-bottom:4px}
+.wl-x{position:absolute;bottom:-21px;left:0;right:0;font-size:9.5px;font-weight:700;letter-spacing:.04em;
+  color:var(--ink-3);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wl-col.now .wl-x{color:var(--chart)}
+.wl-col.now .wl-x::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;
+  background:var(--chart);margin-right:5px;vertical-align:middle}
+.wl-col.now .wl-v{color:var(--chart)}
+.wl-empty{font-size:12.5px;color:var(--ink-3)}
 .tile{display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;
   border:1px solid var(--line);border-radius:12px;padding:13px 15px;background:var(--surface-2);
   transition:border-color .15s,background .15s,transform .12s}
@@ -653,8 +711,24 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13px}
 .gap .who span{font-size:11.5px;color:var(--ink-3)}
 .gaps .none{padding:22px 20px;font-size:12.5px;color:var(--ink-3);text-align:center}
 .fb-gap{flex:1}
-.card-ft{display:flex;gap:9px;flex-wrap:wrap;padding:13px 20px;border-top:1px solid var(--line);
-  background:var(--surface-2);border-radius:0 0 calc(var(--r) - 1px) calc(var(--r) - 1px)}
+/* the pick list inside the Quick fix window */
+.picklist{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:11px;
+  max-height:210px;overflow-y:auto;background:var(--surface-2)}
+.picklist button{display:flex;align-items:center;gap:10px;text-align:left;border:0;background:transparent;
+  padding:9px 12px;border-bottom:1px solid var(--line);min-width:0}
+.picklist button:last-child{border-bottom:0}
+.picklist button:hover,.picklist button.on{background:var(--brand-tint)}
+.picklist .pid{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);flex:none;min-width:62px}
+.picklist .pnm{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.picklist .pwhy{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;flex:none;
+  color:var(--crit);background:var(--crit-bg);border-radius:5px;padding:2px 6px}
+.picklist .pwhy.mild{color:var(--warn);background:var(--warn-bg)}
+.picklist .none{padding:16px;font-size:12.5px;color:var(--ink-3);text-align:center}
+.fx-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.fx-head .fx-id{font-family:var(--mono);font-size:11px;color:var(--ink-3)}
+.fx-head b{font-size:14.5px}
+.quickbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.quickbar .qb-note{font-size:12px;color:var(--ink-3)}
 p.lede{font-size:12.5px;color:var(--ink-3);margin:-4px 2px 0}
 ol.howto{margin:0;padding-left:19px;font-size:12.5px;color:var(--ink-2)}
 ol.howto li{margin-top:4px}
@@ -743,6 +817,13 @@ footer.foot p{max-width:78ch}
   .day{min-height:78px;padding:5px} .ev{height:19px;font-size:10px;padding:0 5px}
   .lanes{top:24px}
   .dow div{padding:7px 5px;font-size:9px}
+  /* the roomier nav has to give that room back on a phone */
+  .segnav{width:100%;padding:4px}
+  .segnav button{flex:1 1 0;padding:9px 6px;font-size:12.5px;gap:5px;justify-content:center}
+  .segnav button svg{width:15px;height:15px}
+  .btn.big{padding:10px 16px;font-size:13.5px}
+  .cal-mid{width:100%}
+  .cal-mid .btn{width:100%;justify-content:center}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @media print{
@@ -837,33 +918,36 @@ footer.foot p{max-width:78ch}
       <div class="rem-list" id="remList"></div>
     </div>
 
-    <div class="card">
-      <div class="card-hd"><h2>What needs doing</h2><span class="hint">Overdue first, then by due date</span></div>
-      <div class="up" id="priorities"></div>
+    <div class="grid-main">
+      <div class="card">
+        <div class="card-hd"><h2>What needs doing</h2>
+          <span class="hint">Tick one off and it updates everywhere</span></div>
+        <div class="up" id="priorities"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><h2>Where the plan stands</h2><span class="hint" id="standNote">—</span></div>
+        <div class="card-bd stack">
+          <div>
+            <div class="mix" id="statusMix"></div>
+            <div class="legend" id="statusLegend" style="margin-top:10px"></div>
+          </div>
+          <div>
+            <div class="eyebrow" style="margin:4px 0 9px">Work by type</div>
+            <div class="bars" id="typeBars"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="card">
       <div class="card-hd"><h2>The cycle</h2><span class="hint">Click a quarter to open it in the calendar</span></div>
-      <div class="card-bd"><div class="qstrip" id="qstrip"></div></div>
+      <div class="card-bd"><div class="qrail" id="qstrip"></div></div>
     </div>
 
     <details class="ref">
-      <summary>More detail</summary>
-      <div class="stack">
-        <div>
-          <div class="eyebrow" style="margin:2px 0 9px">Work by type</div>
-          <div class="bars" id="typeBars"></div>
-        </div>
-        <div>
-          <div class="eyebrow" style="margin:2px 0 9px">Status</div>
-          <div class="mix" id="statusMix"></div>
-          <div class="legend" id="statusLegend" style="margin-top:10px"></div>
-        </div>
-        <div>
-          <div class="eyebrow" style="margin:2px 0 9px">By department</div>
-          <div class="tbl-wrap"><table class="tbl dense" id="deptTbl"></table></div>
-        </div>
-      </div>
+      <summary>By department</summary>
+      <div><div class="tbl-wrap"><table class="tbl dense" id="deptTbl"></table></div></div>
     </details>
   </section>
 
@@ -915,6 +999,11 @@ footer.foot p{max-width:78ch}
       <div class="card-hd"><h2>The plan at a glance</h2>
         <span class="hint">Click any figure to filter the table below</span></div>
       <div class="card-bd"><div class="tiles" id="wpTiles"></div></div>
+      <div class="card-bd chart-bd">
+        <div class="chart-hd"><span class="eyebrow">Workload across the cycle</span>
+          <span class="hint" id="wlNote">—</span></div>
+        <div class="wl" id="wlChart"></div>
+      </div>
     </div>
 
     <div class="grid-main">
@@ -926,17 +1015,28 @@ footer.foot p{max-width:78ch}
       <div class="card">
         <div class="card-hd"><h2>Not yet in the sheet</h2><span class="hint" id="pendCount">—</span></div>
         <div class="gaps" id="wpPending"></div>
-        <div class="card-ft">
-          <button class="btn solid" id="btnQuickAdd">
-            <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-            Quick add</button>
-          <button class="btn warn" id="btnQuickFix">
-            <svg class="btn-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/></svg>
-            Quick fix</button>
-        </div>
       </div>
     </div>
 
+    <div class="quickbar">
+      <button class="btn solid big" id="btnQuickAdd">
+        <svg class="btn-ico lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Quick add</button>
+      <button class="btn warn big" id="btnQuickFix">
+        <svg class="btn-ico lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 1 1-3.4-6.8M20 4l-8.5 8.5-3-3"/></svg>
+        Quick fix</button>
+      <span class="qb-note">Add something in a hurry, or find an activity and amend it.</span>
+    </div>
+    <details class="ref">
+      <summary>How to use this sheet</summary>
+      <div>
+        <ol class="howto">
+          <li>Enter a brief description of the activity in <em>Activity / Deliverable</em>.</li>
+          <li>Categorise it correctly using the <em>Type</em> list so it is reflected in the Calendar. Other entries are optional.</li>
+          <li>If you have an unlisted category, revert to Yosef to amend CF.</li>
+        </ol>
+      </div>
+    </details>
     <p class="lede">Click any cell to edit. Changes stay in this browser until you sync.</p>
     <details class="ref" id="wpFold">
       <summary>Every activity</summary>
@@ -956,16 +1056,6 @@ footer.foot p{max-width:78ch}
       </div>
     </details>
 
-    <details class="ref">
-      <summary>How to use this sheet</summary>
-      <div>
-        <ol class="howto">
-          <li>Enter a brief description of the activity in <em>Activity / Deliverable</em>.</li>
-          <li>Categorise it correctly using the <em>Type</em> list so it is reflected in the Calendar. Other entries are optional.</li>
-          <li>If you have an unlisted category, revert to Yosef to amend CF.</li>
-        </ol>
-      </div>
-    </details>
     <details class="ref">
       <summary>Source lists &amp; colour key</summary>
       <div class="stack">
@@ -1046,8 +1136,9 @@ footer.foot p{max-width:78ch}
 
 <div class="modal" id="adHocModal" hidden role="dialog" aria-modal="true" aria-labelledby="ahTitle">
   <div class="modal-hd">
-    <div><h3 id="ahTitle">Add an activity</h3>
-      <p>One-off work that is not part of the standing plan. It joins the Work Plan and syncs like everything else.</p></div>
+    <div><h3 id="ahTitle">Ad hoc activity</h3>
+      <p>For one-off work, entered quickly. A name and a date are all it needs — everything else can wait,
+         and the rest of the details can be filled in later from the Work Plan.</p></div>
     <button type="button" class="modal-x" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
   </div>
   <form id="ahForm">
@@ -1064,8 +1155,6 @@ footer.foot p{max-width:78ch}
       <div class="fgrid">
         <div class="f"><label for="ahType">Type</label><select id="ahType"></select></div>
         <div class="f"><label for="ahDept">Department</label><select id="ahDept"></select></div>
-        <div class="f"><label for="ahOwner">Owner <span class="opt">optional</span></label><select id="ahOwner"></select></div>
-        <div class="f"><label for="ahStatus">Status</label><select id="ahStatus"></select></div>
       </div>
 
       <div class="fsec">
@@ -1091,18 +1180,9 @@ footer.foot p{max-width:78ch}
 
       <div class="fsec">
         <div class="f">
-          <label for="ahLead">Email an alert</label>
-          <select id="ahLead">
-            <option value="">No alert</option>
-            <option value="0">On the day</option>
-            <option value="1">1 day before</option>
-            <option value="2">2 days before</option>
-            <option value="3">3 days before</option>
-            <option value="7">1 week before</option>
-            <option value="14">2 weeks before</option>
-            <option value="30">1 month before</option>
-          </select>
-          <span class="hint">Counted back from the due date. The sheet sends it each morning.</span>
+          <label>Email an alert <span class="opt">optional · pick as many as you like</span></label>
+          <div id="ahLeads" class="daychips" role="group" aria-label="When to send the alert"></div>
+          <span class="hint">Counted back from the due date. The sheet sends them each morning.</span>
         </div>
         <div id="ahWho" hidden style="margin-top:12px"></div>
       </div>
@@ -1112,6 +1192,48 @@ footer.foot p{max-width:78ch}
       <button class="btn" type="button" data-close>Cancel</button>
     </div>
   </form>
+</div>
+
+<div class="modal" id="fixModal" hidden role="dialog" aria-modal="true" aria-labelledby="fxTitle">
+  <div class="modal-hd">
+    <div><h3 id="fxTitle">Find an activity and amend it</h3>
+      <p>Search for what you need, change the few things that have moved, and it is done —
+         no need to go through the whole table.</p></div>
+    <button type="button" class="modal-x" data-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="modal-bd">
+    <div class="f full">
+      <label for="fxSearch">Which activity</label>
+      <input id="fxSearch" type="text" placeholder="Type a name, an ID or a note" spellcheck="false" autocomplete="off">
+      <span class="hint" id="fxHint">Anything needing attention is listed first.</span>
+    </div>
+    <div class="picklist" id="fxList"></div>
+
+    <div id="fxEdit" hidden>
+      <div class="fsec">
+        <div class="fx-head"><span class="fx-id" id="fxId">—</span><b id="fxName">—</b></div>
+        <div class="fgrid" style="margin-top:12px">
+          <div class="f"><label for="fxStatus">Status <span class="opt">optional</span></label><select id="fxStatus"></select></div>
+          <div class="f"><label for="fxProgress">Progress <span class="opt">optional</span></label>
+            <select id="fxProgress"></select></div>
+          <div class="f"><label for="fxStart">Starts</label><input id="fxStart" type="date"></div>
+          <div class="f"><label for="fxEnd">Due</label><input id="fxEnd" type="date"></div>
+          <div class="f"><label for="fxType">Type</label><select id="fxType"></select></div>
+          <div class="f"><label for="fxOwner">Owner <span class="opt">optional</span></label><select id="fxOwner"></select></div>
+        </div>
+        <div class="f full" style="margin-top:14px">
+          <label for="fxNotes">Note <span class="opt">optional</span></label>
+          <textarea id="fxNotes" class="ta" rows="2" maxlength="600"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-ft">
+    <button class="btn solid" id="fxSave" disabled>Save changes</button>
+    <button class="btn" type="button" data-close>Cancel</button>
+    <span class="spacer"></span>
+    <button class="btn" id="fxOpenFull" hidden>Open the full row</button>
+  </div>
 </div>
 
 <div class="modal" id="syncModal" hidden role="dialog" aria-modal="true" aria-labelledby="syTitle">
@@ -1205,6 +1327,11 @@ const PEOPLE = [
 ];
 /* who a brand-new reminder emails before anyone has chosen otherwise */
 const DEFAULT_TO = "yalturaifi@masdr.sa";
+/* An activity can carry several leads, stored as "7,1". */
+function leadList(a){
+  return String(a && a.alertLead!=null ? a.alertLead : "").split(",")
+    .map(x=>parseInt(x,10)).filter(x=>!isNaN(x)&&x>=0);
+}
 /* How long before the due date an alert goes out. "" means no alert. */
 const LEADS = {"0":"on the day","1":"1 day before","2":"2 days before","3":"3 days before",
   "7":"1 week before","14":"2 weeks before","30":"1 month before"};
@@ -1468,16 +1595,59 @@ function renderLists2(){
   const t=today();
   const dated=acts().filter(a=>d(a.end));
   const open=dated.filter(a=>a.status!=="Complete");
-  const overdue=open.filter(isOverdue).sort((a,b)=>d(a.end)-d(b.end));
-  const ahead=open.filter(a=>!isOverdue(a)).sort((a,b)=>d(a.end)-d(b.end));
+  const byDue=(a,b)=>d(a.end)-d(b.end);
+  const overdue=open.filter(isOverdue).sort(byDue);
+  const ahead=open.filter(a=>!isOverdue(a)).sort(byDue);
+  const soon=ahead.filter(a=>dayDiff(t,d(a.end))<=30);
+  const later=ahead.filter(a=>dayDiff(t,d(a.end))>30);
   /* anything ticked in the last week stays visible, so a mistaken tick is easy to undo */
   const justDone=dated.filter(a=>a.status==="Complete"&&a.updatedAt&&
     dayDiff(d(a.updatedAt.slice(0,10)), t)<=7).slice(0,2);
-  const rows=overdue.concat(ahead).slice(0,5).concat(justDone);
-  $("priorities").innerHTML = rows.length ? rows.map(upItem).join("")
+
+  /* Grouped by how much time is left, because that is the decision being
+     made — a flat list by date makes you work that out for yourself. */
+  const groups=[
+    ["Overdue", overdue, "od"],
+    ["Within a month", soon.slice(0, overdue.length?3:5), "soon"],
+    ["Later", later.slice(0, overdue.length||soon.length?2:5), "later"],
+    ["Just ticked off", justDone, "done"]
+  ].filter(g=>g[1].length);
+
+  $("priorities").innerHTML = groups.length
+    ? groups.map(g=>'<div class="up-grp '+g[2]+'"><span>'+esc(g[0])+'</span><em>'+g[1].length+'</em></div>'+
+        g[1].map(upItem).join("")).join("")
     : '<div class="empty">Nothing outstanding — every activity is complete.</div>';
 }
 
+/* ══ workload across the cycle ══════════════════════════════════════
+   How much falls in each quarter. One measure, one hue — the current
+   quarter is the only thing picked out. */
+function renderWorkload(){
+  const host=$("wlChart"); if(!host) return;
+  const qs=quarters(), t=today(), nowQ=qLabel(t);
+  const data=qs.map(q=>{
+    const b=qBounds(q);
+    return {q, n:acts().filter(a=>dueIn(a,b.start,b.end)).length, end:b.end};
+  });
+  if(!data.length){ host.innerHTML='<div class="wl-empty">No dated activities yet.</div>'; return; }
+  const max=Math.max(1,...data.map(x=>x.n));
+  const busiest=data.reduce((m,x)=>x.n>m.n?x:m,data[0]);
+  const total=data.reduce((s2,x)=>s2+x.n,0);
+  $("wlNote").textContent=total+(total===1?" deadline":" deadlines")+" · busiest is "+
+    busiest.q+" with "+busiest.n;
+  host.innerHTML=data.map(x=>{
+    const h=Math.round(x.n/max*100);
+    const now=x.q===nowQ, past=x.end<t&&!now;
+    /* a value on every column at the peak and on the one you are in; the
+       rest are a hover away */
+    const label=(x.n===max||now)&&x.n?'<span class="wl-v">'+x.n+'</span>':"";
+    return '<button class="wl-col'+(now?" now":"")+(past?" past":"")+'" data-q="'+esc(x.q)+'" '+
+      'data-tip="<b>'+esc(x.q)+'</b><br>'+x.n+(x.n===1?" deadline":" deadlines")+'" '+
+      'aria-label="'+esc(x.q)+': '+x.n+' deadlines">'+
+      label+'<span class="wl-bar" style="height:'+Math.max(2,h)+'%"></span>'+
+      '<span class="wl-x">'+esc(x.q.replace(" ","\u2009"))+'</span></button>';
+  }).join("");
+}
 /* ══ workload chart ═════════════════════════════════════════════════ */
 function renderQuarterStrip(){
   const t=today(), nowQ=qLabel(t);
@@ -1488,14 +1658,15 @@ function renderQuarterStrip(){
     const done=active.filter(a=>a.status==="Complete").length;
     const pct=active.length?Math.round(done/active.length*100):0;
     const cls=(q===nowQ?" now":"")+(b.end<t&&q!==nowQ?" past":"");
-    const types=[...new Set(active.map(a=>a.type))].filter(Boolean).slice(0,6);
-    return '<button class="qcard'+cls+'" data-q="'+esc(q)+'" data-tip="<b>'+esc(q)+'</b><br>'+
+    const types=[...new Set(active.map(a=>a.type))].filter(Boolean).slice(0,5);
+    return '<button class="qstop'+cls+'" data-q="'+esc(q)+'" data-tip="<b>'+esc(q)+'</b><br>'+
       active.length+' active · '+due.length+' due<br>'+fmt(b.start)+' → '+fmt(b.end)+'">'+
-      '<div class="qh">'+esc(q.replace(" "," "))+(q===nowQ?'<em>now</em>':'')+'</div>'+
-      '<div class="qn">'+active.length+'</div><div class="ql">active</div>'+
-      '<div class="qdue">'+(due.length?due.length+(due.length===1?" deadline":" deadlines"):"no deadlines")+'</div>'+
-      '<div class="qtypes">'+types.map(x=>typeSwatch(x)).join("")+'</div>'+
-      '<div class="qbar"><span style="width:'+pct+'%"></span></div>'+
+      '<span class="qs-node"></span>'+
+      '<span class="qs-h">'+esc(q)+(q===nowQ?'<em>now</em>':'')+'</span>'+
+      '<span class="qs-n">'+active.length+'<small>active</small></span>'+
+      '<span class="qs-due">'+(due.length?due.length+(due.length===1?" deadline":" deadlines"):"no deadlines")+'</span>'+
+      '<span class="qs-types">'+types.map(x=>typeSwatch(x)).join("")+'</span>'+
+      '<span class="qs-bar"><i style="width:'+pct+'%"></i></span>'+
       '</button>';
   }).join("");
 }
@@ -1503,6 +1674,12 @@ function renderQuarterStrip(){
 /* ══ breakdowns ═════════════════════════════════════════════════════ */
 function renderBreakdowns(){
   const A=acts(), total=A.length||1;
+  const done=A.filter(a=>a.status==="Complete").length;
+  const od=A.filter(isOverdue).length;
+  const note=$("standNote");
+  if(note) note.textContent = A.length
+    ? Math.round(done/A.length*100)+"% complete"+(od?" · "+od+" overdue":"")
+    : "nothing loaded";
   const rows=listOf("Activity Type").map(t=>({k:t,n:A.filter(a=>a.type===t).length}))
     .filter(r=>r.n>0).sort((a,b)=>b.n-a.n);
   $("typeBars").innerHTML = rows.length ? rows.map(r=>{
@@ -1736,20 +1913,36 @@ function nextAdHocId(){
 function openAdHoc(onDate){
   const day = onDate || cursorDayForAdd();
   $("ahText").value=""; $("ahNotes").value="";
-  fillSel($("ahType"), listOf("Activity Type"), "Monitoring");
+  /* ad hoc work rarely fits the standing categories, so it starts as Other */
+  fillSel($("ahType"), listOf("Activity Type"), "Other");
   fillSel($("ahDept"), listOf("Department"), "Legal & GRC");
-  fillSel($("ahOwner"), [""].concat(listOf("Owner")), "");
-  fillSel($("ahStatus"), listOf("Status"), "Not Started");
   $("ahStart").value=iso(day); $("ahEnd").value=iso(day);
   setAhSpan(false);
   $("ahTimed").checked=false; $("ahTimeWrap").hidden=true;
   $("ahT1").value="09:00"; $("ahT2").value="10:00";
-  $("ahLead").value=""; $("ahWho").hidden=true; whoFill("ahWho", remEmailAddr());
+  fillLeadChips([]);
+  $("ahWho").hidden=true; whoFill("ahWho", remEmailAddr());
   $("adHocModal").hidden=false; $("scrim").hidden=false;
   requestAnimationFrame(()=>{ $("scrim").classList.add("on"); $("ahText").focus(); });
 }
 $("ahTimed").addEventListener("change",e=>{ $("ahTimeWrap").hidden=!e.target.checked; });
-$("ahLead").addEventListener("change",e=>{ $("ahWho").hidden=!e.target.value; });
+
+/* An alert can go out more than once — a week before and again on the day. */
+function fillLeadChips(picked){
+  $("ahLeads").innerHTML = Object.keys(LEADS).map(k=>
+    '<button type="button" class="dchip'+(picked.indexOf(k)>=0?" on":"")+'" data-lead="'+k+'">'+
+    esc(LEADS[k].replace(/^./,c=>c.toUpperCase()))+'</button>').join("");
+  syncLeadWho();
+}
+function chosenLeads(){
+  return [...$("ahLeads").querySelectorAll(".dchip.on")].map(b2=>b2.getAttribute("data-lead"))
+    .sort((a,b)=>Number(b)-Number(a));
+}
+function syncLeadWho(){ $("ahWho").hidden = chosenLeads().length===0; }
+$("ahLeads").addEventListener("click",e=>{
+  const b2=e.target.closest(".dchip"); if(!b2) return;
+  b2.classList.toggle("on"); syncLeadWho();
+});
 function fillSel(el, vals, pick){
   el.innerHTML=vals.map(v=>'<option value="'+esc(v)+'"'+(v===pick?" selected":"")+'>'+
     esc(v||"— none —")+'</option>').join("");
@@ -1763,7 +1956,7 @@ function setAhSpan(on){
 }
 function closeAdHoc(){
   $("adHocModal").hidden=true;
-  if($("drawer").hidden && $("saveModal").hidden && $("syncModal").hidden){
+  if($("drawer").hidden && $("saveModal").hidden && $("syncModal").hidden && $("fixModal").hidden){
     $("scrim").classList.remove("on"); setTimeout(()=>{ $("scrim").hidden=true; },200);
   }
 }
@@ -1789,17 +1982,18 @@ $("ahForm").addEventListener("submit",e=>{
   if(timed && $("ahT2").value && $("ahT1").value && st===en && $("ahT2").value < $("ahT1").value){
     toast("The end time is before the start time.",true); return;
   }
-  const lead=$("ahLead").value;
+  const leads=chosenLeads();
   let alertTo="";
-  if(lead){
+  if(leads.length){
     alertTo=whoRead("ahWho");
     if(alertTo===null){ toast("That email address does not look right.",true); return; }
     if(!alertTo){ toast("Pick at least one person for the alert.",true); return; }
     rememberWho(alertTo);
   }
-  const a={id:nextAdHocId(), activity:text, type:$("ahType").value, owner:$("ahOwner").value||"",
+  const lead=leads.join(",");
+  const a={id:nextAdHocId(), activity:text, type:$("ahType").value, owner:"",
     department:$("ahDept").value, frequency:"One-off", start:st, end:en, duration:0,
-    status:$("ahStatus").value||"Not Started", progress:0, reviewer:"", approval:"Pending",
+    status:"Not Started", progress:0, reviewer:"", approval:"Pending",
     notes:$("ahNotes").value.trim(),
     startTime: timed?$("ahT1").value:"", endTime: timed?$("ahT2").value:"",
     alertLead: lead, alertTo: alertTo,
@@ -1811,7 +2005,8 @@ $("ahForm").addEventListener("submit",e=>{
   closeAdHoc(); renderAll();
   if($("view-plan").hidden===false){ wpFilters={type:"All",status:"All",q:a.id,view:""}; $("wSearch").value=a.id; renderWorkPlan(); }
   toast(a.id+" added — "+(st===en?fmt(d(st)):fmt(d(st))+" to "+fmt(d(en)))+
-    (a.startTime?" at "+a.startTime:"")+(lead?" · alert "+LEADS[lead]:"")+".");
+    (a.startTime?" at "+a.startTime:"")+
+    (leads.length?" · alert "+listWords(leads.map(k=>LEADS[k])):"")+".");
 });
 
 /* ══ detail drawer ══════════════════════════════════════════════════ */
@@ -2220,7 +2415,7 @@ function openRemModal(){
 }
 function closeRemModal(){
   $("remModal").hidden=true;
-  if($("drawer").hidden && $("saveModal").hidden && $("syncModal").hidden && $("adHocModal").hidden){
+  if($("drawer").hidden && $("saveModal").hidden && $("syncModal").hidden && $("adHocModal").hidden && $("fixModal").hidden){
     $("scrim").classList.remove("on"); setTimeout(()=>{ $("scrim").hidden=true; },200);
   }
 }
@@ -2242,19 +2437,102 @@ $("remEmail").addEventListener("change",()=>{
 });
 $("btnRemAll").addEventListener("click",()=>{ remShowAll=!remShowAll; renderReminders(); });
 
-/* Quick add opens the same window as everywhere else; Quick fix narrows the
-   table to just the rows that need attention and takes you there. */
+/* ══ Quick add / Quick fix ══════════════════════════════════════════
+   Two windows for the same idea: get something in, or put something
+   right, without going near the table. */
 $("btnQuickAdd").addEventListener("click",()=>openAdHoc(null));
-$("btnQuickFix").addEventListener("click",()=>{
-  const n2=gapFlags().length;
-  if(!n2){ toast("Nothing needs fixing — every activity checks out."); return; }
-  wpFilters={type:"All",status:"All",q:"",view:"gaps"};
-  $("wSearch").value=""; $("wType").value="All"; $("wStatus").value="All";
+$("btnQuickFix").addEventListener("click",openFix);
+
+let fixId=null;
+function openFix(){
+  fixId=null;
+  $("fxSearch").value="";
+  $("fxEdit").hidden=true; $("fxSave").disabled=true; $("fxOpenFull").hidden=true;
+  renderPick("");
+  $("fixModal").hidden=false; $("scrim").hidden=false;
+  requestAnimationFrame(()=>{ $("scrim").classList.add("on"); $("fxSearch").focus(); });
+}
+function closeFix(){
+  $("fixModal").hidden=true;
+  if($("drawer").hidden && $("saveModal").hidden && $("syncModal").hidden &&
+     $("adHocModal").hidden && $("remModal").hidden){
+    $("scrim").classList.remove("on"); setTimeout(()=>{ $("scrim").hidden=true; },200);
+  }
+}
+/* Anything flagged floats to the top, so the window opens on the work
+   that needs doing rather than on an empty search box. */
+function pickRows(q){
+  const t=q.trim().toLowerCase();
+  const match=a=>!t||(a.id+" "+a.activity+" "+(a.notes||"")+" "+(a.type||"")).toLowerCase().indexOf(t)>=0;
+  const flagged=[], rest=[];
+  acts().forEach(a=>{
+    if(!match(a)) return;
+    const why=gapReason(a);
+    (why?flagged:rest).push({a,why});
+  });
+  const byDue=(x,y)=>(d(x.a.end)||0)-(d(y.a.end)||0);
+  flagged.sort(byDue); rest.sort(byDue);
+  return flagged.concat(rest).slice(0,60);
+}
+function renderPick(q){
+  const rows=pickRows(q);
+  $("fxHint").textContent = q.trim()
+    ? rows.length+(rows.length===1?" match":" matches")
+    : "Anything needing attention is listed first.";
+  $("fxList").innerHTML = rows.length
+    ? rows.map(r=>'<button type="button" data-pick="'+esc(r.a.id)+'"'+(r.a.id===fixId?' class="on"':'')+'>'+
+        '<span class="pid">'+esc(r.a.id)+'</span>'+
+        '<span class="pnm">'+esc(r.a.activity||"—")+'</span>'+
+        (r.why?'<span class="pwhy'+(r.why[1]?" mild":"")+'">'+esc(r.why[0])+'</span>':'')+
+      '</button>').join("")
+    : '<div class="none">Nothing matches that.</div>';
+}
+$("fxSearch").addEventListener("input",e=>renderPick(e.target.value));
+$("fxList").addEventListener("click",e=>{
+  const b2=e.target.closest("[data-pick]"); if(!b2) return;
+  loadFix(b2.getAttribute("data-pick"));
+});
+function loadFix(id){
+  const a=byId(id); if(!a) return;
+  fixId=id;
+  renderPick($("fxSearch").value);
+  $("fxId").textContent=a.id;
+  $("fxName").textContent=a.activity||"—";
+  fillSel($("fxStatus"), listOf("Status"), a.status||"Not Started");
+  fillSel($("fxType"), listOf("Activity Type"), a.type||"Other");
+  fillSel($("fxOwner"), [""].concat(listOf("Owner")), a.owner||"");
+  const pct=Math.round((+a.progress||0)*100);
+  $("fxProgress").innerHTML=[0,10,25,50,75,90,100].map(v=>
+    '<option value="'+v+'"'+(v===pct?" selected":"")+'>'+v+'%</option>').join("");
+  $("fxStart").value=a.start||""; $("fxEnd").value=a.end||"";
+  $("fxNotes").value=a.notes||"";
+  $("fxEdit").hidden=false; $("fxSave").disabled=false; $("fxOpenFull").hidden=false;
+  $("fxName").scrollIntoView({block:"nearest"});
+}
+$("fxSave").addEventListener("click",()=>{
+  const a=byId(fixId); if(!a){ toast("Pick an activity first.",true); return; }
+  if($("fxStart").value && $("fxEnd").value && d($("fxEnd").value)<d($("fxStart").value)){
+    toast("The due date is before the start date.",true); return;
+  }
+  a.status=$("fxStatus").value;
+  a.type=$("fxType").value;
+  a.owner=$("fxOwner").value;
+  a.progress=(parseInt($("fxProgress").value,10)||0)/100;
+  a.start=$("fxStart").value; a.end=$("fxEnd").value;
+  a.notes=$("fxNotes").value.trim();
+  a.duration=durationOf(a)||0;
+  touch(a); state.dirty=true; save();
+  closeFix(); renderAll();
+  toast(a.id+" updated — "+a.status.toLowerCase()+", due "+(d(a.end)?fmt(d(a.end)):"no date")+".");
+});
+$("fxOpenFull").addEventListener("click",()=>{
+  const id=fixId; if(!id) return;
+  closeFix();
+  wpFilters={type:"All",status:"All",q:id,view:""}; $("wSearch").value=id;
   const f=$("wpFold"); if(f) f.open=true;
-  renderWpBoard(); renderWorkPlan();
-  const tbl=$("wpTbl");
-  if(tbl) tbl.scrollIntoView({block:"start",behavior:"smooth"});
-  toast(n2+(n2===1?" row needs":" rows need")+" a second look — showing just those.");
+  showTab("plan"); renderWpBoard(); renderWorkPlan();
+  const row=document.querySelector('#wpTbl tr[data-id="'+id+'"]');
+  if(row) row.scrollIntoView({block:"center",behavior:"smooth"});
 });
 /* One address or several, separated by commas or semicolons. Returns them
    tidied and comma-joined, or "" if any one of them is not an address. */
@@ -2370,7 +2648,7 @@ function renderAll(){
     cursor=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),1));
     if(cursor<s.from||cursor>s.to) cursor=new Date(Date.UTC(s.from.getUTCFullYear(),s.from.getUTCMonth(),1)); }
   renderChrome(); renderHero(); renderKpis(); renderLists2(); renderReminders(); renderQuarterStrip();
-  renderBreakdowns(); renderCalendar(); renderWpBoard(); renderWorkPlan(); renderRef();
+  renderBreakdowns(); renderCalendar(); renderWpBoard(); renderWorkload(); renderWorkPlan(); renderRef();
 }
 
 /* ══ tabs ═══════════════════════════════════════════════════════════ */
@@ -2403,6 +2681,7 @@ document.addEventListener("click",e=>{
   else if(dlg.id==="syncModal") closeSyncModal();
   else if(dlg.id==="adHocModal") closeAdHoc();
   else if(dlg.id==="remModal") closeRemModal();
+  else if(dlg.id==="fixModal") closeFix();
 });
 
 /* ══ tooltip / toast ════════════════════════════════════════════════ */
@@ -2826,7 +3105,8 @@ document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ closeMenu();
   if(!$("saveModal").hidden) closeSaveModal();
   if(!$("syncModal").hidden) closeSyncModal();
   if(!$("adHocModal").hidden) closeAdHoc();
-  if(!$("remModal").hidden) closeRemModal(); } });
+  if(!$("remModal").hidden) closeRemModal();
+  if(!$("fixModal").hidden) closeFix(); } });
 
 /* ══ .ics calendar export ═══════════════════════════════════════════ */
 function icsDate(dt){ return dt.toISOString().slice(0,10).replace(/-/g,""); }
@@ -2867,11 +3147,11 @@ function icsText(){
     L.push("TRANSP:TRANSPARENT");
     /* nudges before the deadline, not before the start */
     if(a.status!=="Complete"){
-      const lead = a.alertLead===undefined||a.alertLead===null||a.alertLead==="" ? null : Number(a.alertLead);
       /* a zero-day lead is "PT0S" — "-P0D" is not a legal iCalendar duration */
-      const leads = lead===null || isNaN(lead)
-        ? [["-P7D","One week until "],["-P1D","Tomorrow: "]]
-        : [[lead>0?"-P"+lead+"D":"PT0S", (LEADS[String(lead)]||"Due")+": "]];
+      const chosen = leadList(a);
+      const leads = chosen.length
+        ? chosen.map(function(v){ return [v>0?"-P"+v+"D":"PT0S", (LEADS[String(v)]||"Due")+": "]; })
+        : [["-P7D","One week until "],["-P1D","Tomorrow: "]];
       leads.forEach(function(t2){
         L.push("BEGIN:VALARM");
         L.push("ACTION:DISPLAY");
@@ -3032,7 +3312,7 @@ function openSyncModal(){
 }
 function closeSyncModal(){
   $("syncModal").hidden=true;
-  if($("drawer").hidden && $("saveModal").hidden){
+  if($("drawer").hidden && $("saveModal").hidden && $("fixModal").hidden){
     $("scrim").classList.remove("on"); setTimeout(()=>{ $("scrim").hidden=true; },200);
   }
 }
@@ -3064,7 +3344,7 @@ setInterval(()=>{ if(!syncBusy && sync.url && sync.last) setSyncUi("ok"); }, 600
 try{ const m=localStorage.getItem(STORE+".mode"); if(m) calMode=m; }catch(e){}
 /* Overlays always start closed — a stray edit to the markup can otherwise
    leave one showing on load with no obvious way back. */
-["syncModal","saveModal","drawer","adHocModal","remModal"].forEach(function(id){ const el=$(id); if(el) el.hidden=true; });
+["syncModal","saveModal","drawer","adHocModal","remModal","fixModal"].forEach(function(id){ const el=$(id); if(el) el.hidden=true; });
 $("scrim").hidden=true; $("scrim").classList.remove("on");
 if($("fileMenu")) $("fileMenu").hidden=true;
 (function(){
