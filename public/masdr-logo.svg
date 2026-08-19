@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  MASDR mark. This is a redraw, not the official artwork.
+  Replace this whole file with the real logo (keep the filename) and the
+  calendar page picks it up automatically the next time it loads.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 104" role="img" aria-label="MASDR">
+  <path d="M46 2H24A22 22 0 0 0 2 24v56a22 22 0 0 0 22 22h22Z" fill="#5C2483"/>
+  <path d="M54 2h22a22 22 0 0 1 22 22v56a22 22 0 0 1-22 22H54Z" fill="#C7237A"/>
+</svg>
